@@ -1,38 +1,35 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
-export type UserDocument = HydratedDocument<User>;
+export type PromoDocument = HydratedDocument<Promo>;
 
 @Schema({ timestamps: true })
-export class User {
+export class Promo {
   @Prop({ required: true })
-  email: string;
-
-  @Prop({ required: false })
-  password: string;
+  code: string; // mã khuyến mãi
 
   @Prop()
-  name: string;
+  description: string;
+
+  @Prop({ required: true })
+  discountPercent: number; // % giảm giá
+
+  @Prop({ default: 0 })
+  maxUsage: number; // số lần sử dụng tối đa
+
+  @Prop({ default: 0 })
+  usedCount: number; // số lần đã dùng
 
   @Prop()
-  phone: number;
+  startDate: Date;
 
   @Prop()
-  gender: string;
+  endDate: Date;
 
-  @Prop()
-  address: string;
+  @Prop({ default: true })
+  isActive: boolean;
 
-  @Prop({ default: 'LOCAL' })
-  accountType: string;
-
-  @Prop({ default: 'USER', enum: ['USER', 'ADMIN'] })
-  role: string;
-
-  @Prop()
-  avatar: string;
-
-  @Prop()
+  @Prop({ default: false })
   isDeleted: boolean;
 
   @Prop()
@@ -43,15 +40,6 @@ export class User {
     _id: mongoose.Schema.Types.ObjectId;
     email: string;
   };
-
-  @Prop({ default: false })
-  isActive: boolean;
-
-  @Prop()
-  codeId: string;
-
-  @Prop()
-  codeExpired: Date;
 
   @Prop()
   updatedAt: Date;
@@ -72,4 +60,4 @@ export class User {
   };
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const PromoSchema = SchemaFactory.createForClass(Promo);

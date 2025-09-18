@@ -1,39 +1,26 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
-export type UserDocument = HydratedDocument<User>;
+export type MembershipDocument = HydratedDocument<Membership>;
 
 @Schema({ timestamps: true })
-export class User {
+export class Membership {
   @Prop({ required: true })
-  email: string;
-
-  @Prop({ required: false })
-  password: string;
+  name: string; // ví dụ: Silver, Gold, Platinum
 
   @Prop()
-  name: string;
+  description: string;
 
   @Prop()
-  phone: number;
+  price: number;
 
   @Prop()
-  gender: string;
+  durationInDays: number;
 
-  @Prop()
-  address: string;
+  @Prop({ default: true })
+  isActive: boolean;
 
-  @Prop({ default: 'LOCAL' })
-  accountType: string;
-
-  @Prop({ default: 'USER', enum: ['USER', 'ADMIN'] })
-  role: string;
-
-  @Prop()
-  avatar: string;
-
-  @Prop()
-  isDeleted: boolean;
+  ///
 
   @Prop()
   createdAt: Date;
@@ -43,15 +30,6 @@ export class User {
     _id: mongoose.Schema.Types.ObjectId;
     email: string;
   };
-
-  @Prop({ default: false })
-  isActive: boolean;
-
-  @Prop()
-  codeId: string;
-
-  @Prop()
-  codeExpired: Date;
 
   @Prop()
   updatedAt: Date;
@@ -72,4 +50,4 @@ export class User {
   };
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const MembershipSchema = SchemaFactory.createForClass(Membership);

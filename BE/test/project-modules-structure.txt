@@ -1,0 +1,82 @@
+📁 src/modules
+│
+├── auth
+│   ├── auth.module.ts
+│   ├── auth.service.ts
+│   ├── auth.controller.ts
+│   ├── guards/
+│   │   ├── jwt.auth.guard.ts
+│   │   └── roles.guard.ts
+│   └── strategies/
+│       ├── jwt.strategy.ts
+│       └── google.strategy.ts
+│
+├── users
+│   ├── users.module.ts
+│   ├── users.service.ts
+│   ├── users.controller.ts
+│   ├── dto/
+│   │   ├── create-user.dto.ts
+│   │   └── update-user.dto.ts
+│   └── schema/
+│       └── user.schema.ts
+│
+├── memberships
+│   ├── memberships.module.ts
+│   ├── memberships.service.ts
+│   ├── memberships.controller.ts
+│   ├── dto/
+│   │   ├── create-membership.dto.ts
+│   │   └── update-membership.dto.ts
+│   └── schema/
+│       └── membership.schema.ts
+│
+├── promotions
+│   ├── promotions.module.ts
+│   ├── promotions.service.ts
+│   ├── promotions.controller.ts
+│   ├── dto/
+│   │   ├── create-promotion.dto.ts
+│   │   └── update-promotion.dto.ts
+│   └── schema/
+│       └── promotion.schema.ts
+│
+├── products
+│   ├── products.module.ts
+│   ├── products.service.ts
+│   ├── products.controller.ts
+│   ├── dto/
+│   │   ├── create-product.dto.ts
+│   │   └── update-product.dto.ts
+│   └── schema/
+│       └── product.schema.ts
+│
+├── categories
+│   ├── categories.module.ts
+│   ├── categories.service.ts
+│   ├── categories.controller.ts
+│   ├── dto/
+│   │   ├── create-category.dto.ts
+│   │   └── update-category.dto.ts
+│   └── schema/
+│       └── category.schema.ts
+│
+├── orders
+│   ├── orders.module.ts
+│   ├── orders.service.ts
+│   ├── orders.controller.ts
+│   ├── dto/
+│   │   ├── create-order.dto.ts
+│   │   └── update-order.dto.ts
+│   └── schema/
+│       └── order.schema.ts
+│
+└── carts
+    ├── carts.module.ts
+    ├── carts.service.ts
+    ├── carts.controller.ts
+    ├── dto/
+    │   ├── create-cart.dto.ts
+    │   └── update-cart.dto.ts
+    └── schema/
+        └── cart.schema.ts

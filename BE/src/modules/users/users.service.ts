@@ -8,7 +8,7 @@ import {
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User as UserM, UserDocument } from './schemas/user.schema';
-import mongoose, { Model } from 'mongoose';
+import mongoose from 'mongoose';
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
