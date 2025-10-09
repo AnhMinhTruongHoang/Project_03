@@ -1,0 +1,247 @@
+// ----------------------------------------------
+// Variables Style
+// ----------------------------------------------
+
+// colors
+$white: #fff !default;
+$gray-100: rgba(31, 42, 46, 0.12) !default;
+$gray-200: #F4F8FA !default;
+$gray-300: rgba(31, 42, 46, 0.6) !default;
+$gray-400: rgba(31, 42, 46, 0.7) !default;
+$gray-500: #1F2A2E !default;
+$black: #000 !default;
+
+// Color
+$blue: #C1FF72 !default;
+
+// Main Colors
+$primary: $blue !default;
+$secondary: #1f2a2e !default;
+$light: $gray-100 !default;
+$muted: $gray-300 !default;
+$dark: $gray-500 !default;
+$dark-light: $gray-400 !default;
+$light-gray: $gray-200 !default; 
+
+// Theme Colorss
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "light": $light,
+  "dark": $dark,
+  "muted": $muted,
+  "dark-light": $dark-light,
+  "light-gray": $light-gray,
+  ) !default;
+
+// Spacer
+$spacer: 1rem !default;
+$spacers: (
+  0: 0,
+  1: $spacer * 0.25,
+  2: $spacer * 0.5,
+  3: $spacer,
+  4: $spacer * 1.5,
+  5: $spacer * 3,
+  6: 20px,
+  7: 30px,
+  8: 40px,
+  9: 44px,
+  10: 80px,
+  11: 96px,
+  12: 160px,
+  ) !default;
+
+$utilities: (
+  ) !default;
+$utilities: (
+  "width": (property: width,
+    class: w,
+    values: (20: 20%,
+      25: 25%,
+      30: 30%,
+      40: 40%,
+      50: 50%,
+      60: 60%,
+      70: 70%,
+      75: 75%,
+      85: 85%,
+      100: 100%,
+      auto: auto,
+    ),
+  ),
+);
+
+// Common
+$min-contrast-ratio: 1.7 !default;
+
+// Margins
+$enable-negative-margins: true !default;
+$enable-shadows: true !default;
+
+// Global
+$text-muted: $muted !default;
+$grid-gutter-width: 32px !default;
+
+// Font Weight
+$font-weight-lighter: lighter;
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-bolder: bolder;
+
+$font-weight-base: $font-weight-normal;
+
+// Buttons
+$btn-padding-y: 4px !default;
+$btn-padding-x: 4px !default;
+$btn-color: $dark !default;
+$btn-link-color: $dark !default;
+$btn-font-weight: 700 !default;
+$btn-border-radius: 56px !default;
+$btn-box-shadow: unset !default;
+$btn-font-size: 18px !default;
+$btn-border-radius-lg: 9px !default;
+
+// Font Family
+$font-family-sans-serif: "Manrope", sans-serif !default;
+
+// Font Sizes
+$font-sizes: (
+  1: 10px,
+  2: 12px,
+  3: 14px,
+  4: 16px,
+  5: 18px,
+  6: 20px,
+  7: 24px,
+  8: 28px,
+  9: 32px,
+  10: 36px,
+  11: 40px,
+  12: 48px,
+  13: 56px,
+  14: 60px,
+  15: 72px,
+  16: 128px,
+  17: 290px,
+  ) !default;
+$font-size-base: 1rem !default;
+
+$h1-font-size: 128px !default;
+$h2-font-size: 48px !default;
+$h3-font-size: 36px !default;
+$h4-font-size: 28px !default;
+$h5-font-size: 18px !default;
+$h6-font-size: 16px !default;
+
+// Line Heght
+$line-height-base: 1.5 !default;
+$line-height-sm: 1.25 !default;
+$line-height-lg: 2 !default;
+
+// Body
+$body-bg: $white !default;
+$body-color: $gray-400 !default;
+
+// Heading
+$headings-color: $dark !default;
+$headings-font-weight: 700 !default;
+
+// Border Color
+$border-color: rgba(31, 42, 46, 0.12) !default;
+
+
+// Box Shadow
+$box-shadow: 0px 1px 3px rgba($black, 0.15) !default;
+$box-shadow-sm: 0px 6px 8px -6px rgba($black, 0.15) !default;
+$box-shadow-lg: 0px 12px 16px -4px rgba(16, 24, 40, 0.08),
+  0px 4px 6px -2px rgba(16, 24, 40, 0.03) !default;
+$box-shadow-inset: unset !default;
+
+// Card
+$card-title-color: $dark !default;
+$card-subtitle-color: var(--bs-body-color) !default;
+$card-spacer-y: 30px !default;
+$card-spacer-x: 30px !default;
+$card-spacer-y: 48px !default;
+$card-spacer-x: 48px !default;
+$card-border-radius: 0 !default;
+$card-border-width: 0px !default;
+
+// Border Radius
+$border-radius: 8px !default;
+$border-radius-sm: 20px !default;
+$border-radius-lg: 24px !default;
+
+// Badges
+$badge-font-size: 16px !default;
+$badge-font-weight: 500 !default;
+$badge-padding-y: 8px !default;
+$badge-padding-x: 16px !default;
+$badge-border-radius: $btn-border-radius;
+
+// Tooltips
+$tooltip-font-size: 12px !default;
+$tooltip-bg: $dark;
+
+// Input
+$form-label-color: $gray-500;
+$form-label-font-weight: 600;
+$form-select-indicator-padding: 38px;
+$form-select-border-radius: 7px !default;
+$form-select-box-shadow: unset !default;
+$input-border-radius: 0 !default;
+$input-group-addon-bg: $gray-300 !default;
+$input-group-addon-border-color: $light !default;
+$input-border-color: 0 !default;
+$input-bg: transparent !default;
+$input-color: $gray-300 !default;
+$input-padding-y: 14px;
+$input-padding-x: 0;
+$form-check-input-width: 1.313em;
+$form-check-min-height: 1.313em;
+$form-check-input-border: 1.25px solid $dark;
+$form-check-input-checked-bg-color: var(--bs-primary
+);
+
+
+// Dropdown
+$dropdown-border-radius: $border-radius-lg !default;
+$dropdown-min-width: 380px !default;
+$dropdown-border-width: 0 !default;
+$dropdown-item-padding-y: 10px !default;
+$dropdown-link-hover-bg: $gray-100 !default;
+$dropdown-link-active-bg: $gray-100;
+$dropdown-link-active-color: $dark;
+$link-color: $dark !default;
+
+$link-hover-color: $primary !default;
+
+// Accordion
+$accordion-padding-y: 28px;
+$accordion-padding-x: 0;
+$accordion-button-color: $dark;
+$accordion-body-padding-y: 1rem;
+$accordion-border-color: $border-color;
+$accordion-button-active-bg: transparent !default;
+$accordion-button-active-color: $dark;
+$accordion-icon-color: #0000008a;
+$accordion-icon-active-color: #0000008a;
+$accordion-button-icon: url("../images/svgs/icon-plus.svg");
+$accordion-button-active-icon: url("../images/svgs/icon-x.svg");
+
+
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1140px,
+  xxl: 1680px,
+  ) !default;
+
+
+$hr-border-color: $border-color !default;
+$hr-opacity: 1 !default;

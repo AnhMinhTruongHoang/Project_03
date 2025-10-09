@@ -1,0 +1,69 @@
+.header {
+    padding: 28px 0;
+    z-index: 99;
+    transition: all 0.5s ease-in-out;
+    animation: 0.5s ease-in-out 0s normal none 1 running fadeInDown;
+
+    @include media-breakpoint-down(lg) {
+        padding: 20px 0;
+    }
+
+    &.fixed-header {
+        padding: 20px 0;
+        background-color: var(--bs-primary);
+
+        .logo {
+            .logo-dark {
+                display: block;
+            }
+
+            .logo-white {
+                display: none;
+            }
+        }
+
+        .light-dark {
+            color: var(--bs-dark) !important;
+        }
+
+        .toggle-menu {
+            background-color: var(--bs-dark) !important;
+
+            .menu-icon {
+                color: var(--bs-white) !important;
+            }
+        }
+    }
+
+    .logo {
+        .logo-dark {
+            display: none;
+        }
+    }
+
+    .header-menu {
+
+        .header-item {
+            .header-link {
+                .animate-spin {
+                    transition: 0.5s;
+                }
+
+                .animate-spin {
+                    opacity: 0;
+                    width: 0;
+                }
+
+                &:hover,
+                &.active {
+                    .animate-spin {
+                        opacity: 1;
+                        width: 20px;
+                        margin-inline-end: 5px;
+                    }
+                }
+            }
+        }
+    }
+
+}

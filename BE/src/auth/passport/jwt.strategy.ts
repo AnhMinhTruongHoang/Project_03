@@ -33,7 +33,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     //Kiểm tra trạng thái tài khoản
     if (user.isActive === false) {
-      throw new ForbiddenException('Account is not active');
+      throw new ForbiddenException({
+        message: 'Account is not active',
+        code: 'ACCOUNT_INACTIVE',
+      });
     }
 
     // Gán quyền (nếu là ADMIN)

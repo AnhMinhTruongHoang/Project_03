@@ -1,0 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap");
+
+@import "./variables/variables";
+
+// Import Bootstrap source files (Required file)
+@import "../libs/bootstrap/scss/bootstrap.scss";
+
+// Theme Layouts style (Required file)
+@import "./layouts/header";
+
+// Pages style (Required file)
+@import "./pages/index";
+
+// Component style (Required file)
+@import "./component/reboot";
+
+// Utilities style (Required file)
+@import "./utilities/icon-size";
+@import "./utilities/override"; 

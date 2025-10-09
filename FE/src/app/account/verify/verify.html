@@ -1,0 +1,31 @@
+<section class="min-vh-100 d-flex align-items-center justify-content-center">
+  <div class="card shadow-lg p-4" style="max-width: 400px;">
+    <h3 class="text-center mb-3">Verify Account</h3>
+
+    <form class="d-flex flex-column gap-3">
+      <input
+        type="text"
+        class="form-control"
+        [(ngModel)]="code"
+        name="code"
+        placeholder="Enter activation code"
+      />
+
+      @if (errorMessage) {
+        <p class="text-danger text-center">{{ errorMessage }}</p>
+      }
+
+      @if (successMessage) {
+        <p class="text-success text-center">{{ successMessage }}</p>
+      }
+
+      <button
+        type="button"
+        class="btn btn-dark w-100"
+        (click)="verifyCode()"
+      >
+        Verify
+      </button>
+    </form>
+  </div>
+</section>

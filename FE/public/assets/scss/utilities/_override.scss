@@ -1,0 +1,80 @@
+.text-opacity-70 {
+    --bs-text-opacity: 0.70;
+}
+
+.w-fit {
+    width: fit-content;
+}
+
+.btn-outline-light{ 
+    &:hover{
+        background-color: var(--bs-light-gray) !important;
+    }
+}
+
+.btn-check:checked + .btn, :not(.btn-check) + .btn:active, .btn:first-child:active, .btn.active, .btn.show {
+    background-color: var(--bs-secondary) !important;
+    border-color: var(--bs-secondary) !important;
+    box-shadow: unset !important;
+
+    .btn-text{
+        color: var(--bs-white);
+    }
+}
+
+.btn {
+    position: relative; // Needed for absolute children
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: var(--bs-primary);
+    border-radius: 9999px;
+    padding: 0.5rem 1.5rem;
+    overflow: hidden;
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out;
+    width: fit-content;
+    padding: 16px 58px 16px 30px;
+
+    &:hover {
+        background-color: var(--bs-secondary);
+    }
+
+    .btn-text {
+        position: relative;
+        z-index: 1;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--bs-secondary);
+        transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+        padding-inline-end: 15px;
+    }
+
+    &:hover .btn-text {
+        color: var(--bs-white);
+        transform: translateX(2.5rem); // 10 x 0.25rem
+    }
+
+    .btn-icon {
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translate(-115%, -50%);
+        z-index: 0;
+        transition: transform 0.4s ease, left 0.4s ease;
+    }
+
+    &:hover .btn-icon {
+        left: 0;
+        transform: translate(15%, -50%) rotate(45deg);
+    }
+}
+
+.btn-dark{
+    background-color: var(--bs-dark);
+
+    &:hover{
+        color: var(--bs-dark);
+        background-color: var(--bs-white);
+    }
+}

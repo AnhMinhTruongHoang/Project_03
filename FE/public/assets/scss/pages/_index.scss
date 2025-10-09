@@ -1,0 +1,249 @@
+.banner-section {
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        background-color: rgba($black, 0.50);
+    }
+}
+
+.banner-inner-section {
+    min-height: 650px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+
+    @include media-breakpoint-down(lg) {
+        min-height: 550px;
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(1turn);
+    }
+}
+
+.portfolio-img {
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        display: block;
+        padding-top: 72%;
+    }
+
+    >img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    &:hover {
+        .portfolio-overlay {
+            visibility: visible;
+            transform: translateY(0);
+        }
+    }
+
+    .portfolio-overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        visibility: hidden;
+        transform: translateY(-100%);
+        transition: all 0.4s ease-in-out;
+        background-color: rgba($black, 0.70);
+    }
+}
+
+
+.meet-team-img {
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        display: block;
+        padding-top: 120%;
+    }
+
+    >img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    &:hover {
+        .meet-team-overlay {
+            visibility: visible;
+            transform: translateY(0);
+        }
+    }
+
+    .meet-team-overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        visibility: hidden;
+        transform: translateY(100%);
+        transition: all 0.4s ease-in-out;
+        background-color: rgba($black, 0.60);
+
+        .social {
+            .btn {
+                &:hover {
+                    background-color: var(--bs-primary) !important;
+                }
+            }
+        }
+    }
+}
+
+
+.marquee-content {
+    animation: marquee 20s linear infinite running;
+}
+
+.marquee-content:hover {
+    animation-play-state: paused;
+}
+
+.marquee-tag {
+    width: 200px;
+    transition: all 0.2s ease;
+}
+
+.marquee-tag:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translate(-50%);
+    }
+}
+
+
+.accordion-button {
+    &::after {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 100%;
+        background-position: center;
+        background-size: inherit;
+        background-color: var(--bs-light-gray);
+    }
+
+    &:not(.collapsed)::after {
+        background-color: var(--bs-primary);
+    }
+
+    &:not(.collapsed) {
+        box-shadow: unset;
+    }
+}
+
+.resources-img-first {
+    &::before {
+        padding-top: 66.3% !important;
+    }
+}
+
+.resources-img-blog {
+    &::before {
+        padding-top: 69.5% !important;
+    }
+}
+
+.resources-img {
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        display: block;
+        padding-top: 138%;
+    }
+
+    >img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    transition: all 0.2s ease;
+
+    img {
+        transition: all 0.2s ease;
+    }
+
+    &:hover {
+        img {
+            transform: scale(1.1);
+        }
+    }
+}
+
+.get-template {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    z-index: 99;
+}
+
+#scrollToTopBtn {
+    transition: all .5s ease-in-out;
+    display: none;
+}
+
+
+.services-tab {
+    .nav-tabs {
+        .nav-item {
+            .nav-link {
+                color: var(--bs-white);
+
+                &.active {
+                    background-color: transparent;
+                    color: var(--bs-primary);
+                }
+            }
+        }
+    }
+}
+
+.sign-in{
+    max-width: 520px;
+    width: 100%;
+}
