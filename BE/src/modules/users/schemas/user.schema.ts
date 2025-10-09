@@ -5,44 +5,38 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop({ required: false })
-  password: string;
+  @Prop({ required: false, select: false })
+  password?: string;
 
   @Prop()
   name: string;
 
-  @Prop()
-  phone: number;
+  @Prop({ type: String })
+  phone: string;
 
-  @Prop()
+  @Prop({ enum: ['MALE', 'FEMALE', 'OTHER'], required: false })
   gender: string;
 
   @Prop()
   address: string;
 
-  @Prop({ default: 'LOCAL' })
+  @Prop({ default: 'LOCAL', enum: ['LOCAL', 'GOOGLE', 'FACEBOOK'] })
   accountType: string;
 
-  @Prop({ default: 'USER', enum: ['USER', 'ADMIN'] })
+  @Prop({
+    default: 'USER',
+    enum: ['USER', 'ADMIN', 'STAFF', 'COURIER', 'CUSTOMER'],
+  })
   role: string;
 
   @Prop()
   avatar: string;
 
-  @Prop()
+  @Prop({ default: false })
   isDeleted: boolean;
-
-  @Prop()
-  createdAt: Date;
-
-  @Prop({ type: Object })
-  createdBy: {
-    _id: mongoose.Schema.Types.ObjectId;
-    email: string;
-  };
 
   @Prop({ default: false })
   isActive: boolean;
@@ -53,8 +47,11 @@ export class User {
   @Prop()
   codeExpired: Date;
 
-  @Prop()
-  updatedAt: Date;
+  @Prop({ type: Object })
+  createdBy: {
+    _id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
 
   @Prop({ type: Object })
   updatedBy: {
@@ -70,6 +67,9 @@ export class User {
     _id: mongoose.Schema.Types.ObjectId;
     email: string;
   };
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

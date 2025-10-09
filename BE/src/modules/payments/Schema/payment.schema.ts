@@ -11,29 +11,35 @@ export class Payment {
   @Prop({ required: true })
   amount: number;
 
-  @Prop({ required: true })
+  @Prop({
+    required: true,
+    enum: ['COD', 'MOMO', 'VNPAY', 'BANK_TRANSFER', 'CREDIT_CARD'],
+  })
   method: string;
 
-  @Prop({ default: 'pending' })
+  @Prop({
+    default: 'pending',
+    enum: ['pending', 'paid', 'failed', 'refunded'],
+  })
   status: string;
 
-  @Prop()
-  transactionId: string;
+  @Prop({ unique: true, sparse: true })
+  transactionId?: string;
 
   @Prop({ default: false })
   isDeleted: boolean;
 
   @Prop()
-  deletedAt: Date;
+  deletedAt?: Date;
 
   @Prop({ type: Object })
-  createdBy: { _id: mongoose.Types.ObjectId; email: string };
+  createdBy?: { _id: mongoose.Types.ObjectId; email: string };
 
   @Prop({ type: Object })
-  updatedBy: { _id: mongoose.Types.ObjectId; email: string };
+  updatedBy?: { _id: mongoose.Types.ObjectId; email: string };
 
   @Prop({ type: Object })
-  deletedBy: { _id: mongoose.Types.ObjectId; email: string };
+  deletedBy?: { _id: mongoose.Types.ObjectId; email: string };
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

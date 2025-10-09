@@ -2,19 +2,27 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { User, UserDocument } from '../users/schemas/user.schema';
-import {
-  Membership,
-  MembershipDocument,
-} from '../memberships/schema/membership.schema';
-import {
-  Category,
-  CategoryDocument,
-} from '../categories/schema/category.schema';
-import { Product, ProductDocument } from '../products/schema/product.schema';
-import { Order, OrderDocument } from '../orders/schema/order.schema';
-import { Payment, PaymentDocument } from '../payments/schema/payment.schema';
+import mongoose from 'mongoose';
 import { UsersService } from '../users/users.service';
+import { User, UserDocument } from '../users/schemas/user.schema';
+import { Branch, BranchDocument } from '../branches/schemas/branch.schemas';
+import { Service, ServiceDocument } from '../services/schemas/service.schemas';
+import {
+  Shipment,
+  ShipmentDocument,
+} from '../shipments/schemas/shipment.schema';
+import { Payment, PaymentDocument } from '../payments/schema/payment.schema';
+import {
+  Tracking,
+  TrackingDocument,
+} from '../tracking/schemas/tracking.schemas';
+import {
+  Notification,
+  NotificationDocument,
+  NotificationType,
+} from '../notifications/schemas/notification.schemas';
+import { Pricing, PricingDocument } from '../pricing/schemas/pricing.schemas';
+import { Order, OrderDocument } from '../orders/schemas/order.schemas';
 
 @Injectable()
 export class DatabasesService implements OnModuleInit {
@@ -22,290 +30,348 @@ export class DatabasesService implements OnModuleInit {
 
   constructor(
     @InjectModel(User.name)
-    private userModel: SoftDeleteModel<UserDocument>,
-
-    @InjectModel(Membership.name)
-    private membershipsModel: SoftDeleteModel<MembershipDocument>,
-
-    @InjectModel(Category.name)
-    private categoryModel: SoftDeleteModel<CategoryDocument>,
-
-    @InjectModel(Product.name)
-    private productModel: SoftDeleteModel<ProductDocument>,
-
-    @InjectModel(Order.name)
-    private orderModel: SoftDeleteModel<OrderDocument>,
-
+    private readonly userModel: SoftDeleteModel<UserDocument>,
+    @InjectModel(Branch.name)
+    private readonly branchModel: SoftDeleteModel<BranchDocument>,
+    @InjectModel(Service.name)
+    private readonly serviceModel: SoftDeleteModel<ServiceDocument>,
+    @InjectModel(Shipment.name)
+    private readonly shipmentModel: SoftDeleteModel<ShipmentDocument>,
     @InjectModel(Payment.name)
-    private paymentModel: SoftDeleteModel<PaymentDocument>,
-
-    private configService: ConfigService,
-    private userService: UsersService,
+    private readonly paymentModel: SoftDeleteModel<PaymentDocument>,
+    @InjectModel(Tracking.name)
+    private readonly trackingModel: SoftDeleteModel<TrackingDocument>,
+    @InjectModel(Notification.name)
+    private readonly notificationModel: SoftDeleteModel<NotificationDocument>,
+    @InjectModel(Order.name)
+    private readonly orderModel: SoftDeleteModel<OrderDocument>,
+    @InjectModel(Pricing.name)
+    private readonly pricingModel: SoftDeleteModel<PricingDocument>,
+    private readonly configService: ConfigService,
+    private readonly userService: UsersService,
   ) {}
 
   async onModuleInit() {
-    const isInit = this.configService.get<string>('SHOULD_INIT');
-    if (!isInit || isInit === 'false') return;
+    const shouldInit = this.configService.get<string>('SHOULD_INIT');
+    if (!shouldInit || shouldInit === 'false') return;
 
-    // Seed Users
-    const countUsers = await this.userModel.countDocuments();
-    if (countUsers === 0) {
-      const initPassword = this.userService.getHashPassword(
-        this.configService.get<string>('INIT_PASSWORD'),
-      );
+    await this.seedUsers();
+    await this.seedBranches();
+    await this.seedServices();
+    await this.seedOrders();
+    await this.seedShipmentsAndPayments();
+    await this.seedTracking();
+    await this.seedNotifications();
+    await this.seedPricing();
 
-      await this.userModel.insertMany([
+    this.logger.log('✅ DATABASE SEEDING COMPLETED');
+  }
+
+  // 🧑 USERS
+  private async seedUsers() {
+    const count = await this.userModel.countDocuments();
+    if (count > 0) return;
+
+    const hash = this.userService.getHashPassword(
+      this.configService.get<string>('INIT_PASSWORD'),
+    );
+
+    await this.userModel.insertMany([
+      {
+        name: 'Admin User',
+        email: 'admin@post.vn',
+        password: hash,
+        role: 'ADMIN',
+        isActive: true,
+      },
+      {
+        name: 'Post Staff',
+        email: 'staff@post.vn',
+        password: hash,
+        role: 'STAFF',
+        isActive: true,
+      },
+      {
+        name: 'Courier Guy',
+        email: 'courier@post.vn',
+        password: hash,
+        role: 'COURIER',
+        isActive: true,
+      },
+      {
+        name: 'Customer Test',
+        email: 'customer@post.vn',
+        password: hash,
+        role: 'CUSTOMER',
+        isActive: true,
+      },
+    ]);
+
+    this.logger.log('>>> INIT USERS DONE...');
+  }
+
+  // 🏢 BRANCHES
+  private async seedBranches() {
+    const count = await this.branchModel.countDocuments();
+    if (count > 0) return;
+
+    await this.branchModel.insertMany([
+      {
+        code: 'HN01',
+        name: 'Hà Nội Center',
+        address: '123 Hoàn Kiếm, Hà Nội',
+        city: 'Hà Nội',
+        province: 'Hà Nội',
+        postalCode: '10000',
+        phone: '0123456789',
+        email: 'hn@post.vn',
+        geo: { lat: 21.0278, lng: 105.8342 },
+      },
+      {
+        code: 'HCM01',
+        name: 'HCM Center',
+        address: '456 Quận 1, TP.HCM',
+        city: 'Hồ Chí Minh',
+        province: 'Hồ Chí Minh',
+        postalCode: '70000',
+        phone: '0987654321',
+        email: 'hcm@post.vn',
+        geo: { lat: 10.7769, lng: 106.7009 },
+      },
+    ]);
+
+    this.logger.log('>>> INIT BRANCHES DONE...');
+  }
+
+  // 🚚 SERVICES
+  private async seedServices() {
+    const count = await this.serviceModel.countDocuments();
+    if (count > 0) return;
+
+    await this.serviceModel.insertMany([
+      {
+        code: 'STD',
+        name: 'Tiêu chuẩn',
+        description: 'Giao hàng trong 3-5 ngày',
+        basePrice: 20000,
+        pricePerKg: 5000,
+        estimatedDays: 5,
+        codFeePercent: 2,
+        isActive: true,
+      },
+      {
+        code: 'EXP',
+        name: 'Nhanh',
+        description: 'Giao hàng trong 1-2 ngày',
+        basePrice: 40000,
+        pricePerKg: 8000,
+        estimatedDays: 2,
+        codFeePercent: 2,
+        isActive: true,
+      },
+    ]);
+
+    this.logger.log('>>> INIT SERVICES DONE...');
+  }
+
+  // 📦 SHIPMENTS + PAYMENTS
+  private async seedShipmentsAndPayments() {
+    const count = await this.shipmentModel.countDocuments();
+    if (count > 0) return;
+
+    const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
+    const branches = await this.branchModel.find();
+    const service = await this.serviceModel.findOne({ code: 'STD' });
+
+    if (!customer || branches.length < 2 || !service) return;
+
+    const shipment = await this.shipmentModel.create({
+      trackingNumber: 'TEST001',
+      senderName: 'Test Sender',
+      senderPhone: '0909090909',
+      senderAddress: branches[0].address,
+      receiverName: 'Test Receiver',
+      receiverPhone: '0909090909',
+      receiverAddress: branches[1].address,
+      originBranchId: branches[0]._id,
+      destinationBranchId: branches[1]._id,
+      weight: 2,
+      serviceType: service.code,
+      shippingFee: 30000,
+      status: 'PENDING',
+      createdBy: customer._id,
+      timeline: [
         {
-          name: "I'm admin",
-          email: 'admin@gmail.com',
-          password: initPassword,
-          age: 30,
-          gender: 'MALE',
-          address: 'VietNam',
-          role: 'ADMIN',
-          isActive: true,
+          status: 'PENDING',
+          timestamp: new Date(),
+          note: 'Đơn hàng được khởi tạo',
         },
-        {
-          name: "I'm normal user",
-          email: 'user@gmail.com',
-          password: initPassword,
-          age: 25,
-          gender: 'FEMALE',
-          address: 'VietNam',
-          role: 'USER',
-          isActive: true,
+      ],
+    });
+
+    await this.paymentModel.create({
+      orderId: new mongoose.Types.ObjectId(),
+      shipmentId: shipment._id,
+      userId: customer._id,
+      method: 'COD',
+      amount: 30000,
+      status: 'pending',
+      provider: 'manual',
+    });
+
+    this.logger.log('>>> INIT SHIPMENTS & PAYMENTS DONE...');
+  }
+
+  // 📍 TRACKINGS
+  private async seedTracking() {
+    const count = await this.trackingModel.countDocuments();
+    if (count > 0) return;
+
+    const shipment = await this.shipmentModel.findOne();
+    if (!shipment) return;
+
+    await this.trackingModel.insertMany([
+      {
+        shipmentId: shipment._id,
+        status: 'CREATED', // ✅ dùng đúng enum
+        location: 'Hà Nội Center',
+        note: 'Khởi tạo đơn hàng',
+        branchId: shipment.originBranchId,
+        timestamp: new Date(),
+        createdBy: {
+          _id: new mongoose.Types.ObjectId(),
+          email: 'system@post.vn',
         },
-      ]);
-      this.logger.log('>>> INIT USERS DONE...');
+      },
+      {
+        shipmentId: shipment._id,
+        status: 'IN_TRANSIT',
+        location: 'Kho trung chuyển',
+        note: 'Đang trên đường vận chuyển',
+        branchId: shipment.originBranchId,
+        timestamp: new Date(),
+        createdBy: {
+          _id: new mongoose.Types.ObjectId(),
+          email: 'system@post.vn',
+        },
+      },
+    ]);
+
+    this.logger.log('>>> INIT TRACKING DONE...');
+  }
+
+  // 🔔 NOTIFICATIONS
+  private async seedNotifications() {
+    const count = await this.notificationModel.countDocuments();
+    if (count > 0) return;
+
+    const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
+    if (!customer) return;
+
+    await this.notificationModel.insertMany([
+      {
+        recipient: customer.email,
+        title: 'Chào mừng đến với hệ thống bưu chính',
+        message: 'Tài khoản của bạn đã được kích hoạt thành công!',
+        type: NotificationType.EMAIL,
+        status: 'SENT',
+        sentAt: new Date(),
+      },
+      {
+        recipient: customer.email,
+        title: 'Thông báo đơn hàng',
+        message: 'Đơn hàng TEST001 đang được vận chuyển.',
+        type: NotificationType.EMAIL,
+        status: 'PENDING',
+      },
+    ]);
+
+    this.logger.log('>>> INIT NOTIFICATIONS DONE...');
+  }
+
+  // 💰 PRICING
+  private async seedPricing() {
+    const count = await this.pricingModel.countDocuments();
+    if (count > 0) return;
+
+    const service = await this.serviceModel.findOne();
+    if (!service) return;
+
+    await this.pricingModel.insertMany([
+      {
+        serviceId: service._id,
+        zone: 'LOCAL',
+        minWeight: 0,
+        maxWeight: 5,
+        price: 20000,
+      },
+      {
+        serviceId: service._id,
+        zone: 'REGIONAL',
+        minWeight: 5,
+        maxWeight: 10,
+        price: 40000,
+      },
+      {
+        serviceId: service._id,
+        zone: 'NATIONAL',
+        minWeight: 10,
+        maxWeight: 20,
+        price: 60000,
+      },
+    ]);
+
+    this.logger.log('>>> INIT PRICING DONE...');
+  }
+
+  // 🛍 ORDERS
+  private async seedOrders() {
+    const count = await this.orderModel.countDocuments();
+    if (count > 0) return;
+
+    const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
+    if (!customer) {
+      this.logger.warn('❌ No customer found for order seeding');
+      return;
     }
 
-    // Seed Memberships
-    const countMemberships = await this.membershipsModel.countDocuments();
-    if (countMemberships === 0) {
-      await this.membershipsModel.insertMany([
-        {
-          name: 'Bronze',
-          description: 'Basic membership',
-          discountRate: 0,
-          pointMultiplier: 1,
-          freeShipping: false,
-          monthlyFee: 0,
-        },
-        {
-          name: 'Silver',
-          description: 'Better benefits',
-          discountRate: 5,
-          pointMultiplier: 1.5,
-          freeShipping: false,
-          monthlyFee: 5,
-        },
-        {
-          name: 'Gold',
-          description: 'Premium benefits',
-          discountRate: 10,
-          pointMultiplier: 2,
-          freeShipping: true,
-          monthlyFee: 10,
-        },
-      ]);
-      this.logger.log('>>> INIT MEMBERSHIPS DONE...');
+    const orders = await this.orderModel.insertMany([
+      {
+        userId: customer._id,
+        senderName: 'Nguyễn Văn A',
+        receiverName: 'Trần Thị B',
+        receiverPhone: '0912345678',
+        pickupAddress: '123 Hà Nội',
+        deliveryAddress: '456 TP.HCM',
+        totalPrice: 200000,
+        status: 'PENDING',
+      },
+      {
+        userId: customer._id,
+        senderName: 'Công ty X',
+        receiverName: 'Lê Văn C',
+        receiverPhone: '0987654321',
+        pickupAddress: '789 Đà Nẵng',
+        deliveryAddress: '654 Cần Thơ',
+        totalPrice: 350000,
+        status: 'CONFIRMED',
+      },
+    ]);
+
+    this.logger.log(`>>> INIT ${orders.length} ORDERS DONE...`);
+
+    // 💰 Tạo luôn Payment tương ứng với Order
+    for (const order of orders) {
+      await this.paymentModel.create({
+        orderId: order._id,
+        userId: customer._id,
+        method: 'COD',
+        amount: order.totalPrice,
+        status: 'pending',
+        provider: 'manual',
+      });
     }
 
-    // Seed Categories
-    const countCategories = await this.categoryModel.countDocuments();
-    if (countCategories === 0) {
-      await this.categoryModel.insertMany([
-        { name: 'Mouse', description: 'gaming gear' },
-        { name: 'Keyboard', description: 'gaming gear' },
-        { name: 'Monitor', description: 'gaming gear' },
-        { name: 'Chairs', description: 'gaming gear' },
-      ]);
-      this.logger.log('>>> INIT CATEGORIES DONE...');
-    }
-
-    // Seed Products
-    const countProducts = await this.productModel.countDocuments();
-    if (countProducts === 0) {
-      const categories = await this.categoryModel.find();
-
-      const mouse = categories.find((c) => c.name === 'Mouse');
-      const keyboard = categories.find((c) => c.name === 'Keyboard');
-      const monitor = categories.find((c) => c.name === 'Monitor');
-      const chairs = categories.find((c) => c.name === 'Chairs');
-
-      // Product sample
-      const products = [
-        // Mouse
-        {
-          name: 'Logitech G102',
-          description: 'Gaming mouse',
-          price: 20,
-          stock: 100,
-          sold: 0,
-          category: mouse?._id,
-          brand: 'Logitech',
-        },
-        {
-          name: 'Razer DeathAdder',
-          description: 'Ergonomic gaming mouse',
-          price: 50,
-          stock: 80,
-          sold: 0,
-          category: mouse?._id,
-          brand: 'Razer',
-        },
-        {
-          name: 'SteelSeries Rival 3',
-          description: 'Budget-friendly gaming mouse',
-          price: 30,
-          stock: 120,
-          sold: 0,
-          category: mouse?._id,
-          brand: 'SteelSeries',
-        },
-
-        // Keyboard
-        {
-          name: 'Razer BlackWidow',
-          description: 'Mechanical keyboard',
-          price: 120,
-          stock: 50,
-          sold: 0,
-          category: keyboard?._id,
-          brand: 'Razer',
-        },
-        {
-          name: 'Corsair K95 RGB',
-          description: 'Premium gaming keyboard',
-          price: 180,
-          stock: 40,
-          sold: 0,
-          category: keyboard?._id,
-          brand: 'Corsair',
-        },
-        {
-          name: 'Logitech G213',
-          description: 'Membrane gaming keyboard',
-          price: 70,
-          stock: 60,
-          sold: 0,
-          category: keyboard?._id,
-          brand: 'Logitech',
-        },
-
-        // Monitor
-        {
-          name: 'ASUS TUF 24"',
-          description: '144Hz gaming monitor',
-          price: 200,
-          stock: 30,
-          sold: 0,
-          category: monitor?._id,
-          brand: 'ASUS',
-        },
-        {
-          name: 'Acer Predator 27"',
-          description: '2K 165Hz gaming monitor',
-          price: 400,
-          stock: 20,
-          sold: 0,
-          category: monitor?._id,
-          brand: 'Acer',
-        },
-        {
-          name: 'Samsung Odyssey G5',
-          description: 'Curved 144Hz monitor',
-          price: 350,
-          stock: 25,
-          sold: 0,
-          category: monitor?._id,
-          brand: 'Samsung',
-        },
-
-        // Chairs
-        {
-          name: 'DXRacer Formula',
-          description: 'Professional gaming chair',
-          price: 250,
-          stock: 15,
-          sold: 0,
-          category: chairs?._id,
-          brand: 'DXRacer',
-        },
-        {
-          name: 'Secretlab Titan Evo',
-          description: 'Premium ergonomic chair',
-          price: 450,
-          stock: 10,
-          sold: 0,
-          category: chairs?._id,
-          brand: 'Secretlab',
-        },
-        {
-          name: 'AKRacing Core EX',
-          description: 'Affordable gaming chair',
-          price: 200,
-          stock: 20,
-          sold: 0,
-          category: chairs?._id,
-          brand: 'AKRacing',
-        },
-      ];
-
-      await this.productModel.insertMany(products);
-      this.logger.log('>>> INIT PRODUCTS DONE...');
-    }
-
-    // Seed Orders + Payments
-    const countOrders = await this.orderModel.countDocuments();
-    if (countOrders === 0) {
-      const users = await this.userModel.find({ role: 'USER' });
-      const products = await this.productModel.find();
-
-      if (users.length === 0 || products.length === 0) {
-        this.logger.error(
-          'Missing users or products, cannot seed orders/payments.',
-        );
-      } else {
-        for (const user of users) {
-          // random số đơn hàng (3-5)
-          const orderCount = Math.floor(Math.random() * 3) + 3;
-
-          for (let i = 0; i < orderCount; i++) {
-            // random 1–3 sản phẩm mỗi order
-            const selectedProducts = products
-              .sort(() => 0.5 - Math.random())
-              .slice(0, Math.floor(Math.random() * 3) + 1);
-
-            const items = selectedProducts.map((p) => ({
-              productId: p._id,
-              quantity: Math.floor(Math.random() * 3) + 1,
-              price: p.price,
-            }));
-
-            const totalPrice = items.reduce(
-              (sum, item) => sum + item.price * item.quantity,
-              0,
-            );
-
-            const order = await this.orderModel.create({
-              userId: user._id,
-              items,
-              totalPrice,
-              status: 'pending',
-            });
-
-            await this.paymentModel.create({
-              orderId: order._id,
-              amount: order.totalPrice,
-              method: Math.random() > 0.5 ? 'cash' : 'credit_card',
-              status: Math.random() > 0.3 ? 'paid' : 'pending',
-            });
-          }
-        }
-
-        this.logger.log('>>> INIT ORDERS & PAYMENTS DONE...');
-      }
-    }
+    this.logger.log('>>> INIT PAYMENTS for ORDERS DONE...');
   }
 }

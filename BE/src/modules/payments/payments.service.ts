@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Payment, PaymentDocument } from './schema/payment.schema';
-import { Order, OrderDocument } from '../orders/schema/order.schema';
+import { Order, OrderDocument } from '../orders/schemas/order.schemas';
 
 @Injectable()
 export class PaymentsService {

@@ -3,66 +3,102 @@ import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsInt,
-  isNotEmpty,
   IsNotEmpty,
   IsOptional,
   IsString,
   Max,
   Min,
-  ValidateNested,
+  IsEnum,
+  Matches,
 } from 'class-validator';
-import mongoose from 'mongoose';
 
-class Company {
-  @IsOptional()
-  _id?: mongoose.Schema.Types.ObjectId;
+export enum GenderEnum {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  OTHER = 'OTHER',
+}
 
-  @IsOptional()
-  name?: string;
+export enum RoleEnum {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
 }
 
 export class CreateUserDto {
-  @IsNotEmpty({
-    message: "Email can't be empty",
-  })
-  @IsEmail()
+  @ApiProperty({ example: 'user@example.com', description: 'Email người dùng' })
+  @IsNotEmpty({ message: 'Email không được để trống' })
+  @IsEmail({}, { message: 'Email không hợp lệ' })
   email: string;
 
-  @IsNotEmpty({ message: 'password should not be empty' })
+  @ApiProperty({ example: '123456', description: 'Mật khẩu người dùng' })
+  @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
+  @IsString()
   password: string;
 
-  @IsNotEmpty({ message: "Name mustn't empty" })
-  name?: string;
+  @ApiProperty({ example: 'Nguyễn Văn A', description: 'Họ tên người dùng' })
+  @IsNotEmpty({ message: 'Tên không được để trống' })
+  @IsString()
+  name: string;
 
+  @ApiProperty({ required: false, example: 25, description: 'Tuổi' })
   @IsOptional()
+  @IsInt({ message: 'Tuổi phải là số nguyên' })
+  @Min(0, { message: 'Tuổi không được nhỏ hơn 0' })
+  @Max(120, { message: 'Tuổi không được lớn hơn 120' })
   age?: number;
 
+  @ApiProperty({
+    required: false,
+    enum: GenderEnum,
+    example: GenderEnum.MALE,
+    description: 'Giới tính',
+  })
   @IsOptional()
-  gender?: string;
+  @IsEnum(GenderEnum, { message: 'Giới tính không hợp lệ' })
+  gender?: GenderEnum;
 
+  @ApiProperty({
+    required: false,
+    example: '0987654321',
+    description: 'Số điện thoại',
+  })
   @IsOptional()
-  phone?: number;
+  @Matches(/^[0-9]{9,15}$/, { message: 'Số điện thoại không hợp lệ' })
+  phone?: string;
 
+  @ApiProperty({
+    required: false,
+    example: 'Hà Nội',
+    description: 'Địa chỉ người dùng',
+  })
   @IsOptional()
+  @IsString()
   address?: string;
 
-  role: string;
+  @ApiProperty({
+    required: false,
+    enum: RoleEnum,
+    example: RoleEnum.USER,
+    description: 'Phân quyền',
+  })
+  @IsOptional()
+  @IsEnum(RoleEnum, { message: 'Quyền không hợp lệ' })
+  role?: RoleEnum;
 
+  @ApiProperty({
+    required: false,
+    example: 'https://example.com/avatar.png',
+    description: 'Đường dẫn avatar người dùng',
+  })
   @IsOptional()
   @IsString()
   avatarUrl?: string;
 
-  @ApiProperty({ required: false, type: () => Company })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => Company)
-  company?: Company;
+  createdAt?: string;
 }
 
 ///////////// register valid
 
 export class RegisterUserDto {
- 
   @IsNotEmpty({ message: "Name mustn't empty" })
   name?: string;
 
@@ -106,25 +142,4 @@ export class UserLoginDto {
     description: 'password',
   })
   readonly password: string;
-}
-
-export class CodeAuthDto {
-  @IsNotEmpty({ message: '_id is not empty' })
-  _id: string;
-
-  @IsNotEmpty({ message: 'code is not empty' })
-  code: string;
-}
-export class ChangePasswordDto {
-  @IsNotEmpty({ message: 'code is not empty' })
-  code: string;
-
-  @IsNotEmpty({ message: 'password is not empty' })
-  password: string;
-
-  @IsNotEmpty({ message: 'confirmPassword is not empty' })
-  confirmPassword: string;
-
-  @IsNotEmpty({ message: 'email is not empty' })
-  email: string;
 }

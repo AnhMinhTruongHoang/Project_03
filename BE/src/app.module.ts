@@ -14,14 +14,14 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { UsersModule } from './modules/users/users.module';
 import { FilesModule } from './modules/files/files.module';
 import { DatabasesModule } from './modules/databases/databases.module';
-import { ProductsModule } from './modules/products/products.module';
-import { MembershipsModule } from './modules/memberships/memberships.module';
-import { PromotionsModule } from './modules/promotions/promotions.module';
-import { CategoriesModule } from './modules/categories/categories.module';
+import { ShipmentsModule } from './modules/shipments/shipments.module';
+import { BranchesModule } from './modules/branches/branches.module';
+import { ServicesModule } from './modules/services/services.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
-import { CartsModule } from './modules/carts/carts.module';
-import { ReviewsModule } from './modules/reviews/reviews.module';
+import { PricingModule } from './modules/pricing/pricing.module';
+import { TrackingModule } from './modules/tracking/tracking.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -75,20 +75,19 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
       inject: [ConfigService],
     }),
     ///
-
     UsersModule,
     AuthModule,
     FilesModule,
     DatabasesModule,
     HealthModule,
-    ProductsModule,
-    MembershipsModule,
-    PromotionsModule,
-    CategoriesModule,
+    ShipmentsModule,
+    BranchesModule,
+    ServicesModule,
     OrdersModule,
     PaymentsModule,
-    CartsModule,
-    ReviewsModule,
+    PricingModule,
+    TrackingModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
