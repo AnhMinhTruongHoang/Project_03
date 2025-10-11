@@ -79,15 +79,15 @@ export class DatabasesService implements OnModuleInit {
     await this.userModel.insertMany([
       {
         name: 'Admin User',
-        email: 'admin@gmail.vn',
-        password: '123',
+        email: 'admin@gmail.com',
+        password: hash,
         role: 'ADMIN',
         isActive: true,
       },
       {
         name: 'User',
-        email: 'user@gmail.vn',
-        password: '123',
+        email: 'user@gmail.com',
+        password: hash,
         role: 'USER',
         isActive: true,
       },
@@ -240,7 +240,7 @@ export class DatabasesService implements OnModuleInit {
     await this.trackingModel.insertMany([
       {
         shipmentId: shipment._id,
-        status: 'CREATED', // ✅ dùng đúng enum
+        status: 'CREATED',
         location: 'Hà Nội Center',
         note: 'Khởi tạo đơn hàng',
         branchId: shipment.originBranchId,
