@@ -1,0 +1,24 @@
+PORT=8000
+MONGO_URL=mongodb+srv://truonghoanganhminh2000:05123@cluster0.llfuz.mongodb.net/Project03?retryWrites=true&w=majority&appName=Project03
+
+#setup access token
+JWT_ACCESS_TOKEN_SECRET=JUSTASECRET
+JWT_ACCESS_EXPIRE=1000m #ms
+
+#setup refresh token
+JWT_REFRESH_TOKEN=JUSTASECRET
+JWT_REFRESH_EXPIRE=1d #ms
+
+
+#init sample data
+SHOULD_INIT=true
+INIT_PASSWORD=123
+
+
+#config email
+EMAIL_HOST=smtp.gmail.com
+EMAIL_AUTH_USER=minhlapro01@gmail.com
+EMAIL_AUTH_PASS=sgwi wyyx rvzk emzq
+EMAIL_PREVIEW=true
+
+
