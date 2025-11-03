@@ -6,6 +6,7 @@ import {
   PLATFORM_ID,
   OnInit,
   OnDestroy,
+  CUSTOM_ELEMENTS_SCHEMA,
 } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -17,6 +18,7 @@ import { AuthService } from '../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterOutlet],
   templateUrl: './dashboard-layout.html',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class DashboardLayout implements OnInit, OnDestroy {
   sidebarOpen = true;

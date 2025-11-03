@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { Home } from './home/home';
+
 import { Login } from './account/login/login';
 import { Register } from './account/register/register';
 import { ForgetPassword } from './account/forgetpassword/forgetpassword';
@@ -11,6 +11,7 @@ import { ResetPassword } from './account/reset-password/reset-password';
 import { AuthGuard } from './guard/auth.guard';
 import { DashboardLayout } from './dashboard-layout/dashboard-layout';
 import { DashboardHome } from './dashboard-layout/dashboard-home/dashboard-home';
+import { Home } from './home/home';
 
 export const routes: Routes = [
   {

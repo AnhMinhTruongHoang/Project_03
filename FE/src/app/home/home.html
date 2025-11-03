@@ -71,6 +71,45 @@
   </div>
 </section>
 
+<!-- Tra cứu section có 4 tab -->
+<section class="py-5 bg-white shadow-sm rounded mt-n10 position-relative z-2">
+  <div class="container">
+    <h5 class="mb-4 fw-bold text-center">Ước tính cước phí trong nước</h5>
+
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <!-- Cấp 1: Tỉnh/Thành phố -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Tỉnh/Thành phố</label>
+          <select
+            class="form-select"
+            [(ngModel)]="selectedProvince"
+            (ngModelChange)="onProvinceChange()"
+          >
+            <option [ngValue]="null" disabled selected>Chọn Tỉnh/Thành phố</option>
+            @for (p of provinces; track p.id) {
+            <option [ngValue]="p">{{ p.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Cấp 2: Xã/Phường/Thị trấn -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Xã/Phường/Thị trấn</label>
+          <select class="form-select" [(ngModel)]="selectedCommune" [disabled]="!selectedProvince">
+            <option [ngValue]="null" disabled selected>Chọn Xã/Phường/Thị trấn</option>
+            @for (c of communes; track c.id) {
+            <option [ngValue]="c">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+
+        <button class="btn btn-danger w-100 mt-3">TRA CỨU <i class="bi bi-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!--  Stats & Facts Section -->
 <!-- <section class="stats-facts py-5 py-lg-11 py-xl-12 position-relative overflow-hidden">
       <div class="container">
