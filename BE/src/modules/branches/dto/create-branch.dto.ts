@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateBranchDto {
   @ApiProperty({ example: 'HNI001', description: 'Mã chi nhánh' })
@@ -28,6 +28,21 @@ export class CreateBranchDto {
     required: false,
   })
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   managerId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  postalCode?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  province?: string;
 }

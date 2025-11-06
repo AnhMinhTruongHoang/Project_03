@@ -1,65 +1,98 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import aqp from 'api-query-params';
+import mongoose, { Connection, Types } from 'mongoose';
 import { CreateTrackingDto } from './dto/create-tracking.dto';
 import { UpdateTrackingDto } from './dto/update-tracking.dto';
-import aqp from 'api-query-params';
-import { IUser } from 'src/types/user.interface';
-import mongoose from 'mongoose';
-import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { Tracking, TrackingDocument } from './schemas/tracking.schemas';
+import {
+  Tracking,
+  TrackingDocument,
+  TrackingStatus,
+} from './schemas/tracking.schemas';
 
 @Injectable()
 export class TrackingService {
   constructor(
     @InjectModel(Tracking.name)
-    private trackingModel: SoftDeleteModel<TrackingDocument>,
+    private readonly trackingModel: SoftDeleteModel<TrackingDocument>,
+    @InjectConnection() private readonly connection: Connection,
   ) {}
 
-  async create(createTrackingDto: CreateTrackingDto, user: IUser) {
-    const tracking = new this.trackingModel({
-      ...createTrackingDto,
-      timestamp: new Date(),
-      createdBy: {
-        _id: new mongoose.Types.ObjectId(user._id),
-        email: user.email,
-      },
-    });
-    return tracking.save();
+  private async touchShipmentTimeline(
+    shipmentId: string,
+    status: TrackingStatus,
+    note?: string,
+  ) {
+    const ShipmentModel = this.connection.model('Shipment');
+    const shipment: any = await ShipmentModel.findById(shipmentId);
+    if (!shipment) throw new NotFoundException('Shipment not found');
+
+    // cập nhật status + deliveredAt nếu cần
+    shipment.status = status;
+    if (status === 'DELIVERED') shipment.deliveredAt = new Date();
+    if (status === 'FAILED')
+      shipment.failedReason = note ?? shipment.failedReason;
+
+    shipment.timeline.push({ status, timestamp: new Date(), note });
+    await shipment.save();
   }
 
-  async findAll(currentPage = 1, limit = 10, qs?: string) {
-    const { filter, sort, population } = aqp(qs);
-    delete filter.current;
-    delete filter.pageSize;
+  async create(dto: CreateTrackingDto, user: { _id: string; email: string }) {
+    // đảm bảo shipment tồn tại
+    const ShipmentModel = this.connection.model('Shipment');
+    const shipmentExists = await ShipmentModel.exists({
+      _id: dto.shipmentId,
+      isDeleted: false,
+    });
+    if (!shipmentExists) throw new BadRequestException('Shipment không hợp lệ');
 
-    const offset = (currentPage - 1) * limit;
-    const totalItems = await this.trackingModel.countDocuments(filter);
-    const totalPages = Math.ceil(totalItems / limit);
+    const tracking = await this.trackingModel.create({
+      ...dto,
+      timestamp: new Date(),
+      createdBy: { _id: new Types.ObjectId(user._id), email: user.email },
+    });
 
-    const results = await this.trackingModel
+    // đồng bộ vào Shipment.timeline + status
+    await this.touchShipmentTimeline(dto.shipmentId, dto.status, dto.note);
+
+    return tracking;
+  }
+
+  async findAll(currentPage = 1, limit = 10, queryObj: any = {}) {
+    const { filter, sort, population } = aqp(queryObj);
+    delete (filter as any).current;
+    delete (filter as any).pageSize;
+    if (filter.isDeleted === undefined) (filter as any).isDeleted = false;
+
+    const page = Number(currentPage) > 0 ? Number(currentPage) : 1;
+    const size = Number(limit) > 0 ? Number(limit) : 10;
+    const skip = (page - 1) * size;
+
+    const total = await this.trackingModel.countDocuments(filter);
+    const pages = Math.ceil(total / size);
+
+    const q = this.trackingModel
       .find(filter)
-      .skip(offset)
-      .limit(limit)
       .sort(sort as any)
+      .skip(skip)
+      .limit(size)
       .populate('shipmentId')
-      .populate('branchId')
-      .populate(population)
-      .exec();
+      .populate('branchId');
 
-    return {
-      meta: {
-        current: currentPage,
-        pageSize: limit,
-        pages: totalPages,
-        total: totalItems,
-      },
-      results,
-    };
+    if (population) q.populate(population as any);
+
+    const results = await q.exec();
+    return { meta: { current: page, pageSize: size, pages, total }, results };
   }
 
   async findByShipment(shipmentId: string) {
     return this.trackingModel
-      .find({ shipmentId })
+      .find({ shipmentId, isDeleted: false })
       .sort({ timestamp: 1 })
       .populate('branchId')
       .exec();
@@ -67,32 +100,46 @@ export class TrackingService {
 
   async findOne(id: string) {
     const tracking = await this.trackingModel.findById(id);
-    if (!tracking) throw new NotFoundException('Tracking not found');
+    if (!tracking || tracking.isDeleted)
+      throw new NotFoundException('Tracking not found');
     return tracking;
   }
 
-  async update(id: string, updateTrackingDto: UpdateTrackingDto) {
-    const tracking = await this.trackingModel.findByIdAndUpdate(
-      id,
-      updateTrackingDto,
-      { new: true },
-    );
-    if (!tracking) throw new NotFoundException('Tracking not found');
+  async update(id: string, dto: UpdateTrackingDto) {
+    const tracking = await this.trackingModel.findByIdAndUpdate(id, dto, {
+      new: true,
+    });
+    if (!tracking || tracking.isDeleted)
+      throw new NotFoundException('Tracking not found');
+
+    // nếu đổi status → cập nhật Shipment
+    if (dto.status) {
+      await this.touchShipmentTimeline(
+        String(tracking.shipmentId),
+        dto.status,
+        dto.note,
+      );
+    }
     return tracking;
   }
 
-  async remove(id: string, user: IUser) {
-    const tracking = await this.trackingModel.findById(id);
-    if (!tracking) throw new NotFoundException('Tracking not found');
+  // SOFT DELETE
+  async remove(id: string, user: { _id: string; email: string }) {
+    const res = await this.trackingModel.softDelete({
+      _id: id,
+      deletedBy: { _id: new Types.ObjectId(user._id), email: user.email },
+    } as any);
+    if (!res || (res as any).modifiedCount === 0) {
+      throw new NotFoundException('Tracking not found');
+    }
+    return { message: 'Tracking soft-deleted' };
+  }
 
-    tracking.isDeleted = true;
-    tracking.deletedAt = new Date();
-    tracking.deletedBy = {
-      _id: new mongoose.Types.ObjectId(user._id),
-      email: user.email,
-    };
-
-    await tracking.save();
-    return { message: 'Tracking deleted' };
+  async restore(id: string) {
+    const res = await this.trackingModel.restore({ _id: id } as any);
+    if (!res || (res as any).modifiedCount === 0) {
+      throw new NotFoundException('Tracking not found or not deleted');
+    }
+    return { message: 'Tracking restored' };
   }
 }

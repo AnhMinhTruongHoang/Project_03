@@ -22,6 +22,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { PricingModule } from './modules/pricing/pricing.module';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { LocationModule } from './modules/location/location.module';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     PricingModule,
     TrackingModule,
     NotificationsModule,
+    LocationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

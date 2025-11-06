@@ -26,18 +26,20 @@ export class OrdersController {
 
   @Post()
   @ResponseMessage('Tạo đơn hàng mới')
-  create(@Body() createOrderDto: CreateOrderDto, @Users() user: IUser) {
-    return this.ordersService.create(createOrderDto, user);
+  create(@Body() dto: CreateOrderDto, @Users() user: IUser) {
+    return this.ordersService.create(dto, user);
   }
 
   @Get()
   @ResponseMessage('Danh sách đơn hàng')
   findAll(
-    @Query('current') currentPage: string,
-    @Query('pageSize') limit: string,
-    @Query() qs: string,
+    @Query('current') current?: string,
+    @Query('pageSize') limit?: string,
+    @Query() query?: any,
   ) {
-    return this.ordersService.findAll(+currentPage, +limit, qs);
+    const page = current ? Number(current) : 1;
+    const size = limit ? Number(limit) : 10;
+    return this.ordersService.findAll(page, size, query || {});
   }
 
   @Get(':id')
@@ -48,12 +50,12 @@ export class OrdersController {
 
   @Patch(':id')
   @ResponseMessage('Cập nhật đơn hàng')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(id, updateOrderDto);
+  update(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
+    return this.ordersService.update(id, dto);
   }
 
   @Delete(':id')
-  @ResponseMessage('Xóa đơn hàng')
+  @ResponseMessage('Xóa đơn hàng (soft)')
   remove(@Param('id') id: string, @Users() user: IUser) {
     return this.ordersService.remove(id, user);
   }

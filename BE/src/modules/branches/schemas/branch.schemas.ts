@@ -49,3 +49,7 @@ export class Branch {
 }
 
 export const BranchSchema = SchemaFactory.createForClass(Branch);
+
+BranchSchema.index({ code: 1 }, { unique: true });
+BranchSchema.index({ name: 1 });
+BranchSchema.index({ isDeleted: 1 });

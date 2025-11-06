@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsMongoId,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
   Min,
 } from 'class-validator';
@@ -23,15 +23,15 @@ export class CreateOrderDto {
   @IsString()
   receiverPhone: string;
 
-  @ApiProperty({ example: '123 Trần Hưng Đạo, Hà Nội' })
+  @ApiProperty({ example: '653f2a2bb70f7a1f4fa11111' })
   @IsNotEmpty()
-  @IsString()
-  pickupAddress: string;
+  @IsMongoId()
+  pickupAddressId: string;
 
-  @ApiProperty({ example: '456 Lê Lợi, TP.HCM' })
+  @ApiProperty({ example: '653f2a2bb70f7a1f4fa22222' })
   @IsNotEmpty()
-  @IsString()
-  deliveryAddress: string;
+  @IsMongoId()
+  deliveryAddressId: string;
 
   @ApiProperty({ example: 100000 })
   @IsNumber()

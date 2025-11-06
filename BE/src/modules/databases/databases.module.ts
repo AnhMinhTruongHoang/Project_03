@@ -10,6 +10,7 @@ import { ShipmentsModule } from '../shipments/shipments.module';
 import { TrackingModule } from '../tracking/tracking.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { PricingModule } from '../pricing/pricing.module';
+import { LocationModule } from '../location/location.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PricingModule } from '../pricing/pricing.module';
     TrackingModule,
     NotificationsModule,
     PricingModule,
+    LocationModule,
   ],
   controllers: [DatabasesController],
   providers: [DatabasesService],

@@ -18,24 +18,20 @@ export class AuthService {
   ) {}
 
   // validate user
+
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findOneByUsername(username);
-
-    if (!user) return null;
+    if (!user || !user.password) return null; // ⬅️ thêm guard
 
     const isValid = this.usersService.isValidPassword(pass, user.password);
     if (!isValid) return null;
 
-    // Tạm thời hardcode quyền theo role
     const permissions =
       user.role === 'ADMIN'
         ? ['manage_users', 'view_reports']
         : ['view_profile'];
 
-    return {
-      ...user.toObject(),
-      permissions,
-    };
+    return { ...user.toObject(), permissions };
   }
 
   ////////////////////////////////////////////
