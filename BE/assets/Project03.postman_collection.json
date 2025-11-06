@@ -1,0 +1,2377 @@
+{
+	"info": {
+		"_postman_id": "173c6512-6f54-4246-b0fe-0e8cf2bd1729",
+		"name": "Project03",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36629533"
+	},
+	"item": [
+		{
+			"name": "Branches",
+			"item": [
+				{
+					"name": "Create Branch",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"HN01\",\n  \"name\": \"Hà Nội Center\",\n  \"address\": \"123 Hoàn Kiếm, Hà Nội\",\n  \"phone\": \"024000000\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/branches",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"branches"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Branches",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/branches?current=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"branches"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Branch by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/branches/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"branches",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Branch",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Hà Nội Center Updated\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/branches/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"branches",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Branch",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/branches/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"branches",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Restore Branch",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/branches/:id/restore",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"branches",
+								":id",
+								"restore"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Services",
+			"item": [
+				{
+					"name": "Create Service",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"STD\",\n  \"name\": \"Tiêu chuẩn\",\n  \"description\": \"3–5 ngày\",\n  \"basePrice\": 20000,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/services",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Services",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/services?current=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Service by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/services/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Service",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Tiêu chuẩn+\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/services/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Service",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/services/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pricing",
+			"item": [
+				{
+					"name": "Create Pricing Slab",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"serviceId\": \"REPLACE_SERVICE_ID\",\n  \"minWeightKg\": 0,\n  \"maxWeightKg\": 2,\n  \"minKm\": 0,\n  \"maxKm\": 5,\n  \"baseFee\": 15000,\n  \"perKm\": 1000,\n  \"perKg\": 2000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pricing",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Pricing",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pricing?current=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pricing by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pricing/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Pricing",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"perKm\": 1200\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pricing/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Pricing",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pricing/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calculate Quote",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pricing/calculate?serviceId=REPLACE_SERVICE_ID&km=12.5&weightKg=1.8",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"calculate"
+							],
+							"query": [
+								{
+									"key": "serviceId",
+									"value": "REPLACE_SERVICE_ID"
+								},
+								{
+									"key": "km",
+									"value": "12.5"
+								},
+								{
+									"key": "weightKg",
+									"value": "1.8"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Location",
+			"item": [
+				{
+					"name": "List Provinces",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/location/provinces?current=1&pageSize=50",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"location",
+								"provinces"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Districts by Province",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/location/districts?provinceId=REPLACE_PROVINCE_ID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"location",
+								"districts"
+							],
+							"query": [
+								{
+									"key": "provinceId",
+									"value": "REPLACE_PROVINCE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Wards by District",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/location/wards?districtId=REPLACE_DISTRICT_ID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"location",
+								"wards"
+							],
+							"query": [
+								{
+									"key": "districtId",
+									"value": "REPLACE_DISTRICT_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Address",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"line1\": \"123 Tràng Tiền\",\n  \"provinceId\": \"REPLACE_PROVINCE_ID\",\n  \"districtId\": \"REPLACE_DISTRICT_ID\",\n  \"wardId\": \"REPLACE_WARD_ID\",\n  \"lat\": 21.027763,\n  \"lng\": 105.83416,\n  \"contactName\": \"Khách A\",\n  \"contactPhone\": \"0909009009\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/location/addresses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"location",
+								"addresses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Addresses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/location/addresses?current=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"location",
+								"addresses"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Address by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/location/addresses/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"location",
+								"addresses",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Address",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contactName\": \"Khách B\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/location/addresses/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"location",
+								"addresses",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Address",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/location/addresses/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"location",
+								"addresses",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"senderName\": \"Nguyễn Văn A\",\n  \"receiverName\": \"Trần Thị B\",\n  \"receiverPhone\": \"0912345678\",\n  \"pickupAddressId\": \"REPLACE_ADDRESS_ID\",\n  \"deliveryAddressId\": \"REPLACE_ADDRESS_ID\",\n  \"totalPrice\": 120000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/orders?current=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/orders/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"totalPrice\": 150000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Order",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/orders/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Shipments",
+			"item": [
+				{
+					"name": "Create Shipment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"senderName\": \"Nguyễn Văn A\",\n  \"senderPhone\": \"0909090909\",\n  \"receiverName\": \"Trần Thị B\",\n  \"receiverPhone\": \"0911222333\",\n  \"pickupAddressId\": \"REPLACE_ADDRESS_ID\",\n  \"deliveryAddressId\": \"REPLACE_ADDRESS_ID\",\n  \"originBranchId\": \"REPLACE_BRANCH_ID\",\n  \"destinationBranchId\": \"REPLACE_BRANCH_ID\",\n  \"serviceId\": \"REPLACE_SERVICE_ID\",\n  \"weightKg\": 1.5,\n  \"lengthCm\": 30,\n  \"widthCm\": 20,\n  \"heightCm\": 10,\n  \"note\": \"Giao nhanh\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/shipments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shipments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Shipments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/shipments?current=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shipments"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shipment by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/shipments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shipments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Shipment",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"IN_TRANSIT\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/shipments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shipments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Shipment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/shipments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shipments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Restore Shipment",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/shipments/:id/restore",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shipments",
+								":id",
+								"restore"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tracking",
+			"item": [
+				{
+					"name": "Create Tracking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shipmentId\": \"REPLACE_SHIPMENT_ID\",\n  \"status\": \"IN_TRANSIT\",\n  \"location\": \"Kho Hà Nội\",\n  \"branchId\": \"REPLACE_BRANCH_ID\",\n  \"note\": \"Đang trung chuyển\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tracking",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tracking"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Tracking Logs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tracking?current=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tracking"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tracking by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tracking/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tracking",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Tracking",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"OUT_FOR_DELIVERY\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tracking/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tracking",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Tracking",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tracking/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tracking",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Restore Tracking",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tracking/:id/restore",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tracking",
+								":id",
+								"restore"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tracking Timeline by Shipment",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tracking/shipment/:shipmentId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tracking",
+								"shipment",
+								":shipmentId"
+							],
+							"variable": [
+								{
+									"key": "shipmentId",
+									"value": "REPLACE_SHIPMENT_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "Create Notification",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipient\": \"cus@vtpost.local\",\n  \"title\": \"Thông báo đơn hàng\",\n  \"message\": \"Đơn hàng đã được giao.\",\n  \"type\": \"EMAIL\",\n  \"relatedShipmentId\": \"REPLACE_SHIPMENT_ID\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/notifications",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"notifications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/notifications?current=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notification by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/notifications/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"notifications",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Notification",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"SENT\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/notifications/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"notifications",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Notification",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/notifications/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"notifications",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payments",
+			"item": [
+				{
+					"name": "Create Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"REPLACE_ORDER_ID\",\n  \"amount\": 120000,\n  \"method\": \"COD\",\n  \"status\": \"pending\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Payments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/payments?current=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payment by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/payments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Payment",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"paid\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Payment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/payments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REPLACE_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Fetch User By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjhmMTU4M2YyMDk1NzllMjlmOTM4ZjE5IiwibmFtZSI6IkknbSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzYwNjQ3MzcyLCJleHAiOjE3NjA3MDczNzJ9.tqwIAiSAApkpz26ZV7QWbBFcRvK0Ua_Uq-UHOIVTBHo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/users/68f1583f209579e29f938f19",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"68f1583f209579e29f938f19"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjhlZTQ1Yjk1ZjgyOWIxZjk3Y2VhOThkIiwibmFtZSI6IkknbSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzYwNjQxNzgxLCJleHAiOjE3NjA3MDE3ODF9.tHKyJGkKJiCzR7njE9tjD-MlsN1f0i3lc65DkPqbTNY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Nguyen Van A\",\n  \"email\": \"user1@gmail.com\",\n  \"password\": \"123456\",\n  \"age\": 25,\n  \"gender\": \"MALE\",\n  \"address\": \"Ha Noi\",\n  \"role\": \"USER\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjhlZTQ1Yjk1ZjgyOWIxZjk3Y2VhOThkIiwibmFtZSI6IkknbSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzYwNTY1ODAwLCJleHAiOjE3NjA2MjU4MDB9.b6NgCxhWUXQEnHgNnvZNDuBkpeR0AMjgbGzvjbAlT0E",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New Name 5\",\n  \"address\": \"New Address\",\n  \"age\": 25\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/users/68f004550a76af9c3a6e7cb9",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"68f004550a76af9c3a6e7cb9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjhjYjExZWZmNjc0YTZjMDBkOGQyYmYxIiwibmFtZSI6IkknbSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzU4NDYxMTgxLCJleHAiOjE3NTg1MjExODF9.8ZVrUhNaRW4OXJ7d_YpuQJpIZ7czMILTS-Md2hPnJws",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/users/68cef66de705ae57f5257ff2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"68cef66de705ae57f5257ff2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch user with paginate",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjhjYjExZWZmNjc0YTZjMDBkOGQyYmYxIiwibmFtZSI6IkknbSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzU4MzkzOTM2LCJleHAiOjE3NTg0NTM5MzZ9.OyksC7efWIlcN39HM7YgPA5OcF9QXF5SGr4o7-p2tUg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "current",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "pageSize",
+									"value": "10",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/users?current=1&pageSize=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"users"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "test1228@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "213123123",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "sdasdasda",
+									"type": "text"
+								},
+								{
+									"key": "age",
+									"value": "22",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "male",
+									"type": "text"
+								},
+								{
+									"key": "address",
+									"value": "vn",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "12312312",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "admin@vtpost.local",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123456",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjkwNzljYmNkNTQwMjE3NWZhZGY0ODEwIiwibmFtZSI6IkknbSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzYyMzYwMTAyLCJleHAiOjE3NjI0MjAxMDJ9.lDx-Dp0QSOKiSfmVavOOUr5AQSiW7NE4WiGGir9iG4M",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/auth/account",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login with Social",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"type\": \"GOOGLE\",\r\n  \"email\": \"user@gmail.com\",\r\n  \"name\": \"Google User\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/auth/social-media",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"social-media"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjhlOGU2YzMzZjA0YmMzZmIwOGVlYTBkIiwibmFtZSI6IkknbSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzYwMjAxNDIzLCJleHAiOjE3NjAyNjE0MjN9.ZgNgnb61GMIxXNyqp_xdDJFN4yUheKzYoDaWNDKdRu8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000/api/v1"
+		},
+		{
+			"key": "token",
+			"value": "PASTE_JWT_TOKEN_HERE"
+		}
+	]
+}
