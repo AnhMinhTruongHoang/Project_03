@@ -1,15 +1,8 @@
-// src/modules/databases/databases.service.ts
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { Connection, Types } from 'mongoose';
-
 import { UsersService } from '../users/users.service';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { Payment, PaymentDocument } from '../payments/schema/payment.schema';
@@ -46,11 +39,14 @@ import {
   NotificationType,
 } from '../notifications/schemas/notification.schemas';
 
-type AddressWithCoords = Address & {
+/** Lean address type dùng trong seed */
+type SeedAddress = {
   _id: Types.ObjectId;
-  line1?: string;
+  line1: string;
   lat?: number;
   lng?: number;
+  provinceId: Types.ObjectId;
+  districtId: Types.ObjectId;
 };
 
 @Injectable()
@@ -95,7 +91,7 @@ export class DatabasesService implements OnModuleInit {
 
     await this.seedUsers();
     const { hn, hcm } = await this.seedLocation32(); // 32 tỉnh + quận/huyện
-    const { addrHn1, addrHcm1, addrHn2 } = await this.seedAddresses(hn, hcm); // không dùng ward
+    const { addrHn1, addrHcm1, addrHn2 } = await this.seedAddresses(hn, hcm); // địa chỉ lean
     const { branchHN, branchHCM } = await this.seedBranches(addrHn1, addrHcm1);
     const { svcSTD, svcEXP } = await this.seedServices();
     await this.seedPricing(svcSTD._id, svcEXP._id);
@@ -112,7 +108,7 @@ export class DatabasesService implements OnModuleInit {
     await this.seedTrackings();
     await this.seedNotifications(customer);
 
-    this.logger.log('✅ DATABASE SEEDING COMPLETED');
+    this.logger.log('DATABASE SEEDING COMPLETED');
   }
 
   /* ---------------- USERS ---------------- */
@@ -158,10 +154,6 @@ export class DatabasesService implements OnModuleInit {
   }
 
   /* ---------------- LOCATION (2 cấp) ---------------- */
-  /**
-   * Seed 32 Tỉnh/Thành + một số Quận/Huyện trực thuộc (mẫu).
-   * Bạn có thể mở rộng thêm districts nếu muốn đầy đủ.
-   */
   private async seedLocation32() {
     if ((await this.provinceModel.countDocuments()) >= 32) {
       const hn = await this.provinceModel.findOne({ code: 'HN' }).lean();
@@ -233,7 +225,6 @@ export class DatabasesService implements OnModuleInit {
           { code: 'HCM-TB', name: 'Tân Bình' },
           { code: 'HCM-TP', name: 'Tân Phú' },
           { code: 'HCM-BTAN', name: 'Bình Tân' },
-
           { code: 'HCM-BC', name: 'Huyện Bình Chánh' },
           { code: 'HCM-CC', name: 'Huyện Củ Chi' },
           { code: 'HCM-HM', name: 'Huyện Hóc Môn' },
@@ -243,7 +234,6 @@ export class DatabasesService implements OnModuleInit {
           { code: 'HCM-TD', name: 'Thành phố Thủ Đức' },
         ],
       },
-
       {
         code: 'HP',
         name: 'Hải Phòng',
@@ -265,7 +255,6 @@ export class DatabasesService implements OnModuleInit {
           { code: 'HP-BLV', name: 'Bạch Long Vĩ' },
         ],
       },
-
       {
         code: 'DN',
         name: 'Đà Nẵng',
@@ -505,10 +494,10 @@ export class DatabasesService implements OnModuleInit {
           { code: 'VT-VT', name: 'Thành phố Vũng Tàu' },
           { code: 'VT-BR', name: 'Thành phố Bà Rịa' },
           { code: 'VT-PM', name: 'Thị xã Phú Mỹ' },
-          { code: 'VT-CD', name: 'Huyện Châu Đức' },
+          { code: 'VT-CDU', name: 'Huyện Châu Đức' },
           { code: 'VT-XM', name: 'Huyện Xuyên Mộc' },
-          { code: 'VT-LD', name: 'Huyện Long Đất' },
-          { code: 'VT-CĐ', name: 'Huyện Côn Đảo' },
+          { code: 'VT-LD', name: 'Huyện Long Điền' },
+          { code: 'VT-CD', name: 'Huyện Côn Đảo' },
         ],
       },
       {
@@ -600,16 +589,17 @@ export class DatabasesService implements OnModuleInit {
       },
 
       {
-        code: 'VL',
+        code: 'VLong',
         name: 'Vĩnh Long',
         districts: [
-          { code: 'BL-BL', name: 'Thành phố Bạc Liêu' },
-          { code: 'BL-GR', name: 'Thị xã Giá Rai' },
-          { code: 'BL-HD', name: 'Huyện Hồng Dân' },
-          { code: 'BL-PL', name: 'Huyện Phước Long' },
-          { code: 'BL-VL', name: 'Huyện Vĩnh Lợi' },
-          { code: 'BL-DH', name: 'Huyện Đông Hải' },
-          { code: 'BL-HB', name: 'Huyện Hòa Bình' },
+          { code: 'VL-VL', name: 'Thành phố Vĩnh Long' },
+          { code: 'VL-BM', name: 'Thành phố Bình Minh' },
+          { code: 'VL-LH', name: 'Huyện Long Hồ' },
+          { code: 'VL-MT', name: 'Huyện Mang Thít' },
+          { code: 'VL-VL2', name: 'Huyện Vũng Liêm' },
+          { code: 'VL-TB', name: 'Huyện Tam Bình' },
+          { code: 'VL-TO', name: 'Huyện Trà Ôn' },
+          { code: 'VL-BT', name: 'Huyện Bình Tân' },
         ],
       },
 
@@ -737,7 +727,6 @@ export class DatabasesService implements OnModuleInit {
       {
         code: 'TTH',
         name: 'Thừa Thiên Huế',
-
         districts: [
           { code: 'TTH-H', name: 'Thành phố Huế' },
           { code: 'TTH-HT', name: 'Thị xã Hương Thủy' },
@@ -769,16 +758,16 @@ export class DatabasesService implements OnModuleInit {
         code: 'BDP',
         name: 'Bình Phước',
         districts: [
-          { code: 'BDP-ĐX', name: 'Thành phố Đồng Xoài' },
+          { code: 'BDP-DX', name: 'Thành phố Đồng Xoài' },
           { code: 'BDP-PL', name: 'Thị xã Phước Long' },
           { code: 'BDP-BL', name: 'Thị xã Bình Long' },
           { code: 'BDP-CT', name: 'Thị xã Chơn Thành' },
           { code: 'BDP-BGM', name: 'Huyện Bù Gia Mập' },
           { code: 'BDP-LN', name: 'Huyện Lộc Ninh' },
-          { code: 'BDP-BĐ', name: 'Huyện Bù Đốp' },
+          { code: 'BDP-BD', name: 'Huyện Bù Đốp' },
           { code: 'BDP-HQ', name: 'Huyện Hớn Quản' },
-          { code: 'BDP-ĐP', name: 'Huyện Đồng Phú' },
-          { code: 'BDP-BĐG', name: 'Huyện Bù Đăng' },
+          { code: 'BDP-DP', name: 'Huyện Đồng Phú' },
+          { code: 'BDP-BDG', name: 'Huyện Bù Đăng' },
           { code: 'BDP-PR', name: 'Huyện Phú Riềng' },
         ],
       },
@@ -825,81 +814,114 @@ export class DatabasesService implements OnModuleInit {
     return { hn, hcm };
   }
 
-  /* ---------------- ADDRESSES (không ward) ---------------- */
-  private async seedAddresses(
-    hn: ProvinceDocument | any,
-    hcm: ProvinceDocument | any,
-  ) {
-    if (await this.addressModel.countDocuments()) {
-      const [addrHn1] = await this.addressModel
-        .find({ contactName: 'Kho HN' })
-        .limit(1)
-        .lean<AddressWithCoords[]>();
-      const [addrHcm1] = await this.addressModel
-        .find({ contactName: 'Kho HCM' })
-        .limit(1)
-        .lean<AddressWithCoords[]>();
-      const [addrHn2] = await this.addressModel
-        .find({ contactName: 'Khách HN' })
-        .limit(1)
-        .lean<AddressWithCoords[]>();
-      return { addrHn1, addrHcm1, addrHn2 };
+  /* ---------------- ADDRESSES (no ward) ---------------- */
+  private async getOrCreateAddressByCodes(opts: {
+    contactName: string;
+    contactPhone: string;
+    line1: string;
+    provinceCode: string;
+    districtCode: string;
+    lat?: number;
+    lng?: number;
+  }): Promise<SeedAddress> {
+    // 1) Có sẵn thì dùng (và đảm bảo line1 không rỗng)
+    const existed = await this.addressModel.findOne({
+      contactName: opts.contactName,
+    });
+    if (existed) {
+      if (!existed.line1 || !existed.line1.trim()) {
+        existed.line1 = opts.line1;
+        await existed.save();
+      }
+      return this.toSeedAddress(existed);
     }
 
-    const qHn = await this.districtModel.findOne({ provinceId: hn._id }).lean();
-    const qHcm = await this.districtModel
-      .findOne({ provinceId: hcm._id })
+    // 2) Resolve id tỉnh/quận theo code
+    const prov = await this.provinceModel
+      .findOne({ code: opts.provinceCode })
       .lean();
+    if (!prov?._id) throw new Error(`Missing province ${opts.provinceCode}`);
 
-    const [addrHn1] = (await this.addressModel.insertMany([
+    const dist = await this.districtModel
+      .findOne({ code: opts.districtCode, provinceId: prov._id })
+      .lean();
+    if (!dist?._id)
+      throw new Error(
+        `Missing district ${opts.districtCode} of ${opts.provinceCode}`,
+      );
+
+    // 3) Tạo mới -> trả về lean ngay
+    const [created] = await this.addressModel.insertMany([
       {
-        line1: '123 Tràng Tiền',
-        provinceId: hn._id as Types.ObjectId,
-        districtId: qHn!._id as Types.ObjectId,
-        lat: 21.027763,
-        lng: 105.83416,
-        contactName: 'Kho HN',
-        contactPhone: '0123456789',
+        line1: opts.line1,
+        provinceId: prov._id,
+        districtId: dist._id,
+        lat: opts.lat ?? 0,
+        lng: opts.lng ?? 0,
+        contactName: opts.contactName,
+        contactPhone: opts.contactPhone,
       },
-    ])) as unknown as AddressWithCoords[];
+    ]);
 
-    const [addrHcm1] = (await this.addressModel.insertMany([
-      {
-        line1: '45 Lê Lợi',
-        provinceId: hcm._id as Types.ObjectId,
-        districtId: qHcm!._id as Types.ObjectId,
-        lat: 10.776889,
-        lng: 106.700806,
-        contactName: 'Kho HCM',
-        contactPhone: '0987654321',
-      },
-    ])) as unknown as AddressWithCoords[];
+    return this.toSeedAddress(created);
+  }
 
-    const [addrHn2] = (await this.addressModel.insertMany([
-      {
-        line1: '25 Hàng Bài',
-        provinceId: hn._id as Types.ObjectId,
-        districtId: qHn!._id as Types.ObjectId,
-        lat: 21.0245,
-        lng: 105.8542,
-        contactName: 'Khách HN',
-        contactPhone: '0909009009',
-      },
-    ])) as unknown as AddressWithCoords[];
+  private async seedAddresses(
+    _hn: any,
+    _hcm: any,
+  ): Promise<{
+    addrHn1: SeedAddress;
+    addrHcm1: SeedAddress;
+    addrHn2: SeedAddress;
+  }> {
+    const addrHn1 = await this.getOrCreateAddressByCodes({
+      contactName: 'Kho HN',
+      contactPhone: '0123456789',
+      line1: '123 Tràng Tiền',
+      provinceCode: 'HN',
+      districtCode: 'HN-HK',
+      lat: 21.027763,
+      lng: 105.83416,
+    });
 
-    this.logger.log('>>> INIT ADDRESSES (no ward) DONE');
+    const addrHcm1 = await this.getOrCreateAddressByCodes({
+      contactName: 'Kho HCM',
+      contactPhone: '0987654321',
+      line1: '45 Lê Lợi',
+      provinceCode: 'HCM',
+      districtCode: 'HCM-Q1',
+      lat: 10.776889,
+      lng: 106.700806,
+    });
+
+    const addrHn2 = await this.getOrCreateAddressByCodes({
+      contactName: 'Khách HN',
+      contactPhone: '0909009009',
+      line1: '25 Hàng Bài',
+      provinceCode: 'HN',
+      districtCode: 'HN-HK',
+      lat: 21.0245,
+      lng: 105.8542,
+    });
+
     return { addrHn1, addrHcm1, addrHn2 };
   }
 
   /* ---------------- BRANCHES ---------------- */
-  private async seedBranches(
-    addrHn: AddressWithCoords,
-    addrHcm: AddressWithCoords,
-  ) {
+  private async seedBranches(addrHn: SeedAddress, addrHcm: SeedAddress) {
     if (await this.branchModel.countDocuments()) {
       const branchHN = await this.branchModel.findOne({ code: 'HN01' });
       const branchHCM = await this.branchModel.findOne({ code: 'HCM01' });
       return { branchHN, branchHCM };
+    }
+
+    if (!addrHn?.line1) {
+      this.logger.error('seedBranches: addrHn thiếu line1');
+      throw new Error('seedBranches: addrHn thiếu line1');
+    }
+    if (!addrHcm?.line1) {
+      this.logger.error('seedBranches: addrHcm thiếu line1');
+      throw new Error('seedBranches: addrHcm thiếu line1');
     }
 
     const [branchHN] = await this.branchModel.insertMany([
@@ -1040,10 +1062,7 @@ export class DatabasesService implements OnModuleInit {
   }
 
   /* ---------------- ORDERS ---------------- */
-  private async seedOrders(
-    pickupAddr: AddressWithCoords,
-    deliveryAddr: AddressWithCoords,
-  ) {
+  private async seedOrders(pickupAddr: SeedAddress, deliveryAddr: SeedAddress) {
     if (await this.orderModel.countDocuments()) {
       const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
       const order1 = await this.orderModel.findOne({ userId: customer?._id });
@@ -1053,14 +1072,22 @@ export class DatabasesService implements OnModuleInit {
     const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
     if (!customer) throw new Error('No CUSTOMER user to seed orders');
 
+    if (!pickupAddr?._id)
+      throw new Error('seedOrders: pickupAddressId is empty');
+    if (!deliveryAddr?._id)
+      throw new Error('seedOrders: deliveryAddressId is empty');
+
+    const pickupId = new Types.ObjectId(pickupAddr._id);
+    const deliveryId = new Types.ObjectId(deliveryAddr._id);
+
     const [order1] = await this.orderModel.insertMany([
       {
         userId: customer._id,
         senderName: 'Nguyễn Văn A',
         receiverName: 'Trần Thị B',
         receiverPhone: '0912345678',
-        pickupAddressId: pickupAddr._id,
-        deliveryAddressId: deliveryAddr._id,
+        pickupAddressId: pickupId,
+        deliveryAddressId: deliveryId,
         totalPrice: 120000,
         status: OrderStatus.PENDING,
       },
@@ -1077,8 +1104,8 @@ export class DatabasesService implements OnModuleInit {
     branchHN: BranchDocument,
     branchHCM: BranchDocument,
     svcSTD: ServiceDocument,
-    pickupAddr: AddressWithCoords,
-    deliveryAddr: AddressWithCoords,
+    pickupAddr: SeedAddress,
+    deliveryAddr: SeedAddress,
   ) {
     if (await this.shipmentModel.countDocuments()) return;
 
@@ -1217,5 +1244,38 @@ export class DatabasesService implements OnModuleInit {
       Math.sin(dLat / 2) ** 2 +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
     return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  private async ensureLine1(addr: any): Promise<any> {
+    if (addr?.line1 && addr.line1.trim().length > 0) return addr;
+
+    const [district, province] = await Promise.all([
+      this.districtModel.findById(addr.districtId).lean(),
+      this.provinceModel.findById(addr.provinceId).lean(),
+    ]);
+
+    const fallback = [
+      district?.name || 'Quận/Huyện',
+      province?.name || 'Tỉnh/Thành',
+    ].join(', ');
+
+    await this.addressModel.updateOne(
+      { _id: addr._id },
+      { $set: { line1: fallback } },
+    );
+
+    return { ...addr, line1: fallback };
+  }
+
+  private toSeedAddress(a: any): SeedAddress {
+    const obj = typeof a?.toObject === 'function' ? a.toObject() : a || {};
+    return {
+      _id: obj._id as Types.ObjectId,
+      line1: (obj.line1 as string) || '',
+      lat: obj.lat,
+      lng: obj.lng,
+      provinceId: obj.provinceId as Types.ObjectId,
+      districtId: obj.districtId as Types.ObjectId,
+    };
   }
 }
