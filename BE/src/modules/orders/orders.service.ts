@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import aqp from 'api-query-params';
 import { IUser } from 'src/types/user.interface';
-import { Order, OrderDocument, OrderStatus } from './schemas/order.schemas';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { Types } from 'mongoose';
+import { Order, OrderDocument, OrderStatus } from './schemas/order.schemas';
 
 @Injectable()
 export class OrdersService {
@@ -13,68 +14,62 @@ export class OrdersService {
     @InjectModel(Order.name) private orderModel: SoftDeleteModel<OrderDocument>,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto, user: IUser) {
+  async create(dto: CreateOrderDto, user: IUser) {
     return this.orderModel.create({
-      ...createOrderDto,
-      userId: user._id,
+      ...dto,
+      userId: new Types.ObjectId(user._id),
     });
   }
 
-  async findAll(currentPage = 1, limit = 10, qs?: string) {
-    const { filter, sort, population } = aqp(qs);
-    delete filter.current;
-    delete filter.pageSize;
+  async findAll(currentPage = 1, limit = 10, queryObj: any = {}) {
+    const { filter, sort, population } = aqp(queryObj);
+    delete (filter as any).current;
+    delete (filter as any).pageSize;
 
-    const offset = (currentPage - 1) * limit;
-    const totalItems = await this.orderModel.countDocuments(filter);
-    const totalPages = Math.ceil(totalItems / limit);
+    if (filter.isDeleted === undefined) (filter as any).isDeleted = false;
 
-    const results = await this.orderModel
+    const page = Number(currentPage) > 0 ? Number(currentPage) : 1;
+    const size = Number(limit) > 0 ? Number(limit) : 10;
+    const skip = (page - 1) * size;
+
+    const total = await this.orderModel.countDocuments(filter);
+    const pages = Math.ceil(total / size);
+
+    const q = this.orderModel
       .find(filter)
-      .skip(offset)
-      .limit(limit)
       .sort(sort as any)
-      .populate(population)
-      .exec();
+      .skip(skip)
+      .limit(size);
+    if (population) q.populate(population as any);
+    const results = await q.exec();
 
-    return {
-      meta: {
-        current: currentPage,
-        pageSize: limit,
-        pages: totalPages,
-        total: totalItems,
-      },
-      results,
-    };
+    return { meta: { current: page, pageSize: size, pages, total }, results };
   }
 
   async findOne(id: string) {
     const order = await this.orderModel.findById(id);
-    if (!order) throw new NotFoundException('Order not found');
+    if (!order || order.isDeleted)
+      throw new NotFoundException('Order not found');
     return order;
   }
 
-  async update(id: string, updateOrderDto: UpdateOrderDto) {
-    const order = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, {
+  async update(id: string, dto: UpdateOrderDto) {
+    const order = await this.orderModel.findByIdAndUpdate(id, dto, {
       new: true,
     });
-    if (!order) throw new NotFoundException('Order not found');
+    if (!order || order.isDeleted)
+      throw new NotFoundException('Order not found');
     return order;
   }
 
   async remove(id: string, user: IUser) {
-    const order = await this.orderModel.findById(id);
-    if (!order) throw new NotFoundException('Order not found');
-
-    order.isDeleted = true;
-    order.deletedAt = new Date();
-    order.deletedBy = {
-      _id: user._id,
-      email: user.email,
-    };
-    await order.save();
-
-    return { message: 'Order deleted' };
+    const res = await this.orderModel.softDelete({
+      _id: id,
+      deletedBy: { _id: new Types.ObjectId(user._id), email: user.email },
+    } as any);
+    if (!res || (res as any).modifiedCount === 0)
+      throw new NotFoundException('Order not found');
+    return { message: 'Order soft-deleted' };
   }
 
   async updateStatus(id: string, status: OrderStatus) {
@@ -83,7 +78,8 @@ export class OrdersService {
       { status },
       { new: true },
     );
-    if (!order) throw new NotFoundException('Order not found');
+    if (!order || order.isDeleted)
+      throw new NotFoundException('Order not found');
     return order;
   }
 }

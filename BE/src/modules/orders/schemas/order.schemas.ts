@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
 
 export type OrderDocument = HydratedDocument<Order>;
 
@@ -14,36 +15,40 @@ export enum OrderStatus {
 @Schema({ timestamps: true })
 export class Order {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-  userId: mongoose.Types.ObjectId;
+  userId: Types.ObjectId;
 
-  @Prop({ required: true })
-  senderName: string;
+  @Prop({ required: true }) senderName: string;
 
-  @Prop({ required: true })
-  receiverName: string;
+  @Prop({ required: true }) receiverName: string;
+  @Prop({ required: true }) receiverPhone: string;
 
-  @Prop({ required: true })
-  receiverPhone: string;
+  // dùng Address chuẩn hoá
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Address',
+    required: true,
+  })
+  pickupAddressId: Types.ObjectId;
 
-  @Prop({ required: true })
-  pickupAddress: string;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Address',
+    required: true,
+  })
+  deliveryAddressId: Types.ObjectId;
 
-  @Prop({ required: true })
-  deliveryAddress: string;
-
-  @Prop({ required: true })
-  totalPrice: number;
+  @Prop({ required: true, min: 0 }) totalPrice: number;
 
   @Prop({ type: String, enum: OrderStatus, default: OrderStatus.PENDING })
   status: OrderStatus;
 
-  @Prop({ default: false })
-  isDeleted: boolean;
-
-  @Prop()
-  deletedAt?: Date;
-
-  deletedBy?: any;
+  // soft delete fields (plugin sẽ quản lý)
+  @Prop({ default: false }) isDeleted: boolean;
+  @Prop() deletedAt?: Date;
+  @Prop({ type: Object }) deletedBy?: { _id: Types.ObjectId; email: string };
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
+OrderSchema.index({ userId: 1, createdAt: -1 });
+OrderSchema.index({ status: 1, isDeleted: 1 });
+OrderSchema.plugin(softDeletePlugin);

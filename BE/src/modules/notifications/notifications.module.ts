@@ -13,7 +13,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     MongooseModule.forFeature([
       { name: Notification.name, schema: NotificationSchema },
     ]),
-    MailerModule, // dùng để gửi email
+    MailerModule,
   ],
   controllers: [NotificationsController],
   providers: [NotificationsService],

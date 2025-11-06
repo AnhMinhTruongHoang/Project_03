@@ -26,18 +26,20 @@ export class PricingController {
 
   @Post()
   @ResponseMessage('Tạo bảng giá mới')
-  create(@Body() createPricingDto: CreatePricingDto) {
-    return this.pricingService.create(createPricingDto);
+  create(@Body() dto: CreatePricingDto) {
+    return this.pricingService.create(dto);
   }
 
   @Get()
   @ResponseMessage('Danh sách bảng giá')
   findAll(
-    @Query('current') currentPage: string,
-    @Query('pageSize') limit: string,
-    @Query() qs: string,
+    @Query('current') current?: string,
+    @Query('pageSize') limit?: string,
+    @Query() query?: any,
   ) {
-    return this.pricingService.findAll(+currentPage, +limit, qs);
+    const page = current ? Number(current) : 1;
+    const size = limit ? Number(limit) : 10;
+    return this.pricingService.findAll(page, size, query || {});
   }
 
   @Get(':id')
@@ -48,24 +50,29 @@ export class PricingController {
 
   @Patch(':id')
   @ResponseMessage('Cập nhật bảng giá')
-  update(@Param('id') id: string, @Body() updatePricingDto: UpdatePricingDto) {
-    return this.pricingService.update(id, updatePricingDto);
+  update(@Param('id') id: string, @Body() dto: UpdatePricingDto) {
+    return this.pricingService.update(id, dto);
   }
 
   @Delete(':id')
-  @ResponseMessage('Xóa bảng giá')
+  @ResponseMessage('Xóa bảng giá (soft)')
   remove(@Param('id') id: string, @Users() user: IUser) {
     return this.pricingService.remove(id, user);
   }
 
-  // ✅ Endpoint tính giá vận chuyển theo trọng lượng & zone
-  @Get('calculate/:serviceId/:zone/:weight')
+  // ✅ Tính phí theo km & cân nặng
+  // Ví dụ: GET /pricing/calculate?serviceId=...&km=12.5&weightKg=1.8
+  @Get('calculate')
   @ResponseMessage('Tính giá cước vận chuyển')
   calculate(
-    @Param('serviceId') serviceId: string,
-    @Param('zone') zone: string,
-    @Param('weight') weight: string,
+    @Query('serviceId') serviceId: string,
+    @Query('km') km: string,
+    @Query('weightKg') weightKg: string,
   ) {
-    return this.pricingService.calculate(serviceId, Number(weight), zone);
+    return this.pricingService.calculate(
+      serviceId,
+      Number(km),
+      Number(weightKg),
+    );
   }
 }

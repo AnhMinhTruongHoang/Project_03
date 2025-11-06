@@ -245,8 +245,8 @@ export class UsersService {
   // NOTE: Find a user by username/email for login
   findOneByUsername(username: string) {
     return this.userModel
-      .findOne({ email: username })
-      .populate({ path: 'role', select: { name: 1 } });
+      .findOne({ email: username, isDeleted: false })
+      .select('+password'); // ⬅️ MUST: lấy kèm password
   }
 
   // NOTE: Find a user by email
@@ -259,8 +259,8 @@ export class UsersService {
   }
 
   // NOTE: Compare password with hash (login)
-  isValidPassword(password: string, hash: string) {
-    return compareSync(password, hash);
+  isValidPassword(password: string, hash?: string) {
+    return !!hash && compareSync(password, hash);
   }
 
   // NOTE: Update user data (admin only)

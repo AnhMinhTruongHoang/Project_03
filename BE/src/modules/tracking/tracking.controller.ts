@@ -33,11 +33,13 @@ export class TrackingController {
   @Get()
   @ResponseMessage('Danh sách log tracking')
   findAll(
-    @Query('current') currentPage: string,
-    @Query('pageSize') limit: string,
-    @Query() qs: string,
+    @Query('current') current?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query() query?: any,
   ) {
-    return this.trackingService.findAll(+currentPage, +limit, qs);
+    const page = current ? Number(current) : 1;
+    const size = pageSize ? Number(pageSize) : 10;
+    return this.trackingService.findAll(page, size, query || {});
   }
 
   @Get('shipment/:shipmentId')
@@ -59,8 +61,14 @@ export class TrackingController {
   }
 
   @Delete(':id')
-  @ResponseMessage('Xóa tracking')
+  @ResponseMessage('Xóa (soft) tracking')
   remove(@Param('id') id: string, @Users() user: IUser) {
     return this.trackingService.remove(id, user);
+  }
+
+  @Patch(':id/restore')
+  @ResponseMessage('Khôi phục tracking')
+  restore(@Param('id') id: string) {
+    return this.trackingService.restore(id);
   }
 }

@@ -1,3 +1,4 @@
+// src/modules/shipments/shipments.controller.ts
 import {
   Controller,
   Get,
@@ -26,14 +27,8 @@ export class ShipmentsController {
 
   @Post()
   @ResponseMessage('Tạo vận đơn mới')
-  async create(
-    @Body() createShipmentDto: CreateShipmentDto,
-    @Users() user: IUser,
-  ) {
-    const shipment = await this.shipmentsService.create(
-      createShipmentDto,
-      user._id,
-    );
+  async create(@Body() dto: CreateShipmentDto, @Users() user: IUser) {
+    const shipment = await this.shipmentsService.create(dto, user._id);
     return {
       _id: shipment._id,
       trackingNumber: shipment.trackingNumber,
@@ -44,11 +39,13 @@ export class ShipmentsController {
   @Get()
   @ResponseMessage('Danh sách vận đơn')
   async findAll(
-    @Query('current') currentPage: string,
-    @Query('pageSize') limit: string,
-    @Query() qs: string,
+    @Query('current') current?: string,
+    @Query('pageSize') size?: string,
+    @Query() query?: any,
   ) {
-    return this.shipmentsService.findAll(+currentPage, +limit, qs);
+    const page = current ? Number(current) : 1;
+    const limit = size ? Number(size) : 10;
+    return this.shipmentsService.findAll(page, limit, query || {});
   }
 
   @Get(':id')
@@ -61,15 +58,21 @@ export class ShipmentsController {
   @ResponseMessage('Cập nhật vận đơn')
   async update(
     @Param('id') id: string,
-    @Body() updateShipmentDto: UpdateShipmentDto,
+    @Body() dto: UpdateShipmentDto,
     @Users() user: IUser,
   ) {
-    return this.shipmentsService.update(id, updateShipmentDto, user._id);
+    return this.shipmentsService.update(id, dto, user._id);
   }
 
   @Delete(':id')
-  @ResponseMessage('Xóa vận đơn')
+  @ResponseMessage('Xóa (soft) vận đơn')
   async remove(@Param('id') id: string, @Users() user: IUser) {
     return this.shipmentsService.remove(id, user._id);
+  }
+
+  @Patch(':id/restore')
+  @ResponseMessage('Khôi phục vận đơn')
+  async restore(@Param('id') id: string) {
+    return this.shipmentsService.restore(id);
   }
 }

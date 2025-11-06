@@ -25,18 +25,20 @@ export class BranchesController {
 
   @Post()
   @ResponseMessage('Tạo chi nhánh mới')
-  create(@Body() createBranchDto: CreateBranchDto) {
-    return this.branchesService.create(createBranchDto);
+  create(@Body() dto: CreateBranchDto) {
+    return this.branchesService.create(dto);
   }
 
   @Get()
   @ResponseMessage('Danh sách chi nhánh')
   findAll(
-    @Query('current') currentPage: string,
-    @Query('pageSize') limit: string,
-    @Query() qs: string,
+    @Query('current') current?: string,
+    @Query('pageSize') size?: string,
+    @Query() query?: any,
   ) {
-    return this.branchesService.findAll(+currentPage, +limit, qs);
+    const page = current ? Number(current) : 1;
+    const limit = size ? Number(size) : 10;
+    return this.branchesService.findAll(page, limit, query || {});
   }
 
   @Get(':id')
@@ -47,13 +49,26 @@ export class BranchesController {
 
   @Patch(':id')
   @ResponseMessage('Cập nhật chi nhánh')
-  update(@Param('id') id: string, @Body() updateBranchDto: UpdateBranchDto) {
-    return this.branchesService.update(id, updateBranchDto);
+  update(@Param('id') id: string, @Body() dto: UpdateBranchDto) {
+    return this.branchesService.update(id, dto);
   }
 
   @Delete(':id')
-  @ResponseMessage('Xóa chi nhánh')
+  @ResponseMessage('Xóa (soft) chi nhánh')
   remove(@Param('id') id: string) {
+    // TODO: truyền req.user nếu muốn lưu deletedBy
     return this.branchesService.remove(id);
+  }
+
+  @Patch(':id/restore')
+  @ResponseMessage('Khôi phục chi nhánh')
+  restore(@Param('id') id: string) {
+    return this.branchesService.restore(id);
+  }
+
+  @Delete(':id/force')
+  @ResponseMessage('Xóa vĩnh viễn chi nhánh')
+  hardDelete(@Param('id') id: string) {
+    return this.branchesService.hardDelete(id);
   }
 }
