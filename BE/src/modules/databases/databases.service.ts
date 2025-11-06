@@ -1,11 +1,17 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+// src/modules/databases/databases.service.ts
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  BadRequestException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import mongoose, { Connection, Types } from 'mongoose';
+import { Connection, Types } from 'mongoose';
+
 import { UsersService } from '../users/users.service';
 import { User, UserDocument } from '../users/schemas/user.schema';
-import { Ward, WardDocument } from '../location/schemas/ward.schema';
 import { Payment, PaymentDocument } from '../payments/schema/payment.schema';
 import { Address, AddressDocument } from '../location/schemas/address.schema';
 import { Branch, BranchDocument } from '../branches/schemas/branch.schemas';
@@ -21,7 +27,6 @@ import {
   TrackingDocument,
   TrackingStatus,
 } from '../tracking/schemas/tracking.schemas';
-
 import {
   Province,
   ProvinceDocument,
@@ -41,12 +46,18 @@ import {
   NotificationType,
 } from '../notifications/schemas/notification.schemas';
 
+type AddressWithCoords = Address & {
+  _id: Types.ObjectId;
+  line1?: string;
+  lat?: number;
+  lng?: number;
+};
+
 @Injectable()
 export class DatabasesService implements OnModuleInit {
   private readonly logger = new Logger(DatabasesService.name);
 
   constructor(
-    // ===== Models
     @InjectModel(User.name)
     private readonly userModel: SoftDeleteModel<UserDocument>,
 
@@ -54,8 +65,6 @@ export class DatabasesService implements OnModuleInit {
     private readonly provinceModel: SoftDeleteModel<ProvinceDocument>,
     @InjectModel(District.name)
     private readonly districtModel: SoftDeleteModel<DistrictDocument>,
-    @InjectModel(Ward.name)
-    private readonly wardModel: SoftDeleteModel<WardDocument>,
     @InjectModel(Address.name)
     private readonly addressModel: SoftDeleteModel<AddressDocument>,
 
@@ -85,12 +94,11 @@ export class DatabasesService implements OnModuleInit {
     if (this.config.get('SHOULD_INIT') !== 'true') return;
 
     await this.seedUsers();
-    const { hn, hcm } = await this.seedLocation(); // provinces/districts/wards
-    const { addrHn1, addrHcm1, addrHn2 } = await this.seedAddresses(hn, hcm);
+    const { hn, hcm } = await this.seedLocation32(); // 32 tỉnh + quận/huyện
+    const { addrHn1, addrHcm1, addrHn2 } = await this.seedAddresses(hn, hcm); // không dùng ward
     const { branchHN, branchHCM } = await this.seedBranches(addrHn1, addrHcm1);
     const { svcSTD, svcEXP } = await this.seedServices();
-
-    await this.seedPricing(svcSTD._id, svcEXP._id); // km × kg slabs
+    await this.seedPricing(svcSTD._id, svcEXP._id);
     const { order1, customer } = await this.seedOrders(addrHn2, addrHcm1);
     await this.seedShipments(
       order1,
@@ -107,9 +115,7 @@ export class DatabasesService implements OnModuleInit {
     this.logger.log('✅ DATABASE SEEDING COMPLETED');
   }
 
-  /* ---------------------------------------------------- *
-   *                         USERS                         *
-   * ---------------------------------------------------- */
+  /* ---------------- USERS ---------------- */
   private async seedUsers() {
     if (await this.userModel.countDocuments()) return;
 
@@ -151,109 +157,347 @@ export class DatabasesService implements OnModuleInit {
     this.logger.log('>>> INIT USERS DONE');
   }
 
-  /* ---------------------------------------------------- *
-   *                       LOCATION                        *
-   * ---------------------------------------------------- */
-  private async seedLocation() {
-    // Chỉ seed tối thiểu 2 tỉnh: HN + HCM, mỗi tỉnh 1 quận, 1 phường
-    if (await this.provinceModel.countDocuments()) {
-      const hn = await this.provinceModel.findOne({ code: 'HN' });
-      const hcm = await this.provinceModel.findOne({ code: 'HCM' });
+  /* ---------------- LOCATION (2 cấp) ---------------- */
+  /**
+   * Seed 32 Tỉnh/Thành + một số Quận/Huyện trực thuộc (mẫu).
+   * Bạn có thể mở rộng thêm districts nếu muốn đầy đủ.
+   */
+  private async seedLocation32() {
+    if ((await this.provinceModel.countDocuments()) >= 32) {
+      const hn = await this.provinceModel.findOne({ code: 'HN' }).lean();
+      const hcm = await this.provinceModel.findOne({ code: 'HCM' }).lean();
       return { hn, hcm };
     }
 
-    const [hn] = await this.provinceModel.insertMany([
-      { code: 'HN', name: 'Hà Nội' },
-    ]);
-    const [hcm] = await this.provinceModel.insertMany([
-      { code: 'HCM', name: 'Hồ Chí Minh' },
-    ]);
+    type P = {
+      code: string;
+      name: string;
+      districts: { code: string; name: string }[];
+    };
 
-    const [q1hn] = await this.districtModel.insertMany([
-      { code: 'HN-Q1', name: 'Hoàn Kiếm', provinceId: hn._id },
-    ]);
-    const [q1hcm] = await this.districtModel.insertMany([
-      { code: 'HCM-Q1', name: 'Quận 1', provinceId: hcm._id },
-    ]);
+    const PROVINCES_32: P[] = [
+      {
+        code: 'HN',
+        name: 'Hà Nội',
+        districts: [
+          { code: 'HN-HK', name: 'Hoàn Kiếm' },
+          { code: 'HN-BD', name: 'Ba Đình' },
+          { code: 'HN-CG', name: 'Cầu Giấy' },
+          { code: 'HN-TX', name: 'Thanh Xuân' },
+        ],
+      },
+      {
+        code: 'HCM',
+        name: 'Hồ Chí Minh',
+        districts: [
+          { code: 'HCM-Q1', name: 'Quận 1' },
+          { code: 'HCM-Q3', name: 'Quận 3' },
+          { code: 'HCM-PN', name: 'Phú Nhuận' },
+          { code: 'HCM-TD', name: 'Thủ Đức' },
+        ],
+      },
+      {
+        code: 'HP',
+        name: 'Hải Phòng',
+        districts: [
+          { code: 'HP-HB', name: 'Hồng Bàng' },
+          { code: 'HP-NQ', name: 'Ngô Quyền' },
+        ],
+      },
+      {
+        code: 'DN',
+        name: 'Đà Nẵng',
+        districts: [
+          { code: 'DN-HA', name: 'Hải Châu' },
+          { code: 'DN-ST', name: 'Sơn Trà' },
+        ],
+      },
+      {
+        code: 'CT',
+        name: 'Cần Thơ',
+        districts: [
+          { code: 'CT-NK', name: 'Ninh Kiều' },
+          { code: 'CT-BT', name: 'Bình Thuỷ' },
+        ],
+      },
+      {
+        code: 'QN',
+        name: 'Quảng Ninh',
+        districts: [
+          { code: 'QN-HA', name: 'Hạ Long' },
+          { code: 'QN-UB', name: 'Uông Bí' },
+        ],
+      },
+      {
+        code: 'LA',
+        name: 'Long An',
+        districts: [
+          { code: 'LA-TA', name: 'Tân An' },
+          { code: 'LA-CD', name: 'Cần Đước' },
+        ],
+      },
+      {
+        code: 'BD',
+        name: 'Bình Dương',
+        districts: [
+          { code: 'BD-TDM', name: 'Thủ Dầu Một' },
+          { code: 'BD-DA', name: 'Dĩ An' },
+        ],
+      },
+      {
+        code: 'BH',
+        name: 'Bình Định',
+        districts: [
+          { code: 'BH-QN', name: 'Quy Nhơn' },
+          { code: 'BH-AN', name: 'An Nhơn' },
+        ],
+      },
+      {
+        code: 'NT',
+        name: 'Ninh Thuận',
+        districts: [{ code: 'NT-PR', name: 'Phan Rang - Tháp Chàm' }],
+      },
+      {
+        code: 'BT',
+        name: 'Bình Thuận',
+        districts: [
+          { code: 'BT-PT', name: 'Phan Thiết' },
+          { code: 'BT-HTB', name: 'Hàm Thuận Bắc' },
+        ],
+      },
+      {
+        code: 'KH',
+        name: 'Khánh Hòa',
+        districts: [
+          { code: 'KH-NT', name: 'Nha Trang' },
+          { code: 'KH-CL', name: 'Cam Lâm' },
+        ],
+      },
+      {
+        code: 'LD',
+        name: 'Lâm Đồng',
+        districts: [
+          { code: 'LD-DL', name: 'Đà Lạt' },
+          { code: 'LD-BL', name: 'Bảo Lộc' },
+        ],
+      },
+      {
+        code: 'GL',
+        name: 'Gia Lai',
+        districts: [{ code: 'GL-PK', name: 'Pleiku' }],
+      },
+      {
+        code: 'DLK',
+        name: 'Đắk Lắk',
+        districts: [{ code: 'DLK-BMT', name: 'Buôn Ma Thuột' }],
+      },
+      {
+        code: 'DNA',
+        name: 'Đồng Nai',
+        districts: [
+          { code: 'DNA-BH', name: 'Biên Hòa' },
+          { code: 'DNA-NT', name: 'Nhơn Trạch' },
+        ],
+      },
+      {
+        code: 'VT',
+        name: 'Bà Rịa - Vũng Tàu',
+        districts: [
+          { code: 'VT-VT', name: 'Vũng Tàu' },
+          { code: 'VT-BR', name: 'Bà Rịa' },
+        ],
+      },
+      {
+        code: 'TG',
+        name: 'Tiền Giang',
+        districts: [{ code: 'TG-MT', name: 'Mỹ Tho' }],
+      },
+      {
+        code: 'AG',
+        name: 'An Giang',
+        districts: [{ code: 'AG-LX', name: 'Long Xuyên' }],
+      },
+      {
+        code: 'KG',
+        name: 'Kiên Giang',
+        districts: [{ code: 'KG-RG', name: 'Rạch Giá' }],
+      },
+      {
+        code: 'ST',
+        name: 'Sóc Trăng',
+        districts: [{ code: 'ST-ST', name: 'Sóc Trăng' }],
+      },
+      {
+        code: 'TV',
+        name: 'Trà Vinh',
+        districts: [{ code: 'TV-TV', name: 'Trà Vinh' }],
+      },
+      {
+        code: 'VL',
+        name: 'Vĩnh Long',
+        districts: [{ code: 'VL-VL', name: 'Vĩnh Long' }],
+      },
+      {
+        code: 'BL',
+        name: 'Bạc Liêu',
+        districts: [{ code: 'BL-BL', name: 'Bạc Liêu' }],
+      },
+      {
+        code: 'CM',
+        name: 'Cà Mau',
+        districts: [{ code: 'CM-CM', name: 'Cà Mau' }],
+      },
+      {
+        code: 'TH',
+        name: 'Thanh Hóa',
+        districts: [
+          { code: 'TH-TP', name: 'TP Thanh Hóa' },
+          { code: 'TH-SS', name: 'Sầm Sơn' },
+        ],
+      },
+      {
+        code: 'NA',
+        name: 'Nghệ An',
+        districts: [{ code: 'NA-VI', name: 'Vinh' }],
+      },
+      {
+        code: 'HT',
+        name: 'Hà Tĩnh',
+        districts: [{ code: 'HT-HT', name: 'Hà Tĩnh' }],
+      },
+      {
+        code: 'QB',
+        name: 'Quảng Bình',
+        districts: [{ code: 'QB-DH', name: 'Đồng Hới' }],
+      },
+      {
+        code: 'TTH',
+        name: 'Thừa Thiên Huế',
+        districts: [{ code: 'TTH-H', name: 'Huế' }],
+      },
+      {
+        code: 'PY',
+        name: 'Phú Yên',
+        districts: [{ code: 'PY-TY', name: 'Tuy Hòa' }],
+      },
+      {
+        code: 'BDP',
+        name: 'Bình Phước',
+        districts: [{ code: 'BDP-ĐD', name: 'Đồng Xoài' }],
+      },
+    ];
 
-    await this.wardModel.insertMany([
-      { code: 'HN-W1', name: 'Phường Tràng Tiền', districtId: q1hn._id },
-      { code: 'HCM-W1', name: 'Phường Bến Nghé', districtId: q1hcm._id },
-    ]);
+    await this.provinceModel
+      .insertMany(
+        PROVINCES_32.map((p) => ({
+          code: p.code,
+          name: p.name,
+          isActive: true,
+        })),
+        { ordered: false },
+      )
+      .catch(() => []); 
 
-    this.logger.log('>>> INIT LOCATION DONE');
+    const allProvinces = await this.provinceModel
+      .find({ code: { $in: PROVINCES_32.map((p) => p.code) } })
+      .lean();
+
+    const mapId = new Map(
+      allProvinces.map((p) => [p.code, p._id as Types.ObjectId]),
+    );
+
+    const districts = PROVINCES_32.flatMap((p) =>
+      p.districts.map((d) => ({
+        code: d.code,
+        name: d.name,
+        provinceId: mapId.get(p.code)!,
+        isActive: true,
+      })),
+    );
+
+    await this.districtModel
+      .insertMany(districts, { ordered: false })
+      .catch(() => []);
+
+    const hn = await this.provinceModel.findOne({ code: 'HN' }).lean();
+    const hcm = await this.provinceModel.findOne({ code: 'HCM' }).lean();
+
+    this.logger.log(
+      `>>> INIT LOCATION 32 PROVINCES DONE (provinces: ${allProvinces.length})`,
+    );
     return { hn, hcm };
   }
 
-  private async seedAddresses(hn: ProvinceDocument, hcm: ProvinceDocument) {
+  /* ---------------- ADDRESSES (không ward) ---------------- */
+  private async seedAddresses(
+    hn: ProvinceDocument | any,
+    hcm: ProvinceDocument | any,
+  ) {
     if (await this.addressModel.countDocuments()) {
       const [addrHn1] = await this.addressModel
         .find({ contactName: 'Kho HN' })
-        .limit(1);
+        .limit(1)
+        .lean<AddressWithCoords[]>();
       const [addrHcm1] = await this.addressModel
         .find({ contactName: 'Kho HCM' })
-        .limit(1);
+        .limit(1)
+        .lean<AddressWithCoords[]>();
       const [addrHn2] = await this.addressModel
         .find({ contactName: 'Khách HN' })
-        .limit(1);
+        .limit(1)
+        .lean<AddressWithCoords[]>();
       return { addrHn1, addrHcm1, addrHn2 };
     }
 
-    const qHn = await this.districtModel.findOne({ provinceId: hn._id });
-    const wHn = await this.wardModel.findOne({ districtId: qHn!._id });
+    const qHn = await this.districtModel.findOne({ provinceId: hn._id }).lean();
+    const qHcm = await this.districtModel
+      .findOne({ provinceId: hcm._id })
+      .lean();
 
-    const qHcm = await this.districtModel.findOne({ provinceId: hcm._id });
-    const wHcm = await this.wardModel.findOne({ districtId: qHcm!._id });
-
-    const [addrHn1] = await this.addressModel.insertMany([
+    const [addrHn1] = (await this.addressModel.insertMany([
       {
         line1: '123 Tràng Tiền',
-        provinceId: hn._id,
-        districtId: qHn!._id,
-        wardId: wHn!._id,
+        provinceId: hn._id as Types.ObjectId,
+        districtId: qHn!._id as Types.ObjectId,
         lat: 21.027763,
         lng: 105.83416,
         contactName: 'Kho HN',
         contactPhone: '0123456789',
       },
-    ]);
+    ])) as unknown as AddressWithCoords[];
 
-    const [addrHcm1] = await this.addressModel.insertMany([
+    const [addrHcm1] = (await this.addressModel.insertMany([
       {
         line1: '45 Lê Lợi',
-        provinceId: hcm._id,
-        districtId: qHcm!._id,
-        wardId: wHcm!._id,
+        provinceId: hcm._id as Types.ObjectId,
+        districtId: qHcm!._id as Types.ObjectId,
         lat: 10.776889,
         lng: 106.700806,
         contactName: 'Kho HCM',
         contactPhone: '0987654321',
       },
-    ]);
+    ])) as unknown as AddressWithCoords[];
 
-    const [addrHn2] = await this.addressModel.insertMany([
+    const [addrHn2] = (await this.addressModel.insertMany([
       {
         line1: '25 Hàng Bài',
-        provinceId: hn._id,
-        districtId: qHn!._id,
-        wardId: wHn!._id,
+        provinceId: hn._id as Types.ObjectId,
+        districtId: qHn!._id as Types.ObjectId,
         lat: 21.0245,
         lng: 105.8542,
         contactName: 'Khách HN',
         contactPhone: '0909009009',
       },
-    ]);
+    ])) as unknown as AddressWithCoords[];
 
-    this.logger.log('>>> INIT ADDRESSES DONE');
+    this.logger.log('>>> INIT ADDRESSES (no ward) DONE');
     return { addrHn1, addrHcm1, addrHn2 };
   }
 
-  /* ---------------------------------------------------- *
-   *                        BRANCHES                       *
-   * ---------------------------------------------------- */
+  /* ---------------- BRANCHES ---------------- */
   private async seedBranches(
-    addrHn: AddressDocument,
-    addrHcm: AddressDocument,
+    addrHn: AddressWithCoords,
+    addrHcm: AddressWithCoords,
   ) {
     if (await this.branchModel.countDocuments()) {
       const branchHN = await this.branchModel.findOne({ code: 'HN01' });
@@ -291,9 +535,7 @@ export class DatabasesService implements OnModuleInit {
     return { branchHN, branchHCM };
   }
 
-  /* ---------------------------------------------------- *
-   *                        SERVICES                       *
-   * ---------------------------------------------------- */
+  /* ---------------- SERVICES ---------------- */
   private async seedServices() {
     if (await this.serviceModel.countDocuments()) {
       const svcSTD = await this.serviceModel.findOne({ code: 'STD' });
@@ -308,7 +550,6 @@ export class DatabasesService implements OnModuleInit {
         description: '3–5 ngày',
         basePrice: 20000,
         isActive: true,
-        // volumetricDivisor?: không bắt buộc; có thể thêm field này vào schema Service nếu muốn
       },
     ]);
 
@@ -326,10 +567,7 @@ export class DatabasesService implements OnModuleInit {
     return { svcSTD, svcEXP };
   }
 
-  /* ---------------------------------------------------- *
-   *                        PRICING                        *
-   *  km × kg slabs – ví dụ demo (tùy chỉnh theo thực tế) *
-   * ---------------------------------------------------- */
+  /* ---------------- PRICING ---------------- */
   private async seedPricing(
     svcSTDId: Types.ObjectId,
     svcEXPId: Types.ObjectId,
@@ -404,12 +642,10 @@ export class DatabasesService implements OnModuleInit {
     this.logger.log('>>> INIT PRICING DONE');
   }
 
-  /* ---------------------------------------------------- *
-   *                         ORDERS                        *
-   * ---------------------------------------------------- */
+  /* ---------------- ORDERS ---------------- */
   private async seedOrders(
-    pickupAddr: AddressDocument,
-    deliveryAddr: AddressDocument,
+    pickupAddr: AddressWithCoords,
+    deliveryAddr: AddressWithCoords,
   ) {
     if (await this.orderModel.countDocuments()) {
       const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
@@ -437,28 +673,25 @@ export class DatabasesService implements OnModuleInit {
     return { order1, customer };
   }
 
-  /* ---------------------------------------------------- *
-   *                        SHIPMENTS                      *
-   *  shipment tự tính km/fee bằng Pricing slabs           *
-   * ---------------------------------------------------- */
+  /* ---------------- SHIPMENTS ---------------- */
   private async seedShipments(
     order1: OrderDocument,
     customer: UserDocument,
     branchHN: BranchDocument,
     branchHCM: BranchDocument,
     svcSTD: ServiceDocument,
-    pickupAddr: AddressDocument,
-    deliveryAddr: AddressDocument,
+    pickupAddr: AddressWithCoords,
+    deliveryAddr: AddressWithCoords,
   ) {
     if (await this.shipmentModel.countDocuments()) return;
 
-    // tính sơ bộ distance để chọn slab (reproduce logic của service)
     const km = this.haversineKm(
-      pickupAddr.lat,
-      pickupAddr.lng,
-      deliveryAddr.lat,
-      deliveryAddr.lng,
+      pickupAddr.lat ?? 0,
+      pickupAddr.lng ?? 0,
+      deliveryAddr.lat ?? 0,
+      deliveryAddr.lng ?? 0,
     );
+
     const slab = await this.pricingModel
       .findOne({
         serviceId: svcSTD._id,
@@ -507,7 +740,6 @@ export class DatabasesService implements OnModuleInit {
       },
     ]);
 
-    // payment
     await this.paymentModel.insertMany([
       {
         orderId: order1._id,
@@ -523,9 +755,7 @@ export class DatabasesService implements OnModuleInit {
     this.logger.log('>>> INIT SHIPMENTS & PAYMENTS DONE');
   }
 
-  /* ---------------------------------------------------- *
-   *                        TRACKINGS                      *
-   * ---------------------------------------------------- */
+  /* ---------------- TRACKINGS ---------------- */
   private async seedTrackings() {
     if (await this.trackingModel.countDocuments()) return;
 
@@ -556,9 +786,7 @@ export class DatabasesService implements OnModuleInit {
     this.logger.log('>>> INIT TRACKINGS DONE');
   }
 
-  /* ---------------------------------------------------- *
-   *                      NOTIFICATIONS                    *
-   * ---------------------------------------------------- */
+  /* ---------------- NOTIFICATIONS ---------------- */
   private async seedNotifications(customer: UserDocument) {
     if (await this.notificationModel.countDocuments()) return;
 
@@ -582,7 +810,7 @@ export class DatabasesService implements OnModuleInit {
     this.logger.log('>>> INIT NOTIFICATIONS DONE');
   }
 
-  /* -------------------- helpers ----------------------- */
+  /* ---------------- helpers ---------------- */
   private haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
     const toRad = (d: number) => (d * Math.PI) / 180;
     const R = 6371;

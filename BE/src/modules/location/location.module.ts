@@ -5,7 +5,6 @@ import { LocationService } from './location.service';
 import { LocationController } from './location.controller';
 import { Province, ProvinceSchema } from './schemas/province.schema';
 import { District, DistrictSchema } from './schemas/district.schema';
-import { Ward, WardSchema } from './schemas/ward.schema';
 import { Address, AddressSchema } from './schemas/address.schema';
 
 @Module({
@@ -13,7 +12,6 @@ import { Address, AddressSchema } from './schemas/address.schema';
     MongooseModule.forFeature([
       { name: Province.name, schema: ProvinceSchema },
       { name: District.name, schema: DistrictSchema },
-      { name: Ward.name, schema: WardSchema },
       { name: Address.name, schema: AddressSchema },
     ]),
   ],

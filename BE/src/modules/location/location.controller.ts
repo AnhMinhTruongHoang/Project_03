@@ -1,3 +1,4 @@
+// locations/location.controller.ts
 import { Controller, Get, Post, Body, Query, Param } from '@nestjs/common';
 import { LocationService } from './location.service';
 
@@ -5,21 +6,19 @@ import { LocationService } from './location.service';
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
+  // Cấp 1: Tỉnh/Thành
   @Get('provinces')
   getProvinces() {
     return this.locationService.getProvinces();
   }
 
+  // Cấp 2: Quận/Huyện theo Tỉnh/Thành
   @Get('districts')
   getDistricts(@Query('provinceId') provinceId: string) {
     return this.locationService.getDistricts(provinceId);
   }
 
-  @Get('wards')
-  getWards(@Query('districtId') districtId: string) {
-    return this.locationService.getWards(districtId);
-  }
-
+  // === ĐỊA CHỈ (không còn ward/phường) ===
   @Post('addresses')
   createAddress(@Body() body: any) {
     return this.locationService.createAddress(body);
