@@ -170,115 +170,117 @@ export class DatabasesService implements OnModuleInit {
     const PROVINCES_32: P[] = [
       {
         code: 'HN',
-        name: 'Hà Nội',
+        name: 'Thành phố Hà Nội',
         districts: [
-          { code: 'HN-BD', name: 'Ba Đình' },
-          { code: 'HN-HK', name: 'Hoàn Kiếm' },
-          { code: 'HN-HBT', name: 'Hai Bà Trưng' },
-          { code: 'HN-DD', name: 'Đống Đa' },
-          { code: 'HN-TH', name: 'Tây Hồ' },
-          { code: 'HN-CG', name: 'Cầu Giấy' },
-          { code: 'HN-TX', name: 'Thanh Xuân' },
-          { code: 'HN-HM', name: 'Hoàng Mai' },
-          { code: 'HN-LB', name: 'Long Biên' },
-          { code: 'HN-HD', name: 'Hà Đông' },
-          { code: 'HN-NTL', name: 'Nam Từ Liêm' },
-          { code: 'HN-BTL', name: 'Bắc Từ Liêm' },
-          { code: 'HN-TT', name: 'Thanh Trì' },
-          { code: 'HN-GL', name: 'Gia Lâm' },
-          { code: 'HN-DA', name: 'Đông Anh' },
-          { code: 'HN-SS', name: 'Sóc Sơn' },
-          { code: 'HN-BV', name: 'Ba Vì' },
-          { code: 'HN-PT', name: 'Phúc Thọ' },
-          { code: 'HN-DP', name: 'Đan Phượng' },
-          { code: 'HN-HD2', name: 'Hoài Đức' },
-          { code: 'HN-QO', name: 'Quốc Oai' },
-          { code: 'HN-TT2', name: 'Thạch Thất' },
-          { code: 'HN-CM', name: 'Chương Mỹ' },
-          { code: 'HN-TO', name: 'Thanh Oai' },
-          { code: 'HN-TT3', name: 'Thường Tín' },
-          { code: 'HN-PX', name: 'Phú Xuyên' },
-          { code: 'HN-UH', name: 'Ứng Hòa' },
-          { code: 'HN-MD', name: 'Mỹ Đức' },
-          { code: 'HN-ML', name: 'Mê Linh' },
-          { code: 'HN-ST', name: 'Thị xã Sơn Tây' },
+          { code: 'HN-ST', name: 'Thành phố Sơn Tây' },
+          { code: 'HN-SS', name: 'Huyện Sóc Sơn' },
+          { code: 'HN-DA', name: 'Huyện Đông Anh' },
+          { code: 'HN-GL', name: 'Huyện Gia Lâm' },
+          { code: 'HN-TT', name: 'Huyện Thanh Trì' },
+          { code: 'HN-ML', name: 'Huyện Mê Linh' },
+          { code: 'HN-HĐ', name: 'Huyện Hoài Đức' },
+          { code: 'HN-DP', name: 'Huyện Đan Phượng' },
+          { code: 'HN-PT', name: 'Huyện Phúc Thọ' },
+          { code: 'HN-BV', name: 'Huyện Ba Vì' },
+          { code: 'HN-QO', name: 'Huyện Quốc Oai' },
+          { code: 'HN-TTH', name: 'Huyện Thạch Thất' },
+          { code: 'HN-CM', name: 'Huyện Chương Mỹ' },
+          { code: 'HN-TO', name: 'Huyện Thanh Oai' },
+          { code: 'HN-TTT', name: 'Huyện Thường Tín' },
+          { code: 'HN-PX', name: 'Huyện Phú Xuyên' },
+          { code: 'HN-UH', name: 'Huyện Ứng Hòa' },
+          { code: 'HN-MD', name: 'Huyện Mỹ Đức' },
+          { code: 'HN-BD', name: 'Phường Ba Đình' },
+          { code: 'HN-HK', name: 'Phường Hoàn Kiếm' },
+          { code: 'HN-HBT', name: 'Phường Hai Bà Trưng' },
+          { code: 'HN-DD', name: 'Phường Đống Đa' },
+          { code: 'HN-TH', name: 'Phường Tây Hồ' },
+          { code: 'HN-CG', name: 'Phường Cầu Giấy' },
+          { code: 'HN-TX', name: 'Phường Thanh Xuân' },
+          { code: 'HN-HM', name: 'Phường Hoàng Mai' },
+          { code: 'HN-LB', name: 'Phường Long Biên' },
+          { code: 'HN-HD', name: 'Phường Hà Đông' },
+          { code: 'HN-NTL', name: 'Phường Nam Từ Liêm' },
+          { code: 'HN-BTL', name: 'Phường Bắc Từ Liêm' },
         ],
       },
 
       {
         code: 'HCM',
-        name: 'Hồ Chí Minh',
+        name: 'Thành phố Hồ Chí Minh',
         districts: [
-          { code: 'HCM-Q1', name: 'Quận 1' },
-          { code: 'HCM-Q3', name: 'Quận 3' },
-          { code: 'HCM-Q4', name: 'Quận 4' },
-          { code: 'HCM-Q5', name: 'Quận 5' },
-          { code: 'HCM-Q6', name: 'Quận 6' },
-          { code: 'HCM-Q7', name: 'Quận 7' },
-          { code: 'HCM-Q8', name: 'Quận 8' },
-          { code: 'HCM-Q10', name: 'Quận 10' },
-          { code: 'HCM-Q11', name: 'Quận 11' },
-          { code: 'HCM-Q12', name: 'Quận 12' },
-          { code: 'HCM-BT', name: 'Bình Thạnh' },
-          { code: 'HCM-GV', name: 'Gò Vấp' },
-          { code: 'HCM-PN', name: 'Phú Nhuận' },
-          { code: 'HCM-TB', name: 'Tân Bình' },
-          { code: 'HCM-TP', name: 'Tân Phú' },
-          { code: 'HCM-BTAN', name: 'Bình Tân' },
           { code: 'HCM-BC', name: 'Huyện Bình Chánh' },
           { code: 'HCM-CC', name: 'Huyện Củ Chi' },
           { code: 'HCM-HM', name: 'Huyện Hóc Môn' },
           { code: 'HCM-NB', name: 'Huyện Nhà Bè' },
           { code: 'HCM-CG', name: 'Huyện Cần Giờ' },
-
           { code: 'HCM-TD', name: 'Thành phố Thủ Đức' },
+          { code: 'HCM-BT', name: 'Phường Bình Thạnh' },
+          { code: 'HCM-GV', name: 'Phường Gò Vấp' },
+          { code: 'HCM-PN', name: 'Phường Phú Nhuận' },
+          { code: 'HCM-TB', name: 'Phường Tân Bình' },
+          { code: 'HCM-TP', name: 'Phường Tân Phú' },
+          { code: 'HCM-BTAN', name: 'Phường Bình Tân' },
+          { code: 'HCM-Q1', name: 'Phường Trung tâm (Q1 cũ)' },
+          { code: 'HCM-Q3', name: 'Phường Khu Ba (Q3 cũ)' },
+          { code: 'HCM-Q4', name: 'Phường Kênh Tẻ (Q4 cũ)' },
+          { code: 'HCM-Q5', name: 'Phường Chợ Lớn (Q5 cũ)' },
+          { code: 'HCM-Q6', name: 'Phường Bình Phú (Q6 cũ)' },
+          { code: 'HCM-Q7', name: 'Phường Nam Sài Gòn (Q7 cũ)' },
+          { code: 'HCM-Q8', name: 'Phường Phú Định (Q8 cũ)' },
+          { code: 'HCM-Q10', name: 'Phường Nhật Tảo (Q10 cũ)' },
+          { code: 'HCM-Q11', name: 'Phường Bình Thới (Q11 cũ)' },
+          { code: 'HCM-Q12', name: 'Phường Hiệp Thành (Q12 cũ)' },
         ],
       },
+
       {
         code: 'HP',
-        name: 'Hải Phòng',
+        name: 'Thành phố Hải Phòng',
         districts: [
-          { code: 'HP-HB', name: 'Hồng Bàng' },
-          { code: 'HP-NQ', name: 'Ngô Quyền' },
-          { code: 'HP-LC', name: 'Lê Chân' },
-          { code: 'HP-HA', name: 'Hải An' },
-          { code: 'HP-KA', name: 'Kiến An' },
-          { code: 'HP-DS', name: 'Đồ Sơn' },
-          { code: 'HP-DK', name: 'Dương Kinh' },
-          { code: 'HP-TN', name: 'Thủy Nguyên' },
-          { code: 'HP-AD', name: 'An Dương' },
-          { code: 'HP-AL', name: 'An Lão' },
-          { code: 'HP-KT', name: 'Kiến Thụy' },
-          { code: 'HP-TL', name: 'Tiên Lãng' },
-          { code: 'HP-VB', name: 'Vĩnh Bảo' },
-          { code: 'HP-CH', name: 'Cát Hải' },
-          { code: 'HP-BLV', name: 'Bạch Long Vĩ' },
+          { code: 'HP-TN', name: 'Huyện Thủy Nguyên' },
+          { code: 'HP-AD', name: 'Huyện An Dương' },
+          { code: 'HP-AL', name: 'Huyện An Lão' },
+          { code: 'HP-KT', name: 'Huyện Kiến Thụy' },
+          { code: 'HP-TL', name: 'Huyện Tiên Lãng' },
+          { code: 'HP-VB', name: 'Huyện Vĩnh Bảo' },
+          { code: 'HP-CH', name: 'Huyện Cát Hải' },
+          { code: 'HP-BLV', name: 'Huyện Bạch Long Vĩ' },
+
+          { code: 'HP-HB', name: 'Phường Hồng Bàng' },
+          { code: 'HP-NQ', name: 'Phường Ngô Quyền' },
+          { code: 'HP-LC', name: 'Phường Lê Chân' },
+          { code: 'HP-HA', name: 'Phường Hải An' },
+          { code: 'HP-KA', name: 'Phường Kiến An' },
+          { code: 'HP-DS', name: 'Phường Đồ Sơn' },
+          { code: 'HP-DK', name: 'Phường Dương Kinh' },
         ],
       },
+
       {
         code: 'DN',
-        name: 'Đà Nẵng',
+        name: 'Thành phố Đà Nẵng',
         districts: [
-          { code: 'DN-HA', name: 'Hải Châu' },
-          { code: 'DN-ST', name: 'Sơn Trà' },
-          { code: 'DN-NHS', name: 'Ngũ Hành Sơn' },
-          { code: 'DN-LC', name: 'Liên Chiểu' },
-          { code: 'DN-TK', name: 'Thanh Khê' },
-          { code: 'DN-CL', name: 'Cẩm Lệ' },
-          { code: 'DN-HV', name: 'Hòa Vang' },
-          { code: 'DN-HS', name: 'Hoàng Sa' },
+          { code: 'DN-HA', name: 'Phường Hải Châu' },
+          { code: 'DN-ST', name: 'Phường Sơn Trà' },
+          { code: 'DN-NHS', name: 'Phường Ngũ Hành Sơn' },
+          { code: 'DN-LC', name: 'Phường Liên Chiểu' },
+          { code: 'DN-TK', name: 'Phường Thanh Khê' },
+          { code: 'DN-CL', name: 'Phường Cẩm Lệ' },
+          { code: 'DN-HV', name: 'Huyện Hòa Vang' },
+          { code: 'DN-HS', name: 'Huyện Hoàng Sa' },
         ],
       },
 
       {
         code: 'CT',
-        name: 'Cần Thơ',
+        name: 'Thành phố Cần Thơ',
         districts: [
-          { code: 'CT-NK', name: 'Ninh Kiều' },
-          { code: 'CT-BT', name: 'Bình Thủy' },
-          { code: 'CT-CR', name: 'Cái Răng' },
-          { code: 'CT-OM', name: 'Ô Môn' },
-          { code: 'CT-TN', name: 'Thốt Nốt' },
+          { code: 'CT-NK', name: 'Phường Ninh Kiều' },
+          { code: 'CT-BT', name: 'Phường Bình Thủy' },
+          { code: 'CT-CR', name: 'Phường Cái Răng' },
+          { code: 'CT-OM', name: 'Phường Ô Môn' },
+          { code: 'CT-TN', name: 'Phường Thốt Nốt' },
           { code: 'CT-VT', name: 'Huyện Vĩnh Thạnh' },
           { code: 'CT-CD', name: 'Huyện Cờ Đỏ' },
           { code: 'CT-PD', name: 'Huyện Phong Điền' },
@@ -910,47 +912,139 @@ export class DatabasesService implements OnModuleInit {
   /* ---------------- BRANCHES ---------------- */
   private async seedBranches(addrHn: SeedAddress, addrHcm: SeedAddress) {
     if (await this.branchModel.countDocuments()) {
-      const branchHN = await this.branchModel.findOne({ code: 'HN01' });
-      const branchHCM = await this.branchModel.findOne({ code: 'HCM01' });
-      return { branchHN, branchHCM };
+      const branches = await this.branchModel.find().limit(2);
+      return { branchHN: branches[0], branchHCM: branches[1] };
     }
 
-    if (!addrHn?.line1) {
-      this.logger.error('seedBranches: addrHn thiếu line1');
-      throw new Error('seedBranches: addrHn thiếu line1');
-    }
-    if (!addrHcm?.line1) {
-      this.logger.error('seedBranches: addrHcm thiếu line1');
-      throw new Error('seedBranches: addrHcm thiếu line1');
-    }
-
-    const [branchHN] = await this.branchModel.insertMany([
+    const branches = [
       {
         code: 'HN01',
         name: 'Hà Nội Center',
-        address: addrHn.line1,
+        address: addrHn.line1 ?? '123 Tràng Tiền, Hoàn Kiếm',
         city: 'Hà Nội',
         province: 'Hà Nội',
-        postalCode: '10000',
+        postalCode: '100000',
         phone: '024-000-000',
         isActive: true,
       },
-    ]);
-
-    const [branchHCM] = await this.branchModel.insertMany([
       {
         code: 'HCM01',
         name: 'HCM Center',
-        address: addrHcm.line1,
+        address: addrHcm.line1 ?? '456 Lê Lợi, Quận 1',
         city: 'Hồ Chí Minh',
         province: 'Hồ Chí Minh',
-        postalCode: '70000',
+        postalCode: '700000',
         phone: '028-000-000',
         isActive: true,
       },
-    ]);
+      {
+        code: 'DN01',
+        name: 'Đà Nẵng Center',
+        address: '99 Hùng Vương, Hải Châu',
+        city: 'Đà Nẵng',
+        province: 'Đà Nẵng',
+        postalCode: '550000',
+        phone: '0236-000-000',
+        isActive: true,
+      },
+      {
+        code: 'HP01',
+        name: 'Hải Phòng Hub',
+        address: '88 Điện Biên Phủ, Ngô Quyền',
+        city: 'Hải Phòng',
+        province: 'Hải Phòng',
+        postalCode: '180000',
+        phone: '0225-000-000',
+        isActive: true,
+      },
+      {
+        code: 'CT01',
+        name: 'Cần Thơ Hub',
+        address: '77 Hòa Bình, Ninh Kiều',
+        city: 'Cần Thơ',
+        province: 'Cần Thơ',
+        postalCode: '900000',
+        phone: '0292-000-000',
+        isActive: true,
+      },
+      {
+        code: 'KH01',
+        name: 'Nha Trang Hub',
+        address: '66 Trần Phú, Nha Trang',
+        city: 'Nha Trang',
+        province: 'Khánh Hòa',
+        postalCode: '650000',
+        phone: '0258-000-000',
+        isActive: true,
+      },
+      {
+        code: 'BD01',
+        name: 'Bình Dương Center',
+        address: '12 Đại Lộ Bình Dương, Thủ Dầu Một',
+        city: 'Thủ Dầu Một',
+        province: 'Bình Dương',
+        postalCode: '590000',
+        phone: '0274-000-000',
+        isActive: true,
+      },
+      {
+        code: 'DN02',
+        name: 'Biên Hòa Hub',
+        address: '55 Võ Thị Sáu, Biên Hòa',
+        city: 'Biên Hòa',
+        province: 'Đồng Nai',
+        postalCode: '810000',
+        phone: '0251-000-000',
+        isActive: true,
+      },
+      {
+        code: 'TH01',
+        name: 'Thanh Hóa Hub',
+        address: '33 Lê Hoàn, Thanh Hóa',
+        city: 'Thanh Hóa',
+        province: 'Thanh Hóa',
+        postalCode: '440000',
+        phone: '0237-000-000',
+        isActive: true,
+      },
+      {
+        code: 'NA01',
+        name: 'Vinh Hub',
+        address: '22 Trường Thi, Vinh',
+        city: 'Vinh',
+        province: 'Nghệ An',
+        postalCode: '460000',
+        phone: '0238-000-000',
+        isActive: true,
+      },
+      {
+        code: 'HU01',
+        name: 'Huế Center',
+        address: '45 Hùng Vương, Huế',
+        city: 'Huế',
+        province: 'Thừa Thiên Huế',
+        postalCode: '530000',
+        phone: '0234-000-000',
+        isActive: true,
+      },
+      {
+        code: 'QN01',
+        name: 'Quảng Ninh Hub',
+        address: '11 Trần Hưng Đạo, Hạ Long',
+        city: 'Hạ Long',
+        province: 'Quảng Ninh',
+        postalCode: '200000',
+        phone: '0203-000-000',
+        isActive: true,
+      },
+    ];
 
-    this.logger.log('>>> INIT BRANCHES DONE');
+    const inserted = await this.branchModel.insertMany(branches);
+    this.logger.log('>>> INIT BRANCHES DONE (12 records)');
+
+    // Return 2 chính để seed shipment
+    const branchHN = inserted.find((b) => b.code === 'HN01')!;
+    const branchHCM = inserted.find((b) => b.code === 'HCM01')!;
     return { branchHN, branchHCM };
   }
 
@@ -1061,8 +1155,12 @@ export class DatabasesService implements OnModuleInit {
     this.logger.log('>>> INIT PRICING DONE');
   }
 
-  /* ---------------- ORDERS ---------------- */
-  private async seedOrders(pickupAddr: SeedAddress, deliveryAddr: SeedAddress) {
+  /* ---------------- ORDERS (no embedded address) ---------------- */
+  private async seedOrders(
+    pickupAddr: SeedAddress,
+    deliveryAddr: SeedAddress,
+  ): Promise<{ order1: OrderDocument; customer: UserDocument }> {
+    // Nếu đã có order thì dùng lại
     if (await this.orderModel.countDocuments()) {
       const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
       const order1 = await this.orderModel.findOne({ userId: customer?._id });
@@ -1077,8 +1175,11 @@ export class DatabasesService implements OnModuleInit {
     if (!deliveryAddr?._id)
       throw new Error('seedOrders: deliveryAddressId is empty');
 
-    const pickupId = new Types.ObjectId(pickupAddr._id);
-    const deliveryId = new Types.ObjectId(deliveryAddr._id);
+    // Bổ sung line1 nếu thiếu (giúp hiển thị/in tem)
+    await Promise.all([
+      this.ensureLine1(pickupAddr),
+      this.ensureLine1(deliveryAddr),
+    ]);
 
     const [order1] = await this.orderModel.insertMany([
       {
@@ -1086,8 +1187,8 @@ export class DatabasesService implements OnModuleInit {
         senderName: 'Nguyễn Văn A',
         receiverName: 'Trần Thị B',
         receiverPhone: '0912345678',
-        pickupAddressId: pickupId,
-        deliveryAddressId: deliveryId,
+        pickupAddressId: new Types.ObjectId(pickupAddr._id),
+        deliveryAddressId: new Types.ObjectId(deliveryAddr._id),
         totalPrice: 120000,
         status: OrderStatus.PENDING,
       },
@@ -1109,6 +1210,7 @@ export class DatabasesService implements OnModuleInit {
   ) {
     if (await this.shipmentModel.countDocuments()) return;
 
+    // 1) Tính khoảng cách
     const km = this.haversineKm(
       pickupAddr.lat ?? 0,
       pickupAddr.lng ?? 0,
@@ -1116,6 +1218,8 @@ export class DatabasesService implements OnModuleInit {
       deliveryAddr.lng ?? 0,
     );
 
+    // 2) Chọn bảng giá phù hợp
+    const now = new Date();
     const slab = await this.pricingModel
       .findOne({
         serviceId: svcSTD._id,
@@ -1125,6 +1229,15 @@ export class DatabasesService implements OnModuleInit {
         maxWeightKg: { $gte: 1.5 },
         minKm: { $lte: km },
         maxKm: { $gte: km },
+        $or: [
+          { effectiveFrom: { $exists: false } },
+          { effectiveFrom: { $lte: now } },
+        ],
+        $or_2: [
+          { effectiveTo: null },
+          { effectiveTo: { $exists: false } },
+          { effectiveTo: { $gte: now } },
+        ],
       })
       .lean();
 
@@ -1136,6 +1249,7 @@ export class DatabasesService implements OnModuleInit {
         )
       : 30000;
 
+    // 3) Tạo shipment
     const [shipment] = await this.shipmentModel.insertMany([
       {
         trackingNumber: 'VNSEED001',
@@ -1160,10 +1274,16 @@ export class DatabasesService implements OnModuleInit {
             timestamp: new Date(),
             note: 'Đơn tạo (seed)',
           },
+          {
+            status: ShipmentStatus.IN_TRANSIT,
+            timestamp: new Date(),
+            note: 'Đang trung chuyển',
+          },
         ],
       },
     ]);
 
+    // 4) Payment (snapshot theo shipment)
     await this.paymentModel.insertMany([
       {
         orderId: order1._id,

@@ -1,85 +1,69 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import aqp from 'api-query-params';
-import { IUser } from 'src/types/user.interface';
-import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { Types } from 'mongoose';
-import { Order, OrderDocument, OrderStatus } from './schemas/order.schemas';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { ResponseMessage, Users } from 'src/health/decorator/customize';
+import { IUser } from 'src/types/user.interface';
+import { OrderStatus } from './schemas/order.schemas';
+import { OrdersService } from './orders.controller';
 
-@Injectable()
-export class OrdersService {
-  constructor(
-    @InjectModel(Order.name) private orderModel: SoftDeleteModel<OrderDocument>,
-  ) {}
+@ApiTags('orders')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('orders')
+export class OrdersController {
+  constructor(private readonly ordersService: OrdersService) {}
 
-  async create(dto: CreateOrderDto, user: IUser) {
-    return this.orderModel.create({
-      ...dto,
-      userId: new Types.ObjectId(user._id),
-    });
+  @Post()
+  @ResponseMessage('Tạo đơn hàng mới')
+  create(@Body() dto: CreateOrderDto, @Users() user: IUser) {
+    return this.ordersService.create(dto, user);
   }
 
-  async findAll(currentPage = 1, limit = 10, queryObj: any = {}) {
-    const { filter, sort, population } = aqp(queryObj);
-    delete (filter as any).current;
-    delete (filter as any).pageSize;
-
-    if (filter.isDeleted === undefined) (filter as any).isDeleted = false;
-
-    const page = Number(currentPage) > 0 ? Number(currentPage) : 1;
-    const size = Number(limit) > 0 ? Number(limit) : 10;
-    const skip = (page - 1) * size;
-
-    const total = await this.orderModel.countDocuments(filter);
-    const pages = Math.ceil(total / size);
-
-    const q = this.orderModel
-      .find(filter)
-      .sort(sort as any)
-      .skip(skip)
-      .limit(size);
-    if (population) q.populate(population as any);
-    const results = await q.exec();
-
-    return { meta: { current: page, pageSize: size, pages, total }, results };
+  @Get()
+  @ResponseMessage('Danh sách đơn hàng')
+  findAll(
+    @Query('current') current?: string,
+    @Query('pageSize') limit?: string,
+    @Query() query?: any,
+  ) {
+    const page = current ? Number(current) : 1;
+    const size = limit ? Number(limit) : 10;
+    return this.ordersService.findAll(page, size, query || {});
   }
 
-  async findOne(id: string) {
-    const order = await this.orderModel.findById(id);
-    if (!order || order.isDeleted)
-      throw new NotFoundException('Order not found');
-    return order;
+  @Get(':id')
+  @ResponseMessage('Chi tiết đơn hàng')
+  findOne(@Param('id') id: string) {
+    return this.ordersService.findOne(id);
   }
 
-  async update(id: string, dto: UpdateOrderDto) {
-    const order = await this.orderModel.findByIdAndUpdate(id, dto, {
-      new: true,
-    });
-    if (!order || order.isDeleted)
-      throw new NotFoundException('Order not found');
-    return order;
+  @Patch(':id')
+  @ResponseMessage('Cập nhật đơn hàng')
+  update(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
+    return this.ordersService.update(id, dto);
   }
 
-  async remove(id: string, user: IUser) {
-    const res = await this.orderModel.softDelete({
-      _id: id,
-      deletedBy: { _id: new Types.ObjectId(user._id), email: user.email },
-    } as any);
-    if (!res || (res as any).modifiedCount === 0)
-      throw new NotFoundException('Order not found');
-    return { message: 'Order soft-deleted' };
+  @Patch(':id/status/:status')
+  @ResponseMessage('Cập nhật trạng thái đơn hàng')
+  updateStatus(@Param('id') id: string, @Param('status') status: OrderStatus) {
+    return this.ordersService.updateStatus(id, status);
   }
 
-  async updateStatus(id: string, status: OrderStatus) {
-    const order = await this.orderModel.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true },
-    );
-    if (!order || order.isDeleted)
-      throw new NotFoundException('Order not found');
-    return order;
+  @Delete(':id')
+  @ResponseMessage('Xóa đơn hàng (soft)')
+  remove(@Param('id') id: string, @Users() user: IUser) {
+    return this.ordersService.remove(id, user);
   }
 }
