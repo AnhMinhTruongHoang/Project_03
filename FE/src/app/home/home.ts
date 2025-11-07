@@ -32,9 +32,9 @@ export class Home {
     });
 
     // (Tuỳ chọn) Log dữ liệu hành chính chuẩn quốc gia
-    this.locationService.getProvinces().subscribe((official) => {
-      console.log('📚 Dữ liệu hành chính quốc gia:', official);
-    });
+    // this.locationService.getProvinces().subscribe((official) => {
+    //   console.log('📚 Dữ liệu hành chính quốc gia:', official);
+    // });
   }
 
   // Khi chọn tỉnh, lấy xã/phường trực thuộc

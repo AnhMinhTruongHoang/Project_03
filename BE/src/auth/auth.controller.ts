@@ -48,7 +48,6 @@ export class AuthController {
 
   //////////////jwt
   @Public()
-  @UseGuards(AuthGuard('jwt'))
   @ResponseMessage('Register a new user')
   @Post('/register')
   handleRegister(@Body() registerUserDto: RegisterUserDto) {
