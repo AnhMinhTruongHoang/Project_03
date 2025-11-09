@@ -1,21 +1,53 @@
-<!-- Cards -->
-<div class="row g-3 mb-4">
-  <div class="col-md-3 col-sm-6">
-    <div class="card border-0 shadow-sm text-center">
-      <div class="card-body">
-        <i class="bi bi-truck text-success fs-3 mb-2"></i>
-        <h6 class="text-muted mb-1">Giao thành công</h6>
-        <h4 class="fw-bold text-success">128</h4>
-      </div>
+<!-- Bộ lọc tháng/năm -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+  <h5 class="fw-bold mb-0">📊 Thống kê tổng quan</h5>
+
+  <div class="d-flex align-items-center gap-2">
+    <div class="d-flex align-items-center">
+      <label for="monthSelect" class="me-2 text-muted fw-semibold">Tháng:</label>
+      <select
+        id="monthSelect"
+        class="form-select form-select-sm shadow-sm w-auto"
+        [(ngModel)]="selectedMonth"
+        [disabled]="viewAllYear"
+        (ngModelChange)="onMonthOrYearChange()"
+      >
+        <option *ngFor="let m of monthOptions" [value]="m.value">{{ m.label }}</option>
+      </select>
+    </div>
+    <div class="d-flex align-items-center">
+      <label for="yearSelect" class="me-2 text-muted fw-semibold">Năm:</label>
+      <select
+        id="yearSelect"
+        class="form-select form-select-sm shadow-sm w-auto"
+        [(ngModel)]="selectedYear"
+        (change)="onMonthOrYearChange()"
+      >
+        <option *ngFor="let y of yearOptions" [value]="y">{{ y }}</option>
+      </select>
+    </div>
+
+    <div class="form-check form-switch ms-2">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="viewAllYear"
+        [(ngModel)]="viewAllYear"
+        (change)="onMonthOrYearChange()"
+      />
+      <label class="form-check-label fw-semibold" for="viewAllYear">Toàn năm</label>
     </div>
   </div>
+</div>
 
-  <div class="col-md-3 col-sm-6">
-    <div class="card border-0 shadow-sm text-center">
+<!-- Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-sm-6" *ngFor="let card of summaryCards">
+    <div class="card border-0 shadow-sm text-center h-100">
       <div class="card-body">
-        <i class="bi bi-arrow-repeat text-danger fs-3 mb-2"></i>
-        <h6 class="text-muted mb-1">Đã hoàn</h6>
-        <h4 class="fw-bold text-danger">12</h4>
+        <i [class]="card.icon + ' fs-3 mb-2'"></i>
+        <h6 class="text-muted mb-1">{{ card.label }}</h6>
+        <h4 class="fw-bold" [class]="card.textClass">{{ card.value }}</h4>
       </div>
     </div>
   </div>
@@ -26,7 +58,7 @@
   <div class="col-lg-8 col-md-7">
     <div class="card shadow-sm border-0">
       <div class="card-body">
-        <h6 class="fw-bold mb-3">Thống kê đơn hàng</h6>
+        <h6 class="fw-bold mb-3">Thống kê đơn hàng theo ngày</h6>
         <canvas #orderChartCanvas height="120"></canvas>
       </div>
     </div>
@@ -35,8 +67,8 @@
   <div class="col-lg-4 col-md-5">
     <div class="card shadow-sm border-0">
       <div class="card-body">
-        <h6 class="fw-bold mb-3">Top 10 sản lượng</h6>
-        <canvas #topChartCanvas height="120"></canvas>
+        <h6 class="fw-bold mb-3">Tỷ lệ trạng thái đơn hàng</h6>
+        <canvas #statusChartCanvas height="120"></canvas>
       </div>
     </div>
   </div>
