@@ -1,114 +1,110 @@
-<section class="banner-section position-relative d-flex align-items-end min-vh-100">
-  <!-- Carousel background -->
+<!-- Banner -->
+<section
+  class="position-relative d-flex align-items-end min-vh-100 text-white bg-dark overflow-hidden"
+>
+  <!-- Carousel nền -->
   <div
     id="bgCarousel"
     class="carousel slide position-absolute top-0 start-0 w-100 h-100"
     data-bs-ride="carousel"
-    data-bs-interval="2000"
+    data-bs-interval="4000"
   >
     <div class="carousel-inner h-100">
       <div class="carousel-item active h-100">
         <img
           src="../assets/images/backgrounds/pic_1.jpg"
-          class="d-block w-100 h-100 object-fit-cover"
+          class="d-block w-100 h-100 object-fit-cover opacity-75"
           alt="Background 1"
         />
       </div>
       <div class="carousel-item h-100">
         <img
           src="../assets/images/backgrounds/pic_2.jpg"
-          class="d-block w-100 h-100 object-fit-cover"
+          class="d-block w-100 h-100 object-fit-cover opacity-75"
           alt="Background 2"
         />
       </div>
       <div class="carousel-item h-100">
         <img
           src="../assets/images/backgrounds/pic_3.jpg"
-          class="d-block w-100 h-100 object-fit-cover"
+          class="d-block w-100 h-100 object-fit-cover opacity-75"
           alt="Background 3"
         />
       </div>
     </div>
   </div>
 
-  <div class="container">
-    <div class="d-flex flex-column gap-4 pb-8 position-relative z-1">
-      <div class="row align-items-center">
-        <div class="col-xl-4">
-          <div
-            class="d-flex align-items-center gap-4"
-            data-aos="fade-up"
-            data-aos-delay="100"
-            data-aos-duration="1000"
-          >
-            <img
-              src="../assets/images/svgs/primary-leaf.svg"
-              alt=""
-              class="img-fluid animate-spin"
-            />
-            <p class="mb-0 text-white fs-5 text-opacity-70">
-              Apps that make <span class="text-primary">shipping easier.</span>
-            </p>
-          </div>
-        </div>
-      </div>
-      <div
-        class="d-flex align-items-end gap-3"
-        data-aos="fade-up"
-        data-aos-delay="200"
-        data-aos-duration="1000"
+  <!-- Lớp phủ tối giúp chữ nổi bật -->
+  <div class="position-absolute top-0 start-0 w-100 h-100 bg-black opacity-50"></div>
+
+  <!-- Nội dung chữ trắng (góc trái dưới) -->
+  <div class="container position-relative z-1 mb-5">
+    <div class="col-lg-6">
+      <h1 class="fw-bold display-4 text-uppercase text-white mb-3">
+        Gửi hàng dễ dàng với <span class="text-warning">AppPost</span>
+      </h1>
+      <p class="lead fw-semibold text-white-50 mb-4">
+        Ứng dụng giúp bạn gửi hàng nhanh chóng, tiện lợi và chính xác
+      </p>
+      <button
+        class="btn btn-warning btn-lg rounded-pill px-4 py-2 fw-semibold"
+        (click)="onStartClick()"
       >
-        <h1 class="mb-0 fs-16 text-white lh-1">App Post</h1>
-        <a href="javascript:void(0)" class="p-1 ps-7 bg-primary rounded-pill">
-          <span
-            class="bg-white round-52 rounded-circle d-flex align-items-center justify-content-center"
-          >
-            <iconify-icon icon="lucide:arrow-up-right" class="fs-8 text-dark"></iconify-icon>
-          </span>
-        </a>
-      </div>
+        Bắt đầu ngay <i class="bi bi-arrow-up-right ms-2"></i>
+      </button>
     </div>
   </div>
 </section>
 
-<!-- Tra cứu section có 4 tab -->
-<section class="py-5 bg-white shadow-sm rounded mt-n10 position-relative z-2">
+<!-- Phần tra cứu -->
+<!-- <section class="bg-white py-5">
   <div class="container">
-    <h5 class="mb-4 fw-bold text-center">Ước tính cước phí trong nước</h5>
+    <div
+      class="bg-light rounded-4 p-4 shadow-lg mx-auto"
+      style="max-width: 600px; margin-top: -80px"
+    >
+      <h5 class="fw-bold text-center text-dark mb-4">Ước tính cước phí trong nước</h5>
 
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <!-- Cấp 1: Tỉnh/Thành phố -->
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Tỉnh/Thành phố</label>
-          <select
-            class="form-select"
-            [(ngModel)]="selectedProvince"
-            (ngModelChange)="onProvinceChange()"
-          >
-            <option [ngValue]="null" disabled selected>Chọn Tỉnh/Thành phố</option>
-            @for (p of provinces; track p.id) {
-            <option [ngValue]="p">{{ p.name }}</option>
-            }
-          </select>
-        </div>
-
-        <!-- Cấp 2: Xã/Phường/Thị trấn -->
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Xã/Phường/Thị trấn</label>
-          <select class="form-select" [(ngModel)]="selectedCommune" [disabled]="!selectedProvince">
-            <option [ngValue]="null" disabled selected>Chọn Xã/Phường/Thị trấn</option>
-            @for (c of communes; track c.id) {
-            <option [ngValue]="c">{{ c.name }}</option>
-            }
-          </select>
-        </div>
-
-        <button class="btn btn-danger w-100 mt-3">TRA CỨU <i class="bi bi-arrow-right"></i></button>
+      <div class="mb-3">
+        <label for="provinceSelect" class="form-label fw-semibold text-secondary"
+          >Tỉnh/Thành phố</label
+        >
+        <select
+          id="provinceSelect"
+          class="form-select form-select-lg"
+          [(ngModel)]="selectedProvince"
+          (ngModelChange)="onProvinceChange()"
+        >
+          <option [ngValue]="null" disabled selected>Chọn Tỉnh/Thành phố</option>
+          @for (p of provinces; track p.id) {
+          <option [ngValue]="p">{{ p.name }}</option>
+          }
+        </select>
       </div>
+
+      <div class="mb-4">
+        <label for="communeSelect" class="form-label fw-semibold text-secondary"
+          >Xã/Phường/Thị trấn</label
+        >
+        <select
+          id="communeSelect"
+          class="form-select form-select-lg"
+          [(ngModel)]="selectedCommune"
+          [disabled]="!selectedProvince"
+        >
+          <option [ngValue]="null" disabled selected>Chọn Xã/Phường/Thị trấn</option>
+          @for (c of communes; track c.id) {
+          <option [ngValue]="c">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+
+      <button class="btn btn-danger w-100 py-3 rounded-pill fw-semibold">
+        <i class="bi bi-search me-2"></i>TRA CỨU
+      </button>
     </div>
   </div>
-</section>
+</section> -->
 
 <!--  Stats & Facts Section -->
 <!-- <section class="stats-facts py-5 py-lg-11 py-xl-12 position-relative overflow-hidden">

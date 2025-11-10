@@ -48,10 +48,11 @@ export class OrdersController {
   async getStatistics(
     @Query('month') month?: string,
     @Query('year') year?: string,
+    @Users() user?: IUser,
   ) {
     const m = month ? Number(month) : undefined;
     const y = year ? Number(year) : undefined;
-    return this.ordersService.getStatistics(m, y);
+    return this.ordersService.getStatistics(m, y, user); 
   }
 
   @Get(':id')

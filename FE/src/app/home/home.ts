@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ViettelPostService } from '../services/viettelpost.service';
 import { LocationService } from '../services/location.service';
 import { normalizeAdministrativeData } from '../services/location-normalizer';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -21,7 +22,8 @@ export class Home {
 
   constructor(
     private viettelPostService: ViettelPostService,
-    private locationService: LocationService
+    private locationService: LocationService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -50,5 +52,18 @@ export class Home {
 
   trackById(index: number, item: any) {
     return item.id;
+  }
+
+  // ✅ Xử lý nút "Bắt đầu ngay"
+  onStartClick() {
+    const token = localStorage.getItem('access_token');
+
+    if (token) {
+      // 🔑 Nếu đã đăng nhập
+      this.router.navigate(['/dashboard']);
+    } else {
+      // 🚪 Nếu chưa đăng nhập
+      this.router.navigate(['/login']);
+    }
   }
 }
