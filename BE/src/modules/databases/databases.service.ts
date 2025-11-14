@@ -2147,6 +2147,30 @@ export class DatabasesService implements OnModuleInit {
           // … bổ sung đầy đủ xã/phường
         ],
       },
+
+      {
+        code: 'AG',
+        name: 'Tỉnh An Giang',
+        communes: [
+          { code: 'AG-TB', name: 'Thị trấn Long Xuyên' },
+          { code: 'AG-CL', name: 'Xã Cái Dầu' },
+          { code: 'AG-TN', name: 'Xã Tân An' },
+          { code: 'AG-HB', name: 'Xã Hòa Bình' },
+          { code: 'AG-TK', name: 'Xã Tân Khánh Đông' },
+          { code: 'AG-TP', name: 'Thị trấn Phú Tân' },
+          { code: 'AG-KN', name: 'Xã Kênh Hòa' },
+          { code: 'AG-BN', name: 'Xã Bình Nhựt' },
+          { code: 'AG-QL', name: 'Xã Quảng Long' },
+          { code: 'AG-HA', name: 'Xã Hòa An' },
+          { code: 'AG-DT', name: 'Xã Đức Tân' },
+          { code: 'AG-CH', name: 'Xã Châu Phú' },
+          { code: 'AG-GN', name: 'Xã Giồng Riềng' },
+          { code: 'AG-TD', name: 'Xã Tân Dương' },
+          { code: 'AG-BT', name: 'Xã Bình Tân' },
+          { code: 'AG-HT', name: 'Xã Hậu Thành' },
+          // … có thể thêm các xã khác sau sáp nhập nếu có
+        ],
+      },
     ];
 
     await this.provinceModel

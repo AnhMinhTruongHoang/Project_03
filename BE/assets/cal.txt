@@ -31,15 +31,21 @@ LS   → Lạng Sơn
 CB   → Cao Bằng
 HG   → Hà Giang
 TQ   → Tuyên Quang
+AG    => An Giang
 
 ////
 'HN','HCM','HP','DN','CT','TN','GL','QN','KH','LD',
 'DLK','DNA','DT','KG','BT','BL','CM','TH','NA','HT',
 'QT','HUE','NB','TB','ND','VP','BG','BN','LC','LS',
-'CB','HG','TQ'
+'CB','HG','TQ','AG',
+
+/// region
+North:'HN','HP','NB','TB','ND','VP','BG','BN','LC','LS','CB','HG','TQ'
+Central:'HUE','TH','NA','HT','QT','DN','GL','KH','LD','DLK','BT'
+South:'HCM','DNA','CT','TN','DT','KG','BT','BL','CM','AG'
+
 
 /// branch
-
 HN01,
 HCM01,
 DN01,
