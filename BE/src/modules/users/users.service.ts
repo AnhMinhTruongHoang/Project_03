@@ -206,8 +206,6 @@ export class UsersService {
       throw new BadRequestException('Account does not exist');
     }
 
-    // (Tuỳ schema ChangePasswordDto của bạn có trường code hay không)
-    // Nếu có truyền code thì kiểm tra luôn cho chặt:
     if ((data as any).code && (data as any).code !== user.codeId) {
       throw new BadRequestException('Invalid or expired code');
     }
