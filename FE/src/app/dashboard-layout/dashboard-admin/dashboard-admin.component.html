@@ -1,0 +1,48 @@
+<div class="container-fluid py-4">
+  <h3 class="fw-bold mb-3">Admin Dashboard</h3>
+  <p class="text-muted mb-4">Tổng quan tình hình đơn hàng, sản lượng và trạng thái hệ thống.</p>
+
+  <!-- Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-sm-6">
+      <div class="card border-0 shadow-sm text-center">
+        <div class="card-body">
+          <i class="bi bi-truck text-success fs-3 mb-2"></i>
+          <h6 class="text-muted mb-1">Giao thành công</h6>
+          <h4 class="fw-bold text-success">128</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+      <div class="card border-0 shadow-sm text-center">
+        <div class="card-body">
+          <i class="bi bi-arrow-repeat text-danger fs-3 mb-2"></i>
+          <h6 class="text-muted mb-1">Đã hoàn</h6>
+          <h4 class="fw-bold text-danger">12</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="row g-3">
+    <div class="col-lg-8 col-md-7">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">Thống kê đơn hàng</h6>
+          <canvas #orderChartCanvas height="120"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 col-md-5">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">Top 10 sản lượng</h6>
+          <canvas #topChartCanvas height="120"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

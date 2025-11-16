@@ -19,7 +19,9 @@ import { AuthGuard } from './guard/auth.guard';
 import { AdminGuard } from './guard/admin.guard'; 
 // Layouts mới
 import { UserLayout } from './layouts/user/user-layout';
-import { AdminLayout } from './layouts/admin/admin-layout';
+import { AdminLayout } from './layouts/admin/admin-layout.component';
+import { DashboardAdmin } from './dashboard-layout/dashboard-admin/dashboard-admin.component';
+import { BranchListComponent } from './branches/branch-list/branch-list.component';
 
 export const routes: Routes = [
   // ----- USER LAYOUT -----
@@ -53,18 +55,25 @@ export const routes: Routes = [
     ],
   },
 
-  // ----- ADMIN LAYOUT (tạo dần sau) -----
   {
-    path: 'admin',
-    component: AdminLayout,
-    canActivate: [AuthGuard, AdminGuard], // nếu chưa có AdminGuard, tạm bỏ đi
-    children: [
-      // ví dụ:
-      // { path: '', loadComponent: () => import('./admin/dashboard-home/dashboard-home').then(m => m.AdminDashboardHome) },
-      // { path: 'orders', loadComponent: () => import('./admin/orders/orders').then(m => m.Orders) },
-      // { path: 'users', loadComponent: () => import('./admin/users/users').then(m => m.Users) },
-    ],
-  },
+  path: 'admin',
+  component: AdminLayout,
+  canActivate: [AuthGuard, AdminGuard],
+  children: [
+    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    { path: 'dashboard', component: DashboardAdmin },
+
+    // Khi tạo các component này, thêm vào:
+    // { path: 'orders', component: AdminOrders },
+    { path: 'branch', component: BranchListComponent },
+    // { path: 'users', component: AdminUsers },
+    // { path: 'settings', component: AdminSettings },
+    // { path: 'reports', component: AdminReports },
+    // { path: 'support', component: AdminSupport },
+    // { path: 'activity-log', component: AdminActivityLog },
+  ],
+},
+
 
   // 404
   { path: '**', redirectTo: '' },

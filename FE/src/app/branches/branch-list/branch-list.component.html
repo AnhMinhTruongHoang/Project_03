@@ -1,0 +1,115 @@
+<div class="container-fluid">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">Quản lý chi nhánh</h4>
+      <small class="text-muted">
+        Danh sách chi nhánh / điểm giao dịch trên toàn hệ thống.
+      </small>
+    </div>
+
+    <a class="btn btn-primary" [routerLink]="['/admin/branches/create']">
+      + Thêm chi nhánh
+    </a>
+  </div>
+
+  <!-- Message -->
+  @if (msg) {
+    <div class="alert alert-info py-2">{{ msg }}</div>
+  }
+
+  <!-- Search -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div
+      class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center"
+    >
+      <div class="flex-grow-1">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Tìm theo mã, tên, địa chỉ, thành phố, tỉnh..."
+          [(ngModel)]="keyword"
+          (keyup.enter)="search()"
+        />
+      </div>
+      <button class="btn btn-outline-secondary" (click)="search()">
+        Tìm kiếm
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading) {
+    <div class="text-center text-muted py-4">Đang tải dữ liệu...</div>
+  }
+
+  <!-- Empty -->
+  @if (!isLoading && filteredBranches.length === 0) {
+    <div class="text-center text-muted py-4">
+      Không có chi nhánh nào.
+    </div>
+  }
+
+  <!-- Table -->
+  @if (!isLoading && filteredBranches.length > 0) {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 90px">Mã</th>
+              <th>Tên chi nhánh</th>
+              <th>Địa chỉ</th>
+              <th style="width: 130px">Điện thoại</th>
+              <th style="width: 110px">Mã bưu chính</th>
+              <th style="width: 110px">Trạng thái</th>
+              <th style="width: 120px" class="text-end">Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (b of filteredBranches; track b._id) {
+              <tr>
+                <td class="fw-semibold">{{ b.code }}</td>
+                <td>{{ b.name }}</td>
+                <td>
+                  {{ b.address }} <br />
+                  <small class="text-muted">
+                    {{ b.city }}, {{ b.province }}
+                  </small>
+                </td>
+                <td>{{ b.phone }}</td>
+                <td>{{ b.postalCode }}</td>
+
+                <td>
+                  @if (b.isActive) {
+                    <span class="badge bg-success-subtle text-success">Hoạt động</span>
+                  } @else {
+                    <span class="badge bg-secondary-subtle text-secondary">Tạm dừng</span>
+                  }
+                </td>
+
+                <td class="text-end">
+                  <a
+                    class="btn btn-sm btn-outline-secondary me-2"
+                    [routerLink]="['/admin/branches', b._id]"
+                  >
+                    Sửa
+                  </a>
+
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="delete(b._id)"
+                  >
+                    Xoá
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

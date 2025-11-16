@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router, UrlTree } from '@angular/router';
+import {
+  CanActivate,
+  Router,
+  UrlTree,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
@@ -8,13 +14,24 @@ import { AuthService } from '../services/auth.service';
 export class AdminGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) {}
 
-  canActivate(): boolean | UrlTree {
-    const user = this.authService.getUser(); // hoặc lấy từ localStorage
-    if (user && (user.role === 'admin' || user.roles?.includes('admin'))) {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
+    const isLoggedIn = this.authService.isLoggedIn();
+    const isAdmin = this.authService.isAdmin(); // ✅ dùng hàm đã normalize trong AuthService
+
+    console.log('AdminGuard => isLoggedIn:', isLoggedIn, 'isAdmin:', isAdmin);
+
+    if (isLoggedIn && isAdmin) {
       return true;
     }
 
-    // Nếu không phải admin → chuyển hướng về trang chủ hoặc 403
-    return this.router.createUrlTree(['/']);
+    // Nếu chưa login → về /login kèm returnUrl
+    if (!isLoggedIn) {
+      return this.router.createUrlTree(['/login'], {
+        queryParams: { returnUrl: state.url },
+      });
+    }
+
+    // Đã login nhưng không phải admin → cho về dashboard user
+    return this.router.createUrlTree(['/dashboard']);
   }
 }

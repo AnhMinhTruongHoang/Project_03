@@ -1,1 +1,73 @@
-/* You can add global styles to this file, and also import other style files */
+.nav-link {
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: #333;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  background: #f1f5ff;
+  color: #0d6efd;
+}
+
+.nav-link.active,
+.nav-link.router-link-active {
+  background: #e7f1ff;
+  color: #0d6efd !important;
+  font-weight: 600;
+}
+
+/* Sidebar items */
+.sidebar-nav .nav-link {
+  font-size: 18px !important;
+  padding: 10px 8px;
+  font-weight: 500;
+}
+
+/* Sidebar icons */
+.sidebar-nav iconify-icon {
+  width: 28px !important;
+  height: 38px !important;
+}
+
+/* Sidebar nav links */
+.sidebar-nav .nav-link {
+  font-size: 17px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+  color: #333;
+}
+
+/* Icon kích thước lớn hơn */
+.sidebar-nav iconify-icon {
+  width: 26px !important;
+  height: 26px !important;
+  transition: transform 0.25s ease;
+}
+
+/* Hover effect: nổi nhẹ + đổi nền */
+.sidebar-nav .nav-link:hover {
+  background-color: #f1f9ff;
+  color: #0d6efd;
+  transform: translateX(4px);
+}
+
+/* Hover icon scale */
+.sidebar-nav .nav-link:hover iconify-icon {
+  transform: scale(1.15);
+}
+
+/* --- ACTIVE highlight --- */
+.sidebar-nav .nav-link.active {
+  background-color: #e6f2ff;
+  color: #0d6efd !important;
+  font-weight: 600;
+  border-left: 4px solid #0d6efd;
+}
+
+/* icon trong active */
+.sidebar-nav .nav-link.active iconify-icon {
+  color: #0d6efd !important;
+}

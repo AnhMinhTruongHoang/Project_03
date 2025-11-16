@@ -95,7 +95,30 @@ export class AuthService {
   }
 
   getUser() {
-  return JSON.parse(localStorage.getItem('user') || '{}');
-}
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
 
+  // --- Chuẩn hoá vai trò về dạng lowercase, bỏ ký tự thừa ---
+  private normalizeRoles(user: any): string[] {
+    if (!user) return [];
+    const raw: string[] = [
+      ...(Array.isArray(user.roles) ? user.roles : []),
+      ...(user.role ? [user.role] : []),
+    ];
+    return raw.filter(Boolean).map((r) =>
+      String(r)
+        .trim()
+        .replace(/[,\s;]+/g, '') // ✅ chỉ 1 dấu \ trong \s, gộp , ; và khoảng trắng
+        .toLowerCase()
+    );
+  }
+
+  hasRole(role: string, user?: any): boolean {
+    const list = this.normalizeRoles(user ?? this.getUser());
+    return list.includes(String(role).toLowerCase());
+  }
+
+  isAdmin(user?: any): boolean {
+    return this.hasRole('admin', user);
+  }
 }
