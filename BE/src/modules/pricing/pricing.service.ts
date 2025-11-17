@@ -80,53 +80,69 @@ export class PricingService {
     return { message: 'Pricing soft-deleted' };
   }
 
-  // async calculateShipping(
-  //   originRegion: 'North' | 'Central' | 'South',
-  //   destRegion: 'North' | 'Central' | 'South',
-  //   serviceCode: 'STD' | 'EXP',
-  //   weightKg: number,
-  //   isLocal: boolean,
-  // ) {
-  //   // Nếu nội thành hoặc gần kho => free ship
-  //   if (isLocal) {
-  //     return { totalPrice: 0, description: 'Free ship (nội thành/gần kho)' };
-  //   }
+  ///cal
 
-  //   // Lấy thông tin dịch vụ
-  //   const service = await this.pricingModel.findOne({
-  //     code: serviceCode,
-  //     isActive: true,
-  //   });
-  //   if (!service) throw new NotFoundException('Service not found');
+  async calculateShipping(
+    originRegion: 'North' | 'Central' | 'South',
+    destRegion: 'North' | 'Central' | 'South',
+    serviceCode: 'STD' | 'EXP',
+    weightKg: number,
+    isLocal: boolean,
+  ) {
+    // 1) Nội thành + gần kho => free ship
+    if (isLocal) {
+      return {
+        totalPrice: 0,
+        description: 'Free ship (nội thành/gần kho)',
+      };
+    }
 
-  //   let baseFee = 0;
+    // 2) Giá base theo loại dịch vụ
+    const SERVICE_BASE_PRICE: Record<'STD' | 'EXP', number> = {
+      STD: 20000,
+      EXP: 40000,
+    };
 
-  //   // Logic theo vùng
-  //   if (
-  //     (originRegion === 'North' && destRegion === 'Central') ||
-  //     (originRegion === 'Central' && destRegion === 'North')
-  //   ) {
-  //     baseFee = 10000;
-  //   } else if (
-  //     (originRegion === 'North' && destRegion === 'South') ||
-  //     (originRegion === 'South' && destRegion === 'North')
-  //   ) {
-  //     baseFee = 15000;
-  //   } else if (
-  //     (originRegion === 'South' && destRegion === 'Central') ||
-  //     (originRegion === 'Central' && destRegion === 'South')
-  //   ) {
-  //     baseFee = 10000;
-  //   }
+    const baseServicePrice = SERVICE_BASE_PRICE[serviceCode];
+    if (baseServicePrice == null) {
+      throw new NotFoundException('Service code không hợp lệ');
+    }
 
-  //   // Phụ phí > 5kg
-  //   const extra = weightKg > 5 ? 5000 : 0;
+    // 3) Phụ phí theo vùng
+    let regionFee = 0;
+    const pair = new Set([originRegion, destRegion]);
 
-  //   const totalPrice = baseFee + service.basePrice + extra;
+    // North <-> Central
+    if (pair.has('North') && pair.has('Central')) {
+      regionFee = 10000;
+    }
+    // North <-> South
+    else if (pair.has('North') && pair.has('South')) {
+      regionFee = 15000;
+    }
+    // South <-> Central
+    else if (pair.has('South') && pair.has('Central')) {
+      regionFee = 10000;
+    }
+    // Cùng vùng: theo công thức hiện tại = 0
+    // (nếu sau này bạn cần thêm nội vùng thì cộng ở đây)
 
-  //   return {
-  //     totalPrice,
-  //     serviceDescription: service.description,
-  //   };
-  // }
+    // 4) Phụ phí quá 5kg
+    const overweightFee = weightKg > 5 ? 5000 : 0;
+
+    const totalPrice = baseServicePrice + regionFee + overweightFee;
+
+    return {
+      totalPrice,
+      breakdown: {
+        serviceCode,
+        baseServicePrice,
+        regionFee,
+        overweightFee,
+        originRegion,
+        destRegion,
+        isLocal,
+      },
+    };
+  }
 }

@@ -4319,7 +4319,7 @@ export class DatabasesService implements OnModuleInit {
     ]);
 
     const fallback = [
-      Commune?.name || 'Quận/Huyện',
+      Commune?.name || 'Xã/Phường',
       province?.name || 'Tỉnh/Thành',
     ].join(', ');
 

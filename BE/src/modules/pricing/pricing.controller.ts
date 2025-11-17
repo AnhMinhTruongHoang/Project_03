@@ -60,23 +60,22 @@ export class PricingController {
     return this.pricingService.remove(id, user);
   }
 
-  // @Get('calculate')
-  // @ResponseMessage('Tính giá cước vận chuyển')
-  // calculate(
-  //   @Query('serviceId') serviceId: string,
-  //   @Query('km') km: string,
-  //   @Query('weightKg') weightKg: string,
-  //   @Query('originRegion') originRegion: 'North' | 'Central' | 'South',
-  //   @Query('destRegion') destRegion: 'North' | 'Central' | 'South',
-  //   @Query('isLocal') isLocal?: string,
-  // ) {
-  //   return this.pricingService.calculateShipping(
-  //     serviceId,
-  //     Number(km),
-  //     Number(weightKg),
-  //     originRegion,
-  //     destRegion,
-  //     isLocal === 'true',
-  //   );
-  // }
+  @Get('calculate')
+  @ResponseMessage('Tính giá cước vận chuyển')
+  calculate(
+    @Query('serviceCode') serviceCode: 'STD' | 'EXP',
+    @Query('weightKg') weightKg: string,
+    @Query('originRegion') originRegion: 'North' | 'Central' | 'South',
+    @Query('destRegion') destRegion: 'North' | 'Central' | 'South',
+    @Query('isLocal') isLocal?: string,
+  ) {
+    return this.pricingService.calculateShipping(
+      originRegion,
+      destRegion,
+      serviceCode,
+      Number(weightKg),
+      isLocal === 'true',
+    );
+  }
+
 }
