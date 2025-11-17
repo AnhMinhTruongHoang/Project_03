@@ -9,6 +9,8 @@ import { Branch, BranchDocument } from '../branches/schemas/branch.schemas';
 import { Province } from '../location/schemas/province.schema';
 import { Commune } from '../location/schemas/Commune.schema';
 import { Address } from '../location/schemas/address.schema';
+import { ProvinceCode, Region } from 'src/types/location.type';
+import { getRegionByProvinceCode } from '../location/dto/locations';
 
 @Injectable()
 export class PricingService {
@@ -83,13 +85,13 @@ export class PricingService {
   ///cal
 
   async calculateShipping(
-    originRegion: 'North' | 'Central' | 'South',
-    destRegion: 'North' | 'Central' | 'South',
+    originProvinceCode: ProvinceCode,
+    destProvinceCode: ProvinceCode,
     serviceCode: 'STD' | 'EXP',
     weightKg: number,
     isLocal: boolean,
   ) {
-    // 1) Nội thành + gần kho => free ship
+    // 1) Nội thành + gần kho
     if (isLocal) {
       return {
         totalPrice: 0,
@@ -97,7 +99,14 @@ export class PricingService {
       };
     }
 
-    // 2) Giá base theo loại dịch vụ
+    const originRegion = getRegionByProvinceCode(originProvinceCode);
+    const destRegion = getRegionByProvinceCode(destProvinceCode);
+
+    if (!originRegion || !destRegion) {
+      throw new NotFoundException('Province code không hợp lệ');
+    }
+
+    // 2) Giá dịch vụ
     const SERVICE_BASE_PRICE: Record<'STD' | 'EXP', number> = {
       STD: 20000,
       EXP: 40000,
@@ -110,24 +119,17 @@ export class PricingService {
 
     // 3) Phụ phí theo vùng
     let regionFee = 0;
-    const pair = new Set([originRegion, destRegion]);
+    const pair = new Set<Region>([originRegion, destRegion]);
 
-    // North <-> Central
     if (pair.has('North') && pair.has('Central')) {
       regionFee = 10000;
-    }
-    // North <-> South
-    else if (pair.has('North') && pair.has('South')) {
+    } else if (pair.has('North') && pair.has('South')) {
       regionFee = 15000;
-    }
-    // South <-> Central
-    else if (pair.has('South') && pair.has('Central')) {
+    } else if (pair.has('South') && pair.has('Central')) {
       regionFee = 10000;
-    }
-    // Cùng vùng: theo công thức hiện tại = 0
-    // (nếu sau này bạn cần thêm nội vùng thì cộng ở đây)
+    } // cùng vùng = 0 theo spec hiện tại
 
-    // 4) Phụ phí quá 5kg
+    // 4) Phụ phí > 5kg
     const overweightFee = weightKg > 5 ? 5000 : 0;
 
     const totalPrice = baseServicePrice + regionFee + overweightFee;
@@ -135,12 +137,14 @@ export class PricingService {
     return {
       totalPrice,
       breakdown: {
+        originProvinceCode,
+        destProvinceCode,
+        originRegion,
+        destRegion,
         serviceCode,
         baseServicePrice,
         regionFee,
         overweightFee,
-        originRegion,
-        destRegion,
         isLocal,
       },
     };

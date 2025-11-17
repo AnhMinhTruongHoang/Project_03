@@ -15,8 +15,9 @@ import { UpdatePricingDto } from './dto/update-pricing.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ResponseMessage, Users } from 'src/health/decorator/customize';
+import { Public, ResponseMessage, Users } from 'src/health/decorator/customize';
 import { IUser } from 'src/types/user.interface';
+import { ProvinceCode } from 'src/types/location.type';
 
 @ApiTags('pricing')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -30,6 +31,23 @@ export class PricingController {
     return this.pricingService.create(dto);
   }
 
+  ///cal
+  @Public()
+  @Post('calculate')
+  @ResponseMessage('Tính giá cước vận chuyển')
+  calculate(@Body() body: any) {
+    return this.pricingService.calculateShipping(
+      body.originProvinceCode as ProvinceCode,
+      body.destProvinceCode as ProvinceCode,
+      body.serviceCode as 'STD' | 'EXP',
+      Number(body.weightKg),
+      body.isLocal === true,
+    );
+  }
+
+  ///
+
+  @Public()
   @Get()
   @ResponseMessage('Danh sách bảng giá')
   findAll(
@@ -42,6 +60,7 @@ export class PricingController {
     return this.pricingService.findAll(page, size, query || {});
   }
 
+  @Public()
   @Get(':id')
   @ResponseMessage('Chi tiết bảng giá')
   findOne(@Param('id') id: string) {
@@ -59,23 +78,4 @@ export class PricingController {
   remove(@Param('id') id: string, @Users() user: IUser) {
     return this.pricingService.remove(id, user);
   }
-
-  @Get('calculate')
-  @ResponseMessage('Tính giá cước vận chuyển')
-  calculate(
-    @Query('serviceCode') serviceCode: 'STD' | 'EXP',
-    @Query('weightKg') weightKg: string,
-    @Query('originRegion') originRegion: 'North' | 'Central' | 'South',
-    @Query('destRegion') destRegion: 'North' | 'Central' | 'South',
-    @Query('isLocal') isLocal?: string,
-  ) {
-    return this.pricingService.calculateShipping(
-      originRegion,
-      destRegion,
-      serviceCode,
-      Number(weightKg),
-      isLocal === 'true',
-    );
-  }
-
 }
