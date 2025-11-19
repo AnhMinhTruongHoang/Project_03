@@ -15,7 +15,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   // validate user
 
@@ -54,18 +54,17 @@ export class AuthService {
     // Set the refresh_token as a cookie
     response.cookie('refresh_token', refresh_token, {
       httpOnly: true,
-      secure: false, // chỉ gửi qua HTTPS
+      secure: false,
       maxAge: ms(this.configService.get<string>('JWT_REFRESH_EXPIRE')),
     });
 
+    // Lấy user đã populate (branchId, role, ...). 
+    // Sử dụng usersService.findOne để đảm bảo select('-password') + populate được thực hiện.
+    const fullUser = await this.usersService.findOne(_id as string);
+
     return {
       access_token: this.jwtService.sign(payload),
-      user: {
-        _id,
-        name,
-        email,
-        role,
-      },
+      user: fullUser ? fullUser : { _id, name, email, role },
     };
   }
 
@@ -141,32 +140,26 @@ export class AuthService {
           role,
         };
 
-        const refresh_token = this.createRefreshToken(payload);
+        const newRefreshToken = this.createRefreshToken(payload);
 
         // Update the user with the refresh token
-        await this.usersService.updateUserToken(refresh_token, _id.toString());
-
-        // Fetch the user's role
-        const userRole = user.role as unknown as { _id: string; name: string };
-        const temp = await this.usersService.findOne(userRole._id);
+        await this.usersService.updateUserToken(newRefreshToken, _id.toString());
 
         // Clear the old refresh_token cookie
         response.clearCookie('refresh_token');
 
         // Set the new refresh_token as a cookie
-        response.cookie('refresh_token', refresh_token, {
+        response.cookie('refresh_token', newRefreshToken, {
           httpOnly: true,
           maxAge: ms(this.configService.get<string>('JWT_REFRESH_EXPIRE')),
         });
 
+        // Lấy lại user đầy đủ (populate branchId)
+        const fullUser = await this.usersService.findOne(_id.toString());
+
         return {
           access_token: this.jwtService.sign(payload),
-          user: {
-            _id,
-            name,
-            email,
-            role,
-          },
+          user: fullUser ? fullUser : { _id, name, email, role },
         };
       } else {
         throw new BadRequestException(

@@ -21,7 +21,7 @@ export class UsersService {
     @InjectModel(UserM.name)
     private userModel: SoftDeleteModel<UserDocument>,
     private mailerService: MailerService,
-  ) {}
+  ) { }
 
   /* ------------ Helpers ------------ */
   private generateCode6(): string {
@@ -262,6 +262,7 @@ export class UsersService {
     return this.userModel
       .findOne({ _id: id })
       .select('-password')
+      .populate({ path: 'branchId', select: { name: 1, _id: 1 } })
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 

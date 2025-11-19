@@ -20,17 +20,6 @@ export class DashboardProfile implements OnInit {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-  // ngOnInit() {
-  //   this.isBrowser = isPlatformBrowser(this.platformId);
-  //   if (this.isBrowser) {
-  //     const stored = localStorage.getItem('user');
-  //     if (stored) {
-  //       this.user = JSON.parse(stored);
-  //     }
-  //   }
-  //   console.log('User data:', this.user);
-  // }
-
   ngOnInit() {
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {

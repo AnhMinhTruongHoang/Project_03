@@ -70,6 +70,10 @@ export class User {
 
   createdAt: Date;
   updatedAt: Date;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' })
+  branchId: mongoose.Schema.Types.ObjectId;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

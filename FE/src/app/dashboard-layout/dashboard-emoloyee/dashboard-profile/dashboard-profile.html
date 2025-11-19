@@ -8,13 +8,7 @@
         <!-- Họ và tên -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Họ và tên</label>
-          <input
-            type="text"
-            class="form-control"
-            [(ngModel)]="user.name"
-            name="name"
-            placeholder="Nhập họ và tên"
-          />
+          <input type="text" class="form-control" [(ngModel)]="user.name" name="name" placeholder="Nhập họ và tên" />
         </div>
 
         <!-- Email (disabled, tránh lỗi form) -->
@@ -26,13 +20,8 @@
         <!-- Số điện thoại -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Số điện thoại</label>
-          <input
-            type="text"
-            class="form-control"
-            [(ngModel)]="user.phone"
-            name="phone"
-            placeholder="Nhập số điện thoại"
-          />
+          <input type="text" class="form-control" [(ngModel)]="user.phone" name="phone"
+            placeholder="Nhập số điện thoại" />
         </div>
       </div>
 
@@ -41,13 +30,7 @@
         <!-- Loại tài khoản -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Loại tài khoản</label>
-          <input
-            type="text"
-            class="form-control"
-            [(ngModel)]="user.accountType"
-            name="accountType"
-            disabled
-          />
+          <input type="text" class="form-control" [(ngModel)]="user.accountType" name="accountType" disabled />
         </div>
 
         <!-- Vai trò -->
@@ -56,15 +39,17 @@
           <input type="text" class="form-control" [(ngModel)]="user.role" name="role" disabled />
         </div>
 
+        <!-- Branch -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Bưu cục</label>
+          <input type="text" class="form-control" [value]="user.branchId?.name || 'Chưa có'" disabled />
+        </div>
+
+
         <!-- Ngày tạo tài khoản -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Ngày tạo tài khoản</label>
-          <input
-            type="text"
-            class="form-control"
-            [value]="user.createdAt | date : 'dd/MM/yyyy, HH:mm'"
-            disabled
-          />
+          <input type="text" class="form-control" [value]="user.createdAt | date : 'dd/MM/yyyy, HH:mm'" disabled />
         </div>
       </div>
 
@@ -72,13 +57,8 @@
       <div class="col-12">
         <div class="mb-3">
           <label class="form-label fw-semibold">Mật khẩu mới</label>
-          <input
-            type="password"
-            class="form-control"
-            [(ngModel)]="user.password"
-            name="password"
-            placeholder="Để trống nếu không muốn đổi mật khẩu"
-          />
+          <input type="password" class="form-control" [(ngModel)]="user.password" name="password"
+            placeholder="Để trống nếu không muốn đổi mật khẩu" />
         </div>
       </div>
 
