@@ -9,8 +9,8 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { BranchService } from '../../services/branch.service';
+import { LocationService } from '../../services/location.service';
 import { CommonModule } from '@angular/common';
-import { VIETNAM_PROVINCES } from '../../shared/data/vietnam-provinces';
 
 @Component({
   selector: 'app-branch-create',
@@ -19,36 +19,65 @@ import { VIETNAM_PROVINCES } from '../../shared/data/vietnam-provinces';
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
 })
 export class BranchCreateComponent implements OnInit {
-  provinces = VIETNAM_PROVINCES;
+  provinces: any[] = [];
+  wards: any[] = [];
+
   addForm: FormGroup;
   loading = false;
   msg = '';
 
   constructor(
     private branchService: BranchService,
+    private locationService: LocationService,
     private formBuilder: FormBuilder,
     private router: Router,
     private toastr: ToastrService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
+    // Khởi tạo form
     this.addForm = this.formBuilder.group({
-      // REQUIRED
       code: ['', Validators.required],
       name: ['', Validators.required],
       address: ['', Validators.required],
+
       phone: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
+
       province: ['', Validators.required],
-      ward: ['', Validators.required], // giữ lại Phường/Xã
+      ward: ['', Validators.required],
 
-      // NOT REQUIRED
       note: [''],
-
       isActive: [true],
+    });
+
+    // Load danh sách tỉnh
+    const provinceRes: any = await this.locationService.getProvinces();
+    this.provinces = provinceRes?.data || provinceRes || [];
+
+    // Khi province thay đổi → load phường
+    this.addForm.get('province')?.valueChanges.subscribe((provinceId) => {
+      this.onProvinceChange(provinceId);
     });
   }
 
+  /** Khi đổi tỉnh: reset ward + load API phường */
+  async onProvinceChange(provinceId: string) {
+    this.wards = [];
+    this.addForm.get('ward')?.setValue('');
+
+    if (!provinceId) return;
+
+    try {
+      const res: any = await this.locationService.getCommunes(provinceId);
+      this.wards = res?.data || res || [];
+    } catch (err) {
+      console.error(err);
+      this.toastr.error('Không tải được danh sách phường/xã');
+    }
+  }
+
+  /** Lưu chi nhánh */
   async save() {
     if (this.addForm.invalid || this.loading) {
       this.msg = 'Vui lòng nhập đầy đủ các trường bắt buộc!';
@@ -61,24 +90,19 @@ export class BranchCreateComponent implements OnInit {
 
     const formValue = this.addForm.value;
 
-    // Build payload
     const payload: any = {
       code: formValue.code?.trim(),
       name: formValue.name?.trim(),
       address: formValue.address?.trim(),
-
       phone: formValue.phone?.trim(),
       email: formValue.email?.trim(),
-
-      province: formValue.province?.trim(),
-
-      ward: formValue.ward?.trim() || undefined,
+      province: formValue.province,
+      ward: formValue.ward,
       note: formValue.note?.trim() || undefined,
-
       isActive: formValue.isActive,
     };
 
-    // Remove undefined keys
+    // Remove undefined
     Object.keys(payload).forEach((key) => {
       if (payload[key] === undefined || payload[key] === '') {
         delete payload[key];
@@ -87,25 +111,19 @@ export class BranchCreateComponent implements OnInit {
 
     try {
       const res: any = await this.branchService.create(payload);
-      console.log('Create branch response:', res);
 
-      const message = res?.message || 'Tạo chi nhánh mới thành công';
-      this.toastr.success(message);
+      this.toastr.success(res?.message || 'Tạo chi nhánh mới thành công');
       this.router.navigate(['/admin/branch']);
     } catch (err: any) {
-      console.error('Create branch error:', err);
+      console.error(err);
 
-      let message = 'Thêm chi nhánh thất bại, vui lòng thử lại';
-      const rawMsg = err?.error?.message || err?.message;
+      let msg = 'Thêm chi nhánh thất bại';
+      const raw = err?.error?.message || err?.message;
 
-      if (Array.isArray(rawMsg)) {
-        message = rawMsg.join('<br/>');
-      } else if (typeof rawMsg === 'string') {
-        message = rawMsg;
-      }
+      msg = Array.isArray(raw) ? raw.join('\n') : raw;
 
-      this.msg = message;
-      this.toastr.error(message.replace(/<br\/>/g, '\n'));
+      this.msg = msg;
+      this.toastr.error(msg);
     } finally {
       this.loading = false;
     }

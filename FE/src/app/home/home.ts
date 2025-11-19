@@ -1,9 +1,7 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ViettelPostService } from '../services/viettelpost.service';
 import { LocationService } from '../services/location.service';
-import { normalizeAdministrativeData } from '../services/location-normalizer';
 
 @Component({
   selector: 'app-home',
@@ -19,18 +17,10 @@ export class Home {
   selectedProvince: any = null;
   selectedCommune: any = null;
 
-  constructor(
-    private viettelPostService: ViettelPostService,
-    private locationService: LocationService
-  ) {}
+  constructor(private locationService: LocationService) {}
 
   ngOnInit() {
     // 🗺️ Lấy danh sách tỉnh/thành phố
-    this.viettelPostService.getProvinces().subscribe((res) => {
-      const raw = res?.data?.data || res?.data || res || [];
-      this.provinces = normalizeAdministrativeData(raw, 'province');
-    });
-
     // (Tuỳ chọn) Log dữ liệu hành chính chuẩn quốc gia
     // this.locationService.getProvinces().subscribe((official) => {
     //   console.log('📚 Dữ liệu hành chính quốc gia:', official);
@@ -41,11 +31,6 @@ export class Home {
   onProvinceChange() {
     this.selectedCommune = null;
     if (!this.selectedProvince) return;
-
-    this.viettelPostService.getCommunes(this.selectedProvince.id).subscribe((res) => {
-      const raw = res?.data?.data || res?.data || res || [];
-      this.communes = normalizeAdministrativeData(raw, 'ward');
-    });
   }
 
   trackById(index: number, item: any) {

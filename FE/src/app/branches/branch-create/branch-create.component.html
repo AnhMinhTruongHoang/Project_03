@@ -74,7 +74,9 @@
                 </label>
                 <select class="form-select" formControlName="province">
                   <option value="">Chọn tỉnh / thành phố</option>
-                  <option *ngFor="let p of provinces" [value]="p">{{ p }}</option>
+                  <option *ngFor="let p of provinces" [value]="p._id">
+                    {{ p.name }}
+                  </option>
                 </select>
 
                 <div
@@ -87,13 +89,20 @@
 
               <!-- Phường / Xã -->
               <div class="col-md-6">
-                <label class="form-label"> Phường / Xã <span class="text-danger">*</span> </label>
-                <input type="text" class="form-control" formControlName="ward" />
+                <label class="form-label">Phường / Xã <span class="text-danger">*</span></label>
+
+                <select class="form-select" formControlName="ward">
+                  <option value="">Chọn phường / xã</option>
+                  <option *ngFor="let w of wards" [value]="w._id">
+                    {{ w.name }}
+                  </option>
+                </select>
+
                 <div
                   class="text-danger small"
                   *ngIf="addForm.get('ward')?.invalid && addForm.get('ward')?.touched"
                 >
-                  Vui lòng nhập phường/xã
+                  Vui lòng chọn phường/xã
                 </div>
               </div>
 

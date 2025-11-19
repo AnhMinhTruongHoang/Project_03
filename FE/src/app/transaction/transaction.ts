@@ -2,7 +2,6 @@ import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
-import { TransactionService } from '../services/transaction.service';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -17,7 +16,6 @@ export class Transaction {
   user: any;
 
   constructor(
-    private transactionService: TransactionService,
     private authService: AuthService,
     private toastr: ToastrService,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -46,22 +44,5 @@ export class Transaction {
       return;
     }
 
-    this.transactionService.makeTransaction(this.user._id, this.amount, this.type).subscribe({
-      next: (res: any) => {
-        this.toastr.success(res.message);
-        this.user.balance = res.balance;
-
-        // Cập nhật localStorage
-        if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem('user', JSON.stringify(this.user));
-        }
-
-        // 🔹 Cập nhật lại AuthService để toàn bộ app (AppComponent) nhận được thay đổi ngay
-        this.authService.setUser(this.user);
-      },
-      error: (err) => {
-        this.toastr.error(err.error.message || 'Giao dịch thất bại');
-      },
-    });
   }
 }
