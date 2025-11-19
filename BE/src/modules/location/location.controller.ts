@@ -7,6 +7,7 @@ import { UpdateAddressDto } from './dto/update-location.dto';
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
+  
   @Get('provinces')
   getProvinces() {
     return this.locationService.getProvinces();

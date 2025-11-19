@@ -33,17 +33,18 @@ export class BranchCreateComponent implements OnInit {
 
   ngOnInit() {
     this.addForm = this.formBuilder.group({
-      // REQUIRED từ CreateBranchDto
+      // REQUIRED
       code: ['', Validators.required],
       name: ['', Validators.required],
       address: ['', Validators.required],
-
-      // OPTIONAL
       phone: ['', Validators.required],
-      managerId: ['', Validators.required],
-      city: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
       province: ['', Validators.required],
-      // schema có isActive default true – cho user tick luôn
+      ward: ['', Validators.required], // giữ lại Phường/Xã
+
+      // NOT REQUIRED
+      note: [''],
+
       isActive: [true],
     });
   }
@@ -58,22 +59,26 @@ export class BranchCreateComponent implements OnInit {
     this.loading = true;
     this.msg = '';
 
-    // Lấy value từ form
     const formValue = this.addForm.value;
 
-    // Build payload đúng CreateBranchDto + schema
+    // Build payload
     const payload: any = {
       code: formValue.code?.trim(),
       name: formValue.name?.trim(),
       address: formValue.address?.trim(),
-      phone: formValue.phone?.trim() || undefined,
-      city: formValue.city?.trim() || undefined,
-      province: formValue.province?.trim() || undefined,
-      managerId: formValue.managerId?.trim() || undefined,
+
+      phone: formValue.phone?.trim(),
+      email: formValue.email?.trim(),
+
+      province: formValue.province?.trim(),
+
+      ward: formValue.ward?.trim() || undefined,
+      note: formValue.note?.trim() || undefined,
+
       isActive: formValue.isActive,
     };
 
-    // Xóa field undefined để body gọn, tránh gửi rác
+    // Remove undefined keys
     Object.keys(payload).forEach((key) => {
       if (payload[key] === undefined || payload[key] === '') {
         delete payload[key];
@@ -84,22 +89,16 @@ export class BranchCreateComponent implements OnInit {
       const res: any = await this.branchService.create(payload);
       console.log('Create branch response:', res);
 
-      // Thường pattern ResponseMessage hay wrap kiểu:
-      // { statusCode, message, data }
       const message = res?.message || 'Tạo chi nhánh mới thành công';
       this.toastr.success(message);
-      this.router.navigate(['/admin/branch']); // chỉnh path nếu khác
+      this.router.navigate(['/admin/branch']);
     } catch (err: any) {
       console.error('Create branch error:', err);
 
-      // class-validator + Nest thường trả:
-      // error.error.message: string | string[]
       let message = 'Thêm chi nhánh thất bại, vui lòng thử lại';
-
       const rawMsg = err?.error?.message || err?.message;
 
       if (Array.isArray(rawMsg)) {
-        // ['code không được để trống', 'name không được để trống', ...]
         message = rawMsg.join('<br/>');
       } else if (typeof rawMsg === 'string') {
         message = rawMsg;
