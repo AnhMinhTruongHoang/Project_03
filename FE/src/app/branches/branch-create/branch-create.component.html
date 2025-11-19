@@ -16,7 +16,7 @@
             <div class="row g-3">
               <!-- Tên chi nhánh -->
               <div class="col-md-6">
-                <label class="form-label">Tên chi nhánh <span class="text-danger">*</span></label>
+                <label class="form-label"> Tên chi nhánh <span class="text-danger">*</span> </label>
                 <input
                   type="text"
                   class="form-control"
@@ -24,8 +24,8 @@
                   placeholder="VD: Chi nhánh Hà Nội"
                 />
                 <div
-                  *ngIf="addForm.get('name')?.invalid && addForm.get('name')?.touched"
                   class="text-danger small"
+                  *ngIf="addForm.get('name')?.invalid && addForm.get('name')?.touched"
                 >
                   Vui lòng nhập tên chi nhánh
                 </div>
@@ -33,18 +33,24 @@
 
               <!-- Mã chi nhánh -->
               <div class="col-md-6">
-                <label class="form-label">Mã chi nhánh</label>
+                <label class="form-label"> Mã chi nhánh <span class="text-danger">*</span> </label>
                 <input
                   type="text"
                   class="form-control"
                   formControlName="code"
                   placeholder="VD: CN-HN01"
                 />
+                <div
+                  class="text-danger small"
+                  *ngIf="addForm.get('code')?.invalid && addForm.get('code')?.touched"
+                >
+                  Vui lòng nhập mã chi nhánh
+                </div>
               </div>
 
               <!-- Phone -->
               <div class="col-md-6">
-                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                <label class="form-label"> Số điện thoại <span class="text-danger">*</span> </label>
                 <input
                   type="text"
                   class="form-control"
@@ -52,8 +58,8 @@
                   placeholder="VD: 0912345678"
                 />
                 <div
-                  *ngIf="addForm.get('phone')?.invalid && addForm.get('phone')?.touched"
                   class="text-danger small"
+                  *ngIf="addForm.get('phone')?.invalid && addForm.get('phone')?.touched"
                 >
                   Vui lòng nhập số điện thoại
                 </div>
@@ -61,51 +67,68 @@
 
               <!-- Email -->
               <div class="col-md-6">
-                <label class="form-label">Email</label>
+                <label class="form-label"> Email <span class="text-danger">*</span> </label>
                 <input
                   type="email"
                   class="form-control"
                   formControlName="email"
                   placeholder="VD: hanoi.branch@gmail.com"
                 />
+                <div
+                  class="text-danger small"
+                  *ngIf="addForm.get('email')?.invalid && addForm.get('email')?.touched"
+                >
+                  Vui lòng nhập email
+                </div>
               </div>
 
-              <!-- Địa chỉ: tỉnh -->
+              <!-- Tỉnh -->
               <div class="col-md-4">
-                <label class="form-label"
-                  >Tỉnh / Thành phố <span class="text-danger">*</span></label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  formControlName="province"
-                  placeholder="VD: Hà Nội"
-                />
+                <label class="form-label">
+                  Tỉnh / Thành phố <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" formControlName="province">
+                  <option value="">Chọn tỉnh / thành phố</option>
+                  <option *ngFor="let p of provinces" [value]="p">{{ p }}</option>
+                </select>
+
                 <div
-                  *ngIf="addForm.get('province')?.invalid && addForm.get('province')?.touched"
                   class="text-danger small"
+                  *ngIf="addForm.get('province')?.invalid && addForm.get('province')?.touched"
                 >
                   Vui lòng nhập tỉnh/thành phố
                 </div>
               </div>
 
-              <!-- huyện -->
+              <!-- Huyện -->
               <div class="col-md-4">
-                <label class="form-label">Quận / Huyện</label>
+                <label class="form-label"> Quận / Huyện <span class="text-danger">*</span> </label>
                 <input type="text" class="form-control" formControlName="district" />
-              </div>
-
-              <!-- phường -->
-              <div class="col-md-4">
-                <label class="form-label">Phường / Xã</label>
-                <input type="text" class="form-control" formControlName="ward" />
-              </div>
-
-              <!-- địa chỉ chi tiết -->
-              <div class="col-12">
-                <label class="form-label"
-                  >Địa chỉ chi tiết <span class="text-danger">*</span></label
+                <div
+                  class="text-danger small"
+                  *ngIf="addForm.get('district')?.invalid && addForm.get('district')?.touched"
                 >
+                  Vui lòng nhập quận/huyện
+                </div>
+              </div>
+
+              <!-- Phường -->
+              <div class="col-md-4">
+                <label class="form-label"> Phường / Xã <span class="text-danger">*</span> </label>
+                <input type="text" class="form-control" formControlName="ward" />
+                <div
+                  class="text-danger small"
+                  *ngIf="addForm.get('ward')?.invalid && addForm.get('ward')?.touched"
+                >
+                  Vui lòng nhập phường/xã
+                </div>
+              </div>
+
+              <!-- Địa chỉ chi tiết -->
+              <div class="col-12">
+                <label class="form-label">
+                  Địa chỉ chi tiết <span class="text-danger">*</span>
+                </label>
                 <input
                   type="text"
                   class="form-control"
@@ -113,14 +136,14 @@
                   placeholder="VD: Số 1 Trần Duy Hưng, Cầu Giấy"
                 />
                 <div
-                  *ngIf="addForm.get('address')?.invalid && addForm.get('address')?.touched"
                   class="text-danger small"
+                  *ngIf="addForm.get('address')?.invalid && addForm.get('address')?.touched"
                 >
                   Vui lòng nhập địa chỉ chi tiết
                 </div>
               </div>
 
-              <!-- ghi chú -->
+              <!-- Ghi chú -->
               <div class="col-12">
                 <label class="form-label">Ghi chú</label>
                 <textarea
@@ -128,11 +151,12 @@
                   rows="3"
                   formControlName="note"
                   placeholder="Nội dung ghi chú (nếu có)"
-                ></textarea>
+                >
+                </textarea>
               </div>
             </div>
 
-            <!-- nút -->
+            <!-- Nút -->
             <div class="mt-4 d-flex justify-content-end gap-2">
               <button type="button" class="btn btn-outline-secondary" (click)="backToList()">
                 Hủy
@@ -140,7 +164,6 @@
 
               <button type="submit" class="btn btn-primary" [disabled]="addForm.invalid || loading">
                 <span *ngIf="!loading">Lưu chi nhánh</span>
-
                 <span *ngIf="loading">
                   <span class="spinner-border spinner-border-sm me-1"></span>
                   Đang lưu...

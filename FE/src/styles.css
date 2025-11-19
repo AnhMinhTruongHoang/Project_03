@@ -25,12 +25,6 @@
   font-weight: 500;
 }
 
-/* Sidebar icons */
-.sidebar-nav iconify-icon {
-  width: 28px !important;
-  height: 38px !important;
-}
-
 /* Sidebar nav links */
 .sidebar-nav .nav-link {
   font-size: 17px;
@@ -70,4 +64,139 @@
 /* icon trong active */
 .sidebar-nav .nav-link.active iconify-icon {
   color: #0d6efd !important;
+}
+
+/* ================== TABLE — GLOBAL ================== */
+
+:root {
+  --tbl-head-bg: #f8fafc;
+  --tbl-head-color: #6b7280;
+  --tbl-row-border: #f1f5f9;
+  --tbl-row-hover: #f8fbff;
+
+  --tbl-pad-y: 12px;
+  --tbl-pad-x: 16px;
+  --radius-sm: 8px;
+}
+
+/* Dùng thêm class .app-table để tránh ảnh hưởng các bảng khác */
+.table-responsive {
+  border-radius: var(--radius-sm);
+}
+
+.table.app-table th,
+.table.app-table td {
+  padding: var(--tbl-pad-y) var(--tbl-pad-x);
+  vertical-align: middle;
+}
+
+.table.app-table thead th {
+  background-color: var(--tbl-head-bg);
+  color: var(--tbl-head-color);
+  font-weight: 600;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.table.app-table tbody tr + tr td {
+  border-top: 1px solid var(--tbl-row-border);
+}
+
+.table.app-table tbody tr:hover {
+  background-color: var(--tbl-row-hover);
+}
+
+/* Địa chỉ dòng phụ */
+.table.app-table td small {
+  color: #6c757d;
+}
+
+/* Cột thao tác: gắn class .col-actions cho <th> và .cell-actions cho <td> */
+.table.app-table .col-actions {
+  width: 170px; /* đủ chỗ 2 nút */
+}
+
+.table.app-table .cell-actions {
+  white-space: nowrap;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Badge trạng thái (dùng chung) */
+.badge-status {
+  padding: 0.35rem 0.6rem;
+  font-weight: 600;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+/* Responsive nhỏ hơn: giảm padding + giữ hàng nút gọn hơn */
+@media (max-width: 576px) {
+  .table.app-table th,
+  .table.app-table td {
+    padding: 10px 12px;
+  }
+  .table.app-table .cell-actions {
+    gap: 0.375rem;
+  }
+  .table.app-table .cell-actions .btn {
+    padding: 0.25rem 0.5rem;
+    min-width: auto;
+  }
+}
+
+/* --- Fallback nếu CHƯA thể thêm .cell-actions trong HTML:
+.table.app-table td:last-child { white-space: nowrap; }
+.table.app-table td:last-child .btn + .btn { margin-left: .5rem; }
+*/
+
+/* ========= Center headers ========= */
+/* Căn giữa toàn bộ <th> trong những bảng gắn .app-table */
+.app-table thead th {
+  text-align: center;
+}
+
+/* Ghi đè lớp .text-end (nếu lỡ gắn cho <th> "Thao tác") */
+.app-table thead th.text-end {
+  text-align: center !important;
+}
+
+/* Reset lại nút trong cột Thao tác (thắng mọi rule .btn của theme) */
+.app-table td.col-actions .table-actions > .btn {
+  width: auto !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 8px !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.btn-edit {
+  background-color: rgba(13, 110, 253, 0.10) !important;
+  color: #0d6efd !important;
+  border: 1px solid rgba(13, 110, 253, 0.24) !important;
+  border-radius: 8px !important;
+  padding: 4px 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-edit:hover {
+  background-color: rgba(13, 110, 253, 0.18) !important;
+  border-color: rgba(13, 110, 253, 0.34) !important;
+}
+
+
+.btn-delete {
+  background-color: rgba(220, 53, 69, 0.10) !important;
+  color: #dc3545 !important;
+  border: 1px solid rgba(220, 53, 69, 0.24) !important;
+  border-radius: 8px !important;
+  padding: 4px 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+  background-color: rgba(220, 53, 69, 0.18) !important;
+  border-color: rgba(220, 53, 69, 0.34) !important;
 }

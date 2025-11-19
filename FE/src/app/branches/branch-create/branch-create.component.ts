@@ -10,6 +10,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { BranchService } from '../../services/branch.service';
 import { CommonModule } from '@angular/common';
+import { VIETNAM_PROVINCES } from '../../shared/data/vietnam-provinces';
 
 @Component({
   selector: 'app-branch-create',
@@ -18,6 +19,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
 })
 export class BranchCreateComponent implements OnInit {
+  provinces = VIETNAM_PROVINCES;
   addForm: FormGroup;
   loading = false;
   msg = '';
@@ -37,11 +39,10 @@ export class BranchCreateComponent implements OnInit {
       address: ['', Validators.required],
 
       // OPTIONAL
-      phone: [''],
-      managerId: [''],
-      postalCode: [''],
-      city: [''],
-      province: [''],
+      phone: ['', Validators.required],
+      managerId: ['', Validators.required],
+      city: ['', Validators.required],
+      province: ['', Validators.required],
       // schema có isActive default true – cho user tick luôn
       isActive: [true],
     });
@@ -66,7 +67,6 @@ export class BranchCreateComponent implements OnInit {
       name: formValue.name?.trim(),
       address: formValue.address?.trim(),
       phone: formValue.phone?.trim() || undefined,
-      postalCode: formValue.postalCode?.trim() || undefined,
       city: formValue.city?.trim() || undefined,
       province: formValue.province?.trim() || undefined,
       managerId: formValue.managerId?.trim() || undefined,

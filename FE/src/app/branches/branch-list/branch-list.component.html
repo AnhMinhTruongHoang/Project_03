@@ -1,29 +1,26 @@
 <div class="container-fluid">
-
   <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h4 class="fw-bold mb-1">Quản lý chi nhánh</h4>
-      <small class="text-muted">
-        Danh sách chi nhánh / điểm giao dịch trên toàn hệ thống.
-      </small>
+      <small class="text-muted">Danh sách chi nhánh / điểm giao dịch trên toàn hệ thống.</small>
     </div>
 
-    <a class="btn btn-primary" [routerLink]="['/admin/branch/create']">
-      + Thêm chi nhánh
+    <a class="btn btn-outline-secondary" [routerLink]="['/admin/branch/create']"> + Thêm chi nhánh </a>
+    
+    <a class="btn btn-outline-secondary" [routerLink]="['/admin/branch/trash']">
+      <i class="bi bi-trash"></i> Thùng rác
     </a>
   </div>
 
   <!-- Message -->
   @if (msg) {
-    <div class="alert alert-info py-2">{{ msg }}</div>
+  <div class="alert alert-info py-2">{{ msg }}</div>
   }
 
   <!-- Search -->
   <div class="card border-0 shadow-sm mb-3">
-    <div
-      class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center"
-    >
+    <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
       <div class="flex-grow-1">
         <input
           type="text"
@@ -33,83 +30,125 @@
           (keyup.enter)="search()"
         />
       </div>
-      <button class="btn btn-outline-secondary" (click)="search()">
-        Tìm kiếm
-      </button>
+      <button class="btn btn-outline-secondary" (click)="search()">Tìm kiếm</button>
     </div>
   </div>
 
   <!-- Loading -->
   @if (isLoading) {
-    <div class="text-center text-muted py-4">Đang tải dữ liệu...</div>
+  <div class="text-center text-muted py-4">Đang tải dữ liệu...</div>
   }
 
   <!-- Empty -->
   @if (!isLoading && filteredBranches.length === 0) {
-    <div class="text-center text-muted py-4">
-      Không có chi nhánh nào.
-    </div>
+  <div class="text-center text-muted py-4">Không có chi nhánh nào.</div>
   }
 
   <!-- Table -->
   @if (!isLoading && filteredBranches.length > 0) {
-    <div class="card border-0 shadow-sm">
-      <div class="card-body p-0">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table id="branchTable" class="table table-hover align-middle mb-0 app-table">
+          <thead class="table-light text-center">
             <tr>
-              <th style="width: 90px">Mã</th>
-              <th>Tên chi nhánh</th>
-              <th>Địa chỉ</th>
-              <th style="width: 130px">Điện thoại</th>
-              <th style="width: 110px">Mã bưu chính</th>
-              <th style="width: 110px">Trạng thái</th>
-              <th style="width: 120px" class="text-end">Thao tác</th>
+              <!-- Mã -->
+              <th style="width: 90px" class="sortable" (click)="sortData('code')">
+                Mã
+                <i
+                  *ngIf="sortField === 'code'"
+                  [ngClass]="{
+                    'bi bi-caret-up-fill': sortDirection === 'asc',
+                    'bi bi-caret-down-fill': sortDirection === 'desc'
+                  }"
+                ></i>
+              </th>
+
+              <!-- Tên chi nhánh -->
+              <th style="width: 180px" class="sortable" (click)="sortData('name')">
+                Tên chi nhánh
+                <i
+                  *ngIf="sortField === 'name'"
+                  [ngClass]="{
+                    'bi bi-caret-up-fill': sortDirection === 'asc',
+                    'bi bi-caret-down-fill': sortDirection === 'desc'
+                  }"
+                ></i>
+              </th>
+
+              <th style="width: 220px">Địa chỉ</th>
+              <th style="width: 150px">Điện thoại</th>
+
+              <!-- Trạng thái -->
+              <th style="width: 150px" class="sortable" (click)="sortData('isActive')">
+                Trạng thái
+                <i
+                  *ngIf="sortField === 'isActive'"
+                  [ngClass]="{
+                    'bi bi-caret-up-fill': sortDirection === 'asc',
+                    'bi bi-caret-down-fill': sortDirection === 'desc'
+                  }"
+                ></i>
+              </th>
+
+              <th style="width: 250px" class="text-center col-actions">Thao tác</th>
             </tr>
           </thead>
 
           <tbody>
-            @for (b of filteredBranches; track b._id) {
-              <tr>
-                <td class="fw-semibold">{{ b.code }}</td>
-                <td>{{ b.name }}</td>
-                <td>
-                  {{ b.address }} <br />
-                  <small class="text-muted">
-                    {{ b.city }}, {{ b.province }}
-                  </small>
-                </td>
-                <td>{{ b.phone }}</td>
-                <td>{{ b.postalCode }}</td>
+            @for (b of pagedBranches; track b._id) {
+            <tr>
+              <td class="fw-semibold">{{ b.code }}</td>
+              <td>{{ b.name }}</td>
+              <td>
+                {{ b.address }} <br />
+                <small class="text-muted">{{ b.city }}, {{ b.province }}</small>
+              </td>
+              <td>{{ b.phone }}</td>
 
-                <td>
-                  @if (b.isActive) {
-                    <span class="badge bg-success-subtle text-success">Hoạt động</span>
-                  } @else {
-                    <span class="badge bg-secondary-subtle text-secondary">Tạm dừng</span>
-                  }
-                </td>
+              <td>
+                @if (b.isActive) {
+                <span class="badge-status bg-success-subtle text-success">Hoạt động</span>
+                } @else {
+                <span class="badge-status bg-secondary-subtle text-secondary">Tạm dừng</span>
+                }
+              </td>
 
-                <td class="text-end">
-                  <a
-                    class="btn btn-sm btn-outline-secondary me-2"
-                    [routerLink]="['/admin/branches', b._id]"
-                  >
-                    Sửa
-                  </a>
-
-                  <button
-                    class="btn btn-sm btn-outline-danger"
-                    (click)="delete(b._id)"
-                  >
-                    Xoá
-                  </button>
-                </td>
-              </tr>
+              <td class="text-end col-actions">
+                <div class="table-actions">
+                  <a class="btn-sm btn-info" [routerLink]="['/admin/branches', b._id]"> Xem </a>
+                  <a class="btn-sm btn-edit" [routerLink]="['/admin/branches', b._id]"> Sửa </a>
+                  <button class="btn-sm btn-delete" (click)="delete(b._id)">Xoá</button>
+                </div>
+              </td>
+            </tr>
             }
           </tbody>
         </table>
+
+        <div class="d-flex justify-content-between align-items-center p-3">
+          <div class="text-muted">Trang {{ page }} / {{ totalPages }}</div>
+
+          <div>
+            <button
+              class="btn btn-sm btn-primary-soft me-2"
+              [disabled]="page === 1"
+              (click)="prevPage()"
+            >
+              « Trước
+            </button>
+
+            <button
+              class="btn btn-sm btn-primary-soft"
+              [disabled]="page === totalPages"
+              (click)="nextPage()"
+            >
+              Sau »
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
   }
 </div>
