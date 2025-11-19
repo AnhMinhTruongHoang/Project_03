@@ -29,9 +29,6 @@ export class Branch {
   @Prop({ required: false })
   province?: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false })
-  managerId?: mongoose.Types.ObjectId;
-
   @Prop({ default: true })
   isActive: boolean;
 

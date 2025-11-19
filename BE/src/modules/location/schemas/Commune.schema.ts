@@ -2,10 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Province } from './province.schema';
 
-export type DistrictDocument = HydratedDocument<District>;
+export type CommuneDocument = HydratedDocument<Commune>;
 
 @Schema({ timestamps: true })
-export class District {
+export class Commune {
   @Prop({ required: true, unique: true })
   code: string; // Mã quận/huyện (VD: '760')
 
@@ -23,4 +23,4 @@ export class District {
   isActive: boolean;
 }
 
-export const DistrictSchema = SchemaFactory.createForClass(District);
+export const CommuneSchema = SchemaFactory.createForClass(Commune);

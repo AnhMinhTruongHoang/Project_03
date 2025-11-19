@@ -1,0 +1,87 @@
+const PROVINCES = {
+  HN:  'Hà Nội',
+  HCM: 'Hồ Chí Minh',
+  HP:  'Hải Phòng',
+  DNA: 'Đà Nẵng',
+  CT:  'Cần Thơ',
+  TN:  'Tây Ninh',
+  GL:  'Gia Lai',
+  QNN: 'Quảng Ninh',
+  KH:  'Khánh Hòa',
+  LD:  'Lâm Đồng',
+  DL:  'Đắk Lắk',
+  DN:  'Đồng Nai',
+  DT:  'Đồng Tháp',
+  KG:  'Kiên Giang',
+  BT:  'Bến Tre',
+  BL:  'Bạc Liêu',
+  CM:  'Cà Mau',
+  TH:  'Thanh Hóa',
+  NA:  'Nghệ An',
+  HT:  'Hà Tĩnh',
+  QT:  'Quảng Trị',
+  HUE: 'Thừa Thiên Huế',
+  NB:  'Ninh Bình',
+  TB:  'Thái Bình',
+  ND:  'Nam Định',
+  VP:  'Vĩnh Phúc',
+  BG:  'Bắc Giang',
+  BNH: 'Bắc Ninh',
+  LCI: 'Lào Cai',
+  LSN: 'Lạng Sơn',
+  CB:  'Cao Bằng',
+  HG:  'Hà Giang',
+  TQ:  'Tuyên Quang',
+  AG:  'An Giang',
+};
+
+
+
+const REGIONS = {
+  North: [
+    'HN','HP','NB','TB','ND','VP','BG','BNH',
+    'LCI','LSN','CB','HG','TQ'
+  ],
+  Central: [
+    'HUE','TH','NA','HT','QT','DNA',
+    'GL','KH','LD','DL'
+  ],
+  South: [
+    'HCM','DN','CT','TN','DT','KG','BT','BL','CM','AG'
+  ]
+};
+
+
+/// branch
+HN01,
+HCM01,
+DNA01,
+HP01,
+CT01,
+KH01,
+HUE01,
+
+
+/// service
+ {
+        code: 'STD',
+        name: 'Tiêu chuẩn',
+        description: '3–5 ngày',
+        basePrice: 20000,
+        isActive: true,
+      },
+
+       {
+        code: 'EXP',
+        name: 'Nhanh',
+        description: '1–2 ngày',
+        basePrice: 40000,
+        isActive: true,
+      },
+
+//// cal
+North   <= | => center = 10k + service  + 5k  neu  > 5 kg
+North   <= | => south = 15k +  service  + 5k  neu  > 5 kg
+south <= | => center =  10k + service  + 5k  neu  > 5 kg
+
+noi thanh + gan kho : free ship

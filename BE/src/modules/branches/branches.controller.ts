@@ -42,6 +42,8 @@ export class BranchesController {
     return this.branchesService.findAll(page, limit, query || {});
   }
 
+  @Public()
+  @Public()
   @Get(':id')
   @ResponseMessage('Chi tiết chi nhánh')
   findOne(@Param('id') id: string) {

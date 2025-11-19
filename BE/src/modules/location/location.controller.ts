@@ -1,22 +1,33 @@
-// locations/location.controller.ts
-import { Controller, Get, Post, Body, Query, Param, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { LocationService } from './location.service';
 import { UpdateAddressDto } from './dto/update-location.dto';
+import { Public } from 'src/health/decorator/customize';
 
 @Controller('locations')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
   
+  @Public()
   @Get('provinces')
   getProvinces() {
     return this.locationService.getProvinces();
   }
 
-  @Get('districts')
-  getDistricts(@Query('provinceId') provinceId: string) {
-    return this.locationService.getDistricts(provinceId);
+  @Public()
+  @Get('Communes')
+  getCommunes(@Query('provinceId') provinceId: string) {
+    return this.locationService.getCommunes(provinceId);
   }
+
   @Get('addresses')
   listAddresses(
     @Query('current') current = '1',

@@ -1,20 +1,43 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
-import { IUser } from 'src/types/user.interface';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { Types } from 'mongoose';
+
+import { IUser } from 'src/types/user.interface';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { Types } from 'mongoose';
 import { Order, OrderDocument, OrderStatus } from './schemas/order.schemas';
+import { Address, AddressDocument } from '../location/schemas/address.schema';
+import { Commune, CommuneDocument } from '../location/schemas/commune.schema';
+import {
+  Province,
+  ProvinceDocument,
+} from '../location/schemas/province.schema';
 
 @Injectable()
 export class OrdersService {
   constructor(
-    @InjectModel(Order.name) private orderModel: SoftDeleteModel<OrderDocument>,
+    @InjectModel(Order.name)
+    private readonly orderModel: SoftDeleteModel<OrderDocument>,
+    @InjectModel(Address.name)
+    private readonly addressModel: SoftDeleteModel<AddressDocument>,
+    @InjectModel(Commune.name)
+    private readonly communeModel: SoftDeleteModel<CommuneDocument>,
+    @InjectModel(Province.name)
+    private readonly provinceModel: SoftDeleteModel<ProvinceDocument>,
   ) {}
 
   async create(dto: CreateOrderDto, user: IUser) {
+    if (!dto.pickupAddressId || !dto.deliveryAddressId) {
+      throw new BadRequestException(
+        'Both pickup and delivery addresses required',
+      );
+    }
     return this.orderModel.create({
       ...dto,
       userId: new Types.ObjectId(user._id),
@@ -25,7 +48,6 @@ export class OrdersService {
     const { filter, sort, population } = aqp(queryObj);
     delete (filter as any).current;
     delete (filter as any).pageSize;
-
     if (filter.isDeleted === undefined) (filter as any).isDeleted = false;
 
     const page = Number(currentPage) > 0 ? Number(currentPage) : 1;
@@ -39,7 +61,24 @@ export class OrdersService {
       .find(filter)
       .sort(sort as any)
       .skip(skip)
-      .limit(size);
+      .limit(size)
+      .populate({
+        path: 'pickupAddressId',
+        model: Address.name,
+        populate: [
+          { path: 'provinceId', model: Province.name },
+          { path: 'communeId', model: Commune.name }, // <-- communeId
+        ],
+      })
+      .populate({
+        path: 'deliveryAddressId',
+        model: Address.name,
+        populate: [
+          { path: 'provinceId', model: Province.name },
+          { path: 'communeId', model: Commune.name }, // <-- communeId
+        ],
+      });
+
     if (population) q.populate(population as any);
     const results = await q.exec();
 
@@ -47,7 +86,25 @@ export class OrdersService {
   }
 
   async findOne(id: string) {
-    const order = await this.orderModel.findById(id);
+    const order = await this.orderModel
+      .findById(id)
+      .populate({
+        path: 'pickupAddressId',
+        model: Address.name,
+        populate: [
+          { path: 'provinceId', model: Province.name },
+          { path: 'communeId', model: Commune.name },
+        ],
+      })
+      .populate({
+        path: 'deliveryAddressId',
+        model: Address.name,
+        populate: [
+          { path: 'provinceId', model: Province.name },
+          { path: 'communeId', model: Commune.name },
+        ],
+      });
+
     if (!order || order.isDeleted)
       throw new NotFoundException('Order not found');
     return order;

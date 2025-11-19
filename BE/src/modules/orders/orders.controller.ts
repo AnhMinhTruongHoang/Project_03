@@ -9,14 +9,15 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { OrdersService } from './orders.service';
+import { ApiTags } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ResponseMessage, Users } from 'src/health/decorator/customize';
+import { Public, ResponseMessage, Users } from 'src/health/decorator/customize';
 import { IUser } from 'src/types/user.interface';
+import { OrderStatus } from './schemas/order.schemas';
+import { OrdersService } from './orders.service';
 
 @ApiTags('orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -42,6 +43,7 @@ export class OrdersController {
     return this.ordersService.findAll(page, size, query || {});
   }
 
+  @Public()
   @Get(':id')
   @ResponseMessage('Chi tiết đơn hàng')
   findOne(@Param('id') id: string) {
@@ -52,6 +54,12 @@ export class OrdersController {
   @ResponseMessage('Cập nhật đơn hàng')
   update(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
     return this.ordersService.update(id, dto);
+  }
+
+  @Patch(':id/status/:status')
+  @ResponseMessage('Cập nhật trạng thái đơn hàng')
+  updateStatus(@Param('id') id: string, @Param('status') status: OrderStatus) {
+    return this.ordersService.updateStatus(id, status);
   }
 
   @Delete(':id')

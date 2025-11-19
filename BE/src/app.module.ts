@@ -17,11 +17,11 @@ import { DatabasesModule } from './modules/databases/databases.module';
 import { ShipmentsModule } from './modules/shipments/shipments.module';
 import { BranchesModule } from './modules/branches/branches.module';
 import { ServicesModule } from './modules/services/services.module';
-import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { PricingModule } from './modules/pricing/pricing.module';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { OrdersModule } from './modules/orders/orders.module';
 import { LocationModule } from './modules/location/location.module';
 
 @Module({

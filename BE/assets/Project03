@@ -49,7 +49,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjkwYzZlNGRjMjRhMDdmOGVjZGFjNmRjIiwibmFtZSI6IkFkbWluIiwiZW1haWwiOiJhZG1pbkB2dHBvc3QubG9jYWwiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjI0MjM5NTksImV4cCI6MTc2MjQ4Mzk1OX0._7au1ySIMDiPKTuNOgAZiE5zfU1v3qsf-peuYlY05_E",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjkwZTJkZGU2MTllZDEyMDdmMGEzMDEzIiwibmFtZSI6IkFkbWluIiwiZW1haWwiOiJhZG1pbkB2dHBvc3QubG9jYWwiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjI1MzgzNjQsImV4cCI6MTc2MjU5ODM2NH0.o-xEISsnUR-9uclqYj1S5F9jtWwDUIWorfRxsRsChf4",
 									"type": "string"
 								}
 							]
@@ -676,14 +676,7 @@
 					"name": "List Provinces",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjkwY2Q0ZTE2OGQ2N2YwNWQwMjEwODYwIiwibmFtZSI6IkFkbWluIiwiZW1haWwiOiJhZG1pbkB2dHBvc3QubG9jYWwiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjI0NDg4MzUsImV4cCI6MTc2MjUwODgzNX0.FDcseDcoqLs-VXtY_PPynG58c4X597i06cloyQ3FZNE",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "GET",
 						"header": [
@@ -716,17 +709,10 @@
 					"response": []
 				},
 				{
-					"name": "List Districts by Province",
+					"name": "List Communes by Province",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjkwY2Q0ZTE2OGQ2N2YwNWQwMjEwODYwIiwibmFtZSI6IkFkbWluIiwiZW1haWwiOiJhZG1pbkB2dHBvc3QubG9jYWwiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjI0NDg4MzUsImV4cCI6MTc2MjUwODgzNX0.FDcseDcoqLs-VXtY_PPynG58c4X597i06cloyQ3FZNE",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "GET",
 						"header": [
@@ -742,7 +728,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8000/api/v1/locations/districts?provinceId=690cd4e168d67f05d0210881",
+							"raw": "http://localhost:8000/api/v1/locations/Communes?provinceId=690e2dde619ed1207f0a3031",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -752,12 +738,12 @@
 								"api",
 								"v1",
 								"locations",
-								"districts"
+								"Communes"
 							],
 							"query": [
 								{
 									"key": "provinceId",
-									"value": "690cd4e168d67f05d0210881"
+									"value": "690e2dde619ed1207f0a3031"
 								}
 							]
 						}
@@ -819,7 +805,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjkwY2Q0ZTE2OGQ2N2YwNWQwMjEwODYwIiwibmFtZSI6IkFkbWluIiwiZW1haWwiOiJhZG1pbkB2dHBvc3QubG9jYWwiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjI0NDg4MzUsImV4cCI6MTc2MjUwODgzNX0.FDcseDcoqLs-VXtY_PPynG58c4X597i06cloyQ3FZNE",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjkwZTJkZGU2MTllZDEyMDdmMGEzMDEzIiwibmFtZSI6IkFkbWluIiwiZW1haWwiOiJhZG1pbkB2dHBvc3QubG9jYWwiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjI1MzgzNjQsImV4cCI6MTc2MjU5ODM2NH0.o-xEISsnUR-9uclqYj1S5F9jtWwDUIWorfRxsRsChf4",
 									"type": "string"
 								}
 							]
@@ -1037,7 +1023,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjkwYzZlNGRjMjRhMDdmOGVjZGFjNmRjIiwibmFtZSI6IkFkbWluIiwiZW1haWwiOiJhZG1pbkB2dHBvc3QubG9jYWwiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjI0NDAwMzEsImV4cCI6MTc2MjUwMDAzMX0.Ayrq--paxkMijtv8Dba6K8sMh7kS1vJ3ScvPSYp4dAM",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjkwZTJkZGU2MTllZDEyMDdmMGEzMDEzIiwibmFtZSI6IkFkbWluIiwiZW1haWwiOiJhZG1pbkB2dHBvc3QubG9jYWwiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjI1MzgzNjQsImV4cCI6MTc2MjU5ODM2NH0.o-xEISsnUR-9uclqYj1S5F9jtWwDUIWorfRxsRsChf4",
 									"type": "string"
 								}
 							]

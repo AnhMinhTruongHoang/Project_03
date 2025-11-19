@@ -1,17 +1,26 @@
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { IUser } from 'src/types/user.interface';
 import { Pricing, PricingDocument } from './schemas/pricing.schemas';
+import { Branch, BranchDocument } from '../branches/schemas/branch.schemas';
+import { Province } from '../location/schemas/province.schema';
+import { Commune } from '../location/schemas/Commune.schema';
+import { Address } from '../location/schemas/address.schema';
+import { ProvinceCode, Region } from 'src/types/location.type';
+import { getRegionByProvinceCode } from '../location/dto/locations';
 
 @Injectable()
 export class PricingService {
   constructor(
     @InjectModel(Pricing.name)
     private pricingModel: SoftDeleteModel<PricingDocument>,
+    @InjectModel(Branch.name) private branchModel: Model<BranchDocument>,
+    @InjectModel(Province.name) private provinceModel: Model<Province>,
+    @InjectModel(Commune.name) private communeModel: Model<Commune>,
+    @InjectModel(Address.name) private addressModel: Model<Address>,
   ) {}
 
   create(dto: any) {
@@ -73,38 +82,71 @@ export class PricingService {
     return { message: 'Pricing soft-deleted' };
   }
 
-  // Tính phí theo km + cân nặng
-  async calculate(serviceId: string, km: number, weightKg: number) {
-    const now = new Date();
+  ///cal
 
-    const slab = await this.pricingModel.findOne({
-      serviceId,
-      isActive: true,
-      isDeleted: false,
-      minWeightKg: { $lte: weightKg },
-      maxWeightKg: { $gte: weightKg },
-      minKm: { $lte: km },
-      maxKm: { $gte: km },
-      effectiveFrom: { $lte: now },
-      $or: [
-        { effectiveTo: null },
-        { effectiveTo: { $exists: false } },
-        { effectiveTo: { $gte: now } },
-      ],
-    });
+  async calculateShipping(
+    originProvinceCode: ProvinceCode,
+    destProvinceCode: ProvinceCode,
+    serviceCode: 'STD' | 'EXP',
+    weightKg: number,
+    isLocal: boolean,
+  ) {
+    // 1) Nội thành + gần kho
+    if (isLocal) {
+      return {
+        totalPrice: 0,
+        description: 'Free ship (nội thành/gần kho)',
+      };
+    }
 
-    if (!slab)
-      throw new NotFoundException(
-        'No pricing slab found for given km & weight',
-      );
+    const originRegion = getRegionByProvinceCode(originProvinceCode);
+    const destRegion = getRegionByProvinceCode(destProvinceCode);
 
-    if (slab.flatFee != null) return slab.flatFee;
+    if (!originRegion || !destRegion) {
+      throw new NotFoundException('Province code không hợp lệ');
+    }
 
-    const fee =
-      (slab.baseFee ?? 0) +
-      (slab.perKm ?? 0) * km +
-      (slab.perKg ?? 0) * weightKg;
-    // nếu cần làm tròn:
-    return Math.round(fee);
+    // 2) Giá dịch vụ
+    const SERVICE_BASE_PRICE: Record<'STD' | 'EXP', number> = {
+      STD: 20000,
+      EXP: 40000,
+    };
+
+    const baseServicePrice = SERVICE_BASE_PRICE[serviceCode];
+    if (baseServicePrice == null) {
+      throw new NotFoundException('Service code không hợp lệ');
+    }
+
+    // 3) Phụ phí theo vùng
+    let regionFee = 0;
+    const pair = new Set<Region>([originRegion, destRegion]);
+
+    if (pair.has('North') && pair.has('Central')) {
+      regionFee = 10000;
+    } else if (pair.has('North') && pair.has('South')) {
+      regionFee = 15000;
+    } else if (pair.has('South') && pair.has('Central')) {
+      regionFee = 10000;
+    } // cùng vùng = 0 theo spec hiện tại
+
+    // 4) Phụ phí > 5kg
+    const overweightFee = weightKg > 5 ? 5000 : 0;
+
+    const totalPrice = baseServicePrice + regionFee + overweightFee;
+
+    return {
+      totalPrice,
+      breakdown: {
+        originProvinceCode,
+        destProvinceCode,
+        originRegion,
+        destRegion,
+        serviceCode,
+        baseServicePrice,
+        regionFee,
+        overweightFee,
+        isLocal,
+      },
+    };
   }
 }

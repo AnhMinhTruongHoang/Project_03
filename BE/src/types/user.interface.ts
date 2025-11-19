@@ -8,7 +8,7 @@ export interface IUser {
   name: string;
   email: string;
   role?: RoleType;
-  phone: number;
+  phone: string;
   age: number;
   gender: string;
   address: string;

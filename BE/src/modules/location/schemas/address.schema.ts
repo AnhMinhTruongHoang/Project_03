@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
 import { Province } from './province.schema';
-import { District } from './district.schema';
+import { Commune } from './Commune.schema';
 
 @Schema({
   timestamps: true,
@@ -13,8 +13,8 @@ export class Address {
   @Prop({ type: Types.ObjectId, ref: Province.name, required: true })
   provinceId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: District.name, required: true })
-  districtId: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: Commune.name, required: true })
+  communeId: Types.ObjectId;
 
   /** Trường lưu trữ thực tế trong DB */
   @Prop({ type: String, required: false })
@@ -52,7 +52,7 @@ AddressSchema.virtual('line1')
   });
 
 /** Index gợi ý */
-AddressSchema.index({ provinceId: 1, districtId: 1, isDeleted: 1 });
+AddressSchema.index({ provinceId: 1, communeId: 1, isDeleted: 1 });
 AddressSchema.index({ contactName: 1, isDeleted: 1 });
 
 /** Soft-delete plugin */

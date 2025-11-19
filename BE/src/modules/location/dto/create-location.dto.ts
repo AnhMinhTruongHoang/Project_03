@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 export class CreateAddressDto {
   @IsNotEmpty() @IsString() line1: string;
   @IsNotEmpty() provinceId: Types.ObjectId;
-  @IsNotEmpty() districtId: Types.ObjectId;
+  @IsNotEmpty() communeId: Types.ObjectId;
   @IsNotEmpty() wardId: Types.ObjectId;
   @IsNumber() lat: number;
   @IsNumber() lng: number;
