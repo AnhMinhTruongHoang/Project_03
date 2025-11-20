@@ -84,6 +84,9 @@ export class CreateUserDto {
   @IsEnum(RoleEnum, { message: 'Quyền không hợp lệ' })
   role?: RoleEnum;
 
+  @IsOptional()
+  branchId?: string;
+
   @ApiProperty({
     required: false,
     example: 'https://example.com/avatar.png',

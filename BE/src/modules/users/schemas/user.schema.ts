@@ -32,6 +32,13 @@ export class User {
   })
   role: string;
 
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Branch',
+    required: false,
+  })
+  branchId?: mongoose.Types.ObjectId;
+
   @Prop()
   avatar: string;
 
