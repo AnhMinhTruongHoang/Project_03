@@ -17,32 +17,25 @@ export class Pricing {
   })
   serviceId: Types.ObjectId;
 
-  // --- Slab theo cân nặng (kg)
+  /**
+   * Base price cho service (nếu muốn override giá trong Service)
+   * Ví dụ: STD = 20000, EXP = 40000
+   */
   @Prop({ required: true, min: 0 })
-  minWeightKg: number;
+  basePrice: number;
 
-  @Prop({ required: true, min: 0 })
-  maxWeightKg: number;
+  /**
+   * Ngưỡng quá cân (kg) – ví dụ > 5kg thì tính phụ phí
+   */
+  @Prop({ required: true, min: 0, default: 5 })
+  overweightThresholdKg: number;
 
-  // --- Slab theo khoảng cách (km)
-  @Prop({ required: true, min: 0 })
-  minKm: number;
-
-  @Prop({ required: true, min: 0 })
-  maxKm: number;
-
-  // --- Công thức tính phí
-  @Prop({ default: 0 })
-  baseFee: number;
-
-  @Prop({ default: 0 })
-  perKm: number;
-
-  @Prop({ default: 0 })
-  perKg: number;
-
-  @Prop()
-  flatFee?: number; // nếu có, ưu tiên dùng fixed giá
+  /**
+   * Phụ phí khi vượt ngưỡng cân
+   * Ví dụ: 5000
+   */
+  @Prop({ required: true, min: 0, default: 5000 })
+  overweightFee: number;
 
   // --- Quản trị & hiệu lực
   @Prop({ default: true })
@@ -67,17 +60,13 @@ export class Pricing {
 
 export const PricingSchema = SchemaFactory.createForClass(Pricing);
 
-// Index gợi ý
+// Index gợi ý: mỗi service chỉ có 1 giá active theo thời gian
 PricingSchema.index(
   {
     serviceId: 1,
-    minWeightKg: 1,
-    maxWeightKg: 1,
-    minKm: 1,
-    maxKm: 1,
     effectiveFrom: 1,
   },
-  { unique: true },
+  { unique: false },
 );
 PricingSchema.index({ serviceId: 1, isActive: 1, isDeleted: 1 });
 PricingSchema.index({ effectiveFrom: 1, effectiveTo: 1 });

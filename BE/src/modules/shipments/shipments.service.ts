@@ -23,29 +23,24 @@ import { Service } from '../services/schemas/service.schemas';
 import { Province } from '../location/schemas/province.schema';
 import { Commune } from '../location/schemas/Commune.schema';
 
+import { ProvinceCode, Region } from 'src/types/location.type';
+import { getRegionByProvinceCode } from '../location/dto/locations';
+
 // ===== Lean types =====
 interface AddressLean {
   _id: Types.ObjectId;
   lat?: number;
   lng?: number;
+  provinceId?: Types.ObjectId;
 }
 interface ServiceLean {
   _id: Types.ObjectId;
   volumetricDivisor?: number; // vd: 6000
+  code?: string; // 'STD' | 'EXP'
 }
-interface PricingSlabLean {
-  baseFee?: number;
-  perKm?: number;
-  perKg?: number;
-  flatFee?: number | null;
-  isActive: boolean;
-  isDeleted: boolean;
-  minWeightKg: number;
-  maxWeightKg: number;
-  minKm: number;
-  maxKm: number;
-  effectiveFrom?: Date;
-  effectiveTo?: Date | null;
+interface ProvinceLean {
+  _id: Types.ObjectId;
+  code: ProvinceCode;
 }
 
 @Injectable()
@@ -61,6 +56,7 @@ export class ShipmentsService {
     const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
     return `VN${nanoid()}`;
   }
+
   private distanceKm(lat1 = 0, lon1 = 0, lat2 = 0, lon2 = 0) {
     const toRad = (d: number) => (d * Math.PI) / 180;
     const R = 6371;
@@ -79,6 +75,7 @@ export class ShipmentsService {
     // Lấy Address + Service
     const AddressModel = this.connection.model<Address>('Address');
     const ServiceModel = this.connection.model<Service>('Service');
+    const ProvinceModel = this.connection.model<Province>('Province');
 
     const [pickup, delivery, service] = await Promise.all([
       AddressModel.findById(dto.pickupAddressId).lean<AddressLean>(),
@@ -90,6 +87,24 @@ export class ShipmentsService {
       throw new BadRequestException('Địa chỉ không hợp lệ');
     if (!service) throw new BadRequestException('Service không hợp lệ');
 
+    // Lấy provinceCode từ Address -> Province
+    const [originProv, destProv] = await Promise.all([
+      pickup.provinceId
+        ? ProvinceModel.findById(pickup.provinceId).lean<ProvinceLean>()
+        : null,
+      delivery.provinceId
+        ? ProvinceModel.findById(delivery.provinceId).lean<ProvinceLean>()
+        : null,
+    ]);
+
+    if (!originProv || !destProv) {
+      throw new BadRequestException('Province code không hợp lệ');
+    }
+
+    const originProvinceCode = originProv.code;
+    const destProvinceCode = destProv.code;
+
+    // Khoảng cách (chỉ để lưu tham khảo)
     const km = this.distanceKm(
       pickup.lat ?? 0,
       pickup.lng ?? 0,
@@ -97,7 +112,7 @@ export class ShipmentsService {
       delivery.lng ?? 0,
     );
 
-    // Volumetric
+    // Volumetric weight
     let volumetricWeightKg: number | undefined;
     if (
       dto.lengthCm &&
@@ -110,47 +125,47 @@ export class ShipmentsService {
     }
     const chargeableWeightKg = Math.max(dto.weightKg, volumetricWeightKg ?? 0);
 
-    // Bảng giá
-    const PricingModel = this.connection.model('Pricing');
-    const now = new Date();
-    const slab = await PricingModel.findOne({
-      serviceId: new Types.ObjectId(dto.serviceId),
-      isActive: true,
-      isDeleted: false,
-      minWeightKg: { $lte: chargeableWeightKg },
-      maxWeightKg: { $gte: chargeableWeightKg },
-      minKm: { $lte: km },
-      maxKm: { $gte: km },
-      $and: [
-        {
-          $or: [
-            { effectiveFrom: { $exists: false } },
-            { effectiveFrom: { $lte: now } },
-          ],
-        },
-        {
-          $or: [
-            { effectiveTo: null },
-            { effectiveTo: { $exists: false } },
-            { effectiveTo: { $gte: now } },
-          ],
-        },
-      ],
-    }).lean<PricingSlabLean>();
+    // ===== TÍNH GIÁ THEO RULE MỚI =====
+    const originRegion = getRegionByProvinceCode(originProvinceCode);
+    const destRegion = getRegionByProvinceCode(destProvinceCode);
 
-    if (!slab) {
-      throw new BadRequestException(
-        'Không tìm thấy bảng giá phù hợp (km/weight)',
-      );
+    if (!originRegion || !destRegion) {
+      throw new BadRequestException('Province code không hợp lệ (region)');
     }
 
-    const base = slab.baseFee ?? 0;
-    const perKm = slab.perKm ?? 0;
-    const perKg = slab.perKg ?? 0;
-    const shippingFee =
-      slab.flatFee != null
-        ? slab.flatFee
-        : Math.round(base + perKm * km + perKg * chargeableWeightKg);
+    // base theo service code
+    const serviceCode = service.code as 'STD' | 'EXP';
+    const SERVICE_BASE_PRICE: Record<'STD' | 'EXP', number> = {
+      STD: 20000,
+      EXP: 40000,
+    };
+    const baseServicePrice = SERVICE_BASE_PRICE[serviceCode];
+    if (baseServicePrice == null) {
+      throw new BadRequestException('Service code không hợp lệ');
+    }
+
+    // phụ phí vùng
+    let regionFee = 0;
+    const pair = new Set<Region>([originRegion, destRegion]);
+    if (pair.has('North') && pair.has('Central')) {
+      regionFee = 10000;
+    } else if (pair.has('North') && pair.has('South')) {
+      regionFee = 15000;
+    } else if (pair.has('South') && pair.has('Central')) {
+      regionFee = 10000;
+    } // cùng vùng = 0
+
+    // phụ phí quá cân (> 5kg)
+    const overweightFee = chargeableWeightKg > 5 ? 5000 : 0;
+
+    // nội thành + cùng kho = free ship
+    const isLocal =
+      originProvinceCode === destProvinceCode &&
+      dto.originBranchId === dto.destinationBranchId;
+
+    const shippingFee = isLocal
+      ? 0
+      : baseServicePrice + regionFee + overweightFee;
 
     const shipment = await this.shipmentModel.create({
       ...dto,
