@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -20,6 +20,9 @@ export class User {
   @Prop({ enum: ['MALE', 'FEMALE', 'OTHER'], required: false })
   gender: string;
 
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true })
+  BranchId: Types.ObjectId;
+
   @Prop()
   address: string;
 
@@ -31,6 +34,13 @@ export class User {
     enum: ['USER', 'ADMIN', 'STAFF', 'COURIER', 'CUSTOMER'],
   })
   role: string;
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Branch',
+    required: false,
+  })
+  branchId?: mongoose.Types.ObjectId;
 
   @Prop()
   avatar: string;

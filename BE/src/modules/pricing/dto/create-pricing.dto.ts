@@ -5,7 +5,10 @@ import {
   IsNumber,
   Min,
   IsOptional,
+  IsEnum,
+  IsBoolean,
 } from 'class-validator';
+import { ProvinceCode } from 'src/types/location.type';
 
 export class CreatePricingDto {
   @ApiProperty({ example: '652f03bc6db3430b5c1f26a2' })

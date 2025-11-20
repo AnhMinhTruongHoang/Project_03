@@ -56,6 +56,9 @@ export class CreateUserDto {
   @IsEnum(GenderEnum, { message: 'Giới tính không hợp lệ' })
   gender?: GenderEnum;
 
+  @IsOptional()
+  BranchId: string;
+
   @ApiProperty({
     required: false,
     example: '0987654321',
@@ -83,6 +86,9 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(RoleEnum, { message: 'Quyền không hợp lệ' })
   role?: RoleEnum;
+
+  @IsOptional()
+  branchId?: string;
 
   @ApiProperty({
     required: false,

@@ -16,7 +16,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ResponseMessage, Users } from 'src/health/decorator/customize';
+import { Public, ResponseMessage, Users } from 'src/health/decorator/customize';
 import { IUser } from 'src/types/user.interface';
 import { OrderStatus } from './schemas/order.schemas';
 import { OrdersService } from './orders.service';
@@ -64,6 +64,7 @@ export class OrdersController {
     return this.ordersService.getStatistics(m, y, user);
   }
 
+  @Public()
   @Get(':id')
   @ResponseMessage('Chi tiết đơn hàng')
   findOne(@Param('id') id: string) {

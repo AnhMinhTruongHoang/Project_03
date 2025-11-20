@@ -15,7 +15,7 @@ import { UpdateBranchDto } from './dto/update-branch.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ResponseMessage } from 'src/health/decorator/customize';
+import { Public, ResponseMessage } from 'src/health/decorator/customize';
 
 @ApiTags('branches')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -29,6 +29,7 @@ export class BranchesController {
     return this.branchesService.create(dto);
   }
 
+  @Public()
   @Get()
   @ResponseMessage('Danh sách chi nhánh')
   findAll(
@@ -41,6 +42,7 @@ export class BranchesController {
     return this.branchesService.findAll(page, limit, query || {});
   }
 
+  @Public()
   @Get(':id')
   @ResponseMessage('Chi tiết chi nhánh')
   findOne(@Param('id') id: string) {

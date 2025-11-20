@@ -17,32 +17,39 @@ export class CreateBranchDto {
   @IsString()
   address: string;
 
-  @ApiProperty({ example: '0987654321', description: 'Số điện thoại' })
+  @ApiProperty({
+    example: '0987654321',
+    description: 'Số điện thoại',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   phone?: string;
 
   @ApiProperty({
-    example: '653f2a2bb70f7a1f4fa11111',
-    description: 'ID quản lý (User)',
+    example: 'Hà Nội',
+    description: 'Tên thành phố hiển thị (không bắt buộc)',
     required: false,
   })
-  @IsOptional()
-  @IsMongoId()
-  managerId?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  postalCode?: string;
-
-  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   city?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({
+    required: false,
+    example: '653f2a2bb70f7a1f4fa22222',
+    description: 'ProvinceId (Mongo ObjectId)',
+  })
   @IsOptional()
-  @IsString()
-  province?: string;
+  @IsMongoId()
+  provinceId?: string;
+
+  @ApiProperty({
+    required: false,
+    example: '653f2a2bb70f7a1f4fa33333',
+    description: 'CommuneId (Mongo ObjectId)',
+  })
+  @IsOptional()
+  @IsMongoId()
+  communeId?: string;
 }
