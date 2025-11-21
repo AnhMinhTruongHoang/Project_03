@@ -3916,7 +3916,7 @@ export class DatabasesService implements OnModuleInit {
       {
         code: 'HCM01',
         name: 'HCM Center',
-        address: '456 Lê Lợi, Tân Thới Nhì,Thành phố HCM ',
+        address: '456 Lê Lợi, Sài Gòn ,Thành phố HCM ',
         provinceName: 'Thành phố Hồ Chí Minh',
         communeName: 'Sài Gòn',
         phone: '028-000-000',
