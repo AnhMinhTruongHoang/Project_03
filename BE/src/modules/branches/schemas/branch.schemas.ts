@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { Commune } from 'src/modules/location/schemas/Commune.schema';
+import { Province } from 'src/modules/location/schemas/province.schema';
 
 export type BranchDocument = HydratedDocument<Branch> & {
   createdAt: Date;
@@ -20,17 +22,19 @@ export class Branch {
   @Prop()
   phone: string;
 
-  @Prop({ required: false })
-  postalCode?: string;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Province.name,
+    required: false,
+  })
+  provinceId?: mongoose.Types.ObjectId;
 
-  @Prop({ required: false })
-  city?: string;
-
-  @Prop({ required: false })
-  province?: string;
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false })
-  managerId?: mongoose.Types.ObjectId;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Commune.name,
+    required: false,
+  })
+  communeId?: mongoose.Types.ObjectId;
 
   @Prop({ default: true })
   isActive: boolean;

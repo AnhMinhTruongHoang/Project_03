@@ -13,27 +13,43 @@ export class CreatePricingDto {
   @IsMongoId()
   serviceId: string;
 
-  @ApiProperty({ example: 0 }) @IsNumber() @Min(0) minWeightKg: number;
-  @ApiProperty({ example: 2 }) @IsNumber() @Min(0) maxWeightKg: number;
+  @ApiProperty({ example: 20000, description: 'Base price cho service' })
+  @IsNumber()
+  @Min(0)
+  basePrice: number;
 
-  @ApiProperty({ example: 0 }) @IsNumber() @Min(0) minKm: number;
-  @ApiProperty({ example: 5 }) @IsNumber() @Min(0) maxKm: number;
-
-  @ApiProperty({ example: 10000 }) @IsNumber() @Min(0) baseFee: number;
-  @ApiProperty({ example: 1000 }) @IsNumber() @Min(0) perKm: number;
-  @ApiProperty({ example: 2000 }) @IsNumber() @Min(0) perKg: number;
-
-  @ApiProperty({ required: false, example: 35000 })
+  @ApiProperty({
+    example: 5,
+    description: 'Ngưỡng quá cân (kg), ví dụ >5kg thì tính phụ phí',
+    required: false,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
-  flatFee?: number;
+  overweightThresholdKg?: number;
 
-  @ApiProperty({ required: false, example: new Date().toISOString() })
+  @ApiProperty({
+    example: 5000,
+    description: 'Phụ phí khi vượt ngưỡng cân',
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  overweightFee?: number;
+
+  @ApiProperty({
+    required: false,
+    example: new Date().toISOString(),
+    description: 'Ngày bắt đầu hiệu lực',
+  })
   @IsOptional()
   effectiveFrom?: Date;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({
+    required: false,
+    description: 'Ngày kết thúc hiệu lực (nếu có)',
+  })
   @IsOptional()
   effectiveTo?: Date;
 }
