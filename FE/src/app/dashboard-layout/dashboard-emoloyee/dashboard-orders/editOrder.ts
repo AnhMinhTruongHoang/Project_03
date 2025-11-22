@@ -55,20 +55,87 @@ export class EditOrder implements OnInit {
     this.loadProvinces();
     this.loadOrderDetail();
 
-    // Debounce địa chỉ để update map realtime
+    // Thay đổi lớn ở đây: debounce + điều kiện
     this.orderForm
       .get('pickupDetailAddress')
-      ?.valueChanges.pipe(debounceTime(500))
-      .subscribe(() => this.updatePickupMap());
+      ?.valueChanges.pipe(debounceTime(800))
+      .subscribe(() => {
+        if (this.shouldSearch('pickup')) this.updatePickupMap();
+      });
 
     this.orderForm
       .get('deliveryDetailAddress')
-      ?.valueChanges.pipe(debounceTime(500))
-      .subscribe(() => this.updateDeliveryMap());
+      ?.valueChanges.pipe(debounceTime(800))
+      .subscribe(() => {
+        if (this.shouldSearch('delivery')) this.updateDeliveryMap();
+      });
 
-    // Tự động tính lại phí nếu CONFIRMED
     this.orderForm.valueChanges.pipe(debounceTime(600)).subscribe(() => {
       if (this.order?.status === 'CONFIRMED') this.recalculateIfAllowed();
+    });
+  }
+
+  // Thêm hàm này vào class
+  private shouldSearch(type: 'pickup' | 'delivery'): boolean {
+    const f = this.orderForm.value;
+    const detail = type === 'pickup' ? f.pickupDetailAddress : f.deliveryDetailAddress;
+    const provinceId = type === 'pickup' ? f.pickupProvinceId : f.deliveryProvinceId;
+    const communeId = type === 'pickup' ? f.pickupCommuneId : f.deliveryCommuneId;
+    return !!(detail && detail.trim().length >= 3 && provinceId && communeId);
+  }
+
+  // Sửa 2 hàm update map
+  updatePickupMap() {
+    const f = this.orderForm.value;
+    if (!f.pickupDetailAddress || !f.pickupProvinceId || !f.pickupCommuneId) return;
+
+    const fullAddress = `${this.getCommuneName(f.pickupCommuneId)}, ${this.getProvinceName(
+      f.pickupProvinceId
+    )}, ${f.pickupDetailAddress}`;
+    console.log('📍 Pickup full address:', fullAddress); // Debug
+
+    this.geocoding.search(fullAddress).subscribe((res) => {
+      console.log('📍 Pickup result:', res); // Debug
+      if (!res || res.length === 0) {
+        console.warn('⚠️ No pickup location found');
+        return;
+      }
+
+      const lat = parseFloat(res[0].lat);
+      const lng = parseFloat(res[0].lon);
+      console.log(`✅ Setting pickup marker at ${lat}, ${lng}`);
+
+      this.orderForm.patchValue({ pickupLat: lat, pickupLng: lng });
+      if (this.pickupMap) {
+        this.pickupMap.setMarker(lat, lng);
+      }
+    });
+  }
+
+  updateDeliveryMap() {
+    const f = this.orderForm.value;
+    if (!f.deliveryDetailAddress || !f.deliveryProvinceId || !f.deliveryCommuneId) return;
+
+    const fullAddress = `${this.getCommuneName(f.deliveryCommuneId)}, ${this.getProvinceName(
+      f.deliveryProvinceId
+    )}, ${f.deliveryDetailAddress}`;
+    console.log('📍 Delivery full address:', fullAddress); // Debug
+
+    this.geocoding.search(fullAddress).subscribe((res) => {
+      console.log('📍 Delivery result:', res); // Debug
+      if (!res || res.length === 0) {
+        console.warn('⚠️ No delivery location found');
+        return;
+      }
+
+      const lat = parseFloat(res[0].lat);
+      const lng = parseFloat(res[0].lon);
+      console.log(`✅ Setting delivery marker at ${lat}, ${lng}`);
+
+      this.orderForm.patchValue({ deliveryLat: lat, deliveryLng: lng });
+      if (this.deliveryMap) {
+        this.deliveryMap.setMarker(lat, lng);
+      }
     });
   }
 
@@ -255,38 +322,6 @@ export class EditOrder implements OnInit {
 
   setDeliveryLocation(pos: { lat: number; lng: number }) {
     this.orderForm.patchValue({ deliveryLat: pos.lat, deliveryLng: pos.lng });
-  }
-
-  updatePickupMap() {
-    const f = this.orderForm.value;
-    if (!f.pickupDetailAddress || !f.pickupProvinceId || !f.pickupCommuneId) return;
-    const full = `${this.getCommuneName(f.pickupCommuneId)}, ${this.getProvinceName(
-      f.pickupProvinceId
-    )}, ${f.pickupDetailAddress}`;
-    this.geocoding.search(full).subscribe((res) => {
-      if (res?.length) {
-        const lat = parseFloat(res[0].lat);
-        const lng = parseFloat(res[0].lon);
-        this.orderForm.patchValue({ pickupLat: lat, pickupLng: lng });
-        this.pickupMap?.setMarker(lat, lng);
-      }
-    });
-  }
-
-  updateDeliveryMap() {
-    const f = this.orderForm.value;
-    if (!f.deliveryDetailAddress || !f.deliveryProvinceId || !f.deliveryCommuneId) return;
-    const full = `${this.getCommuneName(f.deliveryCommuneId)}, ${this.getProvinceName(
-      f.deliveryProvinceId
-    )}, ${f.deliveryDetailAddress}`;
-    this.geocoding.search(full).subscribe((res) => {
-      if (res?.length) {
-        const lat = parseFloat(res[0].lat);
-        const lng = parseFloat(res[0].lon);
-        this.orderForm.patchValue({ deliveryLat: lat, deliveryLng: lng });
-        this.deliveryMap?.setMarker(lat, lng);
-      }
-    });
   }
 
   getProvinceName(id: string) {

@@ -8,7 +8,7 @@ import { BranchService } from '../../../services/branch.service';
   selector: 'app-branch-list',
   templateUrl: './dashboard-branch.html',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
 })
 export class ListBranch implements OnInit {
   branches: any[] = [];

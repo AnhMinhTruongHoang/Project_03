@@ -37,29 +37,57 @@ export class CreateOrder implements OnInit {
     private locationService: LocationService,
     private router: Router,
     private geocoding: GeocodingService,
-    private http: HttpClient,
-  ) { }
+    private http: HttpClient
+  ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadProvinces();
 
-    // Debounce input địa chỉ pickup
+    // Giảm debounce xuống 800ms (nhạy hơn), chỉ search khi >=3 ký tự
     this.orderForm
       .get('pickupDetailAddress')!
-      .valueChanges.pipe(debounceTime(500))
-      .subscribe(() => this.updatePickupMap());
+      .valueChanges.pipe(debounceTime(800))
+      .subscribe(() => {
+        if (this.shouldSearch('pickup')) {
+          console.log('🔍 Starting pickup search...'); // Debug
+          this.updatePickupMap();
+        }
+      });
 
-    // Debounce input địa chỉ delivery
     this.orderForm
       .get('deliveryDetailAddress')!
-      .valueChanges.pipe(debounceTime(500))
-      .subscribe(() => this.updateDeliveryMap());
+      .valueChanges.pipe(debounceTime(800))
+      .subscribe(() => {
+        if (this.shouldSearch('delivery')) {
+          console.log('🔍 Starting delivery search...'); // Debug
+          this.updateDeliveryMap();
+        }
+      });
 
-    this.orderForm.valueChanges.pipe(
-      debounceTime(600),
-      distinctUntilChanged()
-    ).subscribe(() => this.calculateShippingFee());
+    this.orderForm.valueChanges
+      .pipe(debounceTime(600), distinctUntilChanged())
+      .subscribe(() => this.calculateShippingFee());
+  }
+
+  // Hàm kiểm tra đủ điều kiện để search (tránh gọi thừa)
+  private shouldSearch(type: 'pickup' | 'delivery'): boolean {
+    const f = this.orderForm.value;
+    const detail = type === 'pickup' ? f.pickupDetailAddress : f.deliveryDetailAddress;
+    const provinceId = type === 'pickup' ? f.pickupProvinceId : f.deliveryProvinceId;
+    const communeId = type === 'pickup' ? f.pickupCommuneId : f.deliveryCommuneId;
+
+    const canSearch = !!(
+      detail &&
+      detail.trim().length >= 3 && // Giảm từ 6 xuống 3
+      provinceId &&
+      communeId
+    );
+
+    if (canSearch) {
+      console.log(`✅ Can search ${type}: "${detail}"`); // Debug
+    }
+    return canSearch;
   }
 
   initForm() {
@@ -80,11 +108,11 @@ export class CreateOrder implements OnInit {
     });
   }
 
+  // ... các hàm loadProvinces, onPickupProvinceChange, onDeliveryProvinceChange, submit ... giữ nguyên như cũ
+
   loadProvinces() {
     this.locationService.getProvinces().subscribe({
-      next: (res) => {
-        this.provinces = res.data || [];
-      },
+      next: (res) => (this.provinces = res.data || []),
       error: (err) => console.error('Load provinces failed', err),
     });
   }
@@ -119,6 +147,119 @@ export class CreateOrder implements OnInit {
     });
   }
 
+  setPickupLocation(pos: { lat: number; lng: number }) {
+    this.orderForm.patchValue({ pickupLat: pos.lat, pickupLng: pos.lng });
+  }
+
+  setDeliveryLocation(pos: { lat: number; lng: number }) {
+    this.orderForm.patchValue({ deliveryLat: pos.lat, deliveryLng: pos.lng });
+  }
+
+  updatePickupMap() {
+    const f = this.orderForm.value;
+    if (!f.pickupDetailAddress || !f.pickupProvinceId || !f.pickupCommuneId) return;
+
+    const fullAddress = `${this.getCommuneName(f.pickupCommuneId)}, ${this.getProvinceName(
+      f.pickupProvinceId
+    )}, ${f.pickupDetailAddress}`;
+    console.log('📍 Pickup full address:', fullAddress); // Debug
+
+    this.geocoding.search(fullAddress).subscribe((res) => {
+      console.log('📍 Pickup result:', res); // Debug
+      if (!res || res.length === 0) {
+        console.warn('⚠️ No pickup location found');
+        return;
+      }
+
+      const lat = parseFloat(res[0].lat);
+      const lng = parseFloat(res[0].lon);
+      console.log(`✅ Setting pickup marker at ${lat}, ${lng}`);
+
+      this.orderForm.patchValue({ pickupLat: lat, pickupLng: lng });
+      if (this.pickupMap) {
+        this.pickupMap.setMarker(lat, lng);
+      }
+    });
+  }
+
+  updateDeliveryMap() {
+    const f = this.orderForm.value;
+    if (!f.deliveryDetailAddress || !f.deliveryProvinceId || !f.deliveryCommuneId) return;
+
+    const fullAddress = `${this.getCommuneName(f.deliveryCommuneId)}, ${this.getProvinceName(
+      f.deliveryProvinceId
+    )}, ${f.deliveryDetailAddress}`;
+    console.log('📍 Delivery full address:', fullAddress); // Debug
+
+    this.geocoding.search(fullAddress).subscribe((res) => {
+      console.log('📍 Delivery result:', res); // Debug
+      if (!res || res.length === 0) {
+        console.warn('⚠️ No delivery location found');
+        return;
+      }
+
+      const lat = parseFloat(res[0].lat);
+      const lng = parseFloat(res[0].lon);
+      console.log(`✅ Setting delivery marker at ${lat}, ${lng}`);
+
+      this.orderForm.patchValue({ deliveryLat: lat, deliveryLng: lng });
+      if (this.deliveryMap) {
+        this.deliveryMap.setMarker(lat, lng);
+      }
+    });
+  }
+
+  getProvinceName(id: string) {
+    return this.provinces.find((p) => p._id === id)?.name || '';
+  }
+
+  getCommuneName(id: string) {
+    return (
+      this.pickupCommunes.find((c) => c._id === id)?.name ||
+      this.deliveryCommunes.find((c) => c._id === id)?.name ||
+      ''
+    );
+  }
+
+  async calculateShippingFee() {
+    // ... giữ nguyên như cũ
+    const f = this.orderForm.value;
+    if (!f.pickupProvinceId || !f.deliveryProvinceId || !f.weightKg) {
+      this.shippingFee = 0;
+      this.totalPrice = Number(f.codValue || 0);
+      return;
+    }
+
+    const originProv = this.provinces.find((p) => p._id === f.pickupProvinceId);
+    const destProv = this.provinces.find((p) => p._id === f.deliveryProvinceId);
+
+    if (!originProv?.code || !destProv?.code) {
+      this.shippingFee = 0;
+      this.totalPrice = Number(f.codValue || 0);
+      return;
+    }
+
+    try {
+      const isSameProvince = f.pickupProvinceId === f.deliveryProvinceId;
+      const res: any = await firstValueFrom(
+        this.ordersService.calculateShippingFee({
+          originProvinceCode: originProv.code,
+          destProvinceCode: destProv.code,
+          serviceCode: f.serviceCode,
+          weightKg: Number(f.weightKg),
+          isLocal: isSameProvince,
+        })
+      );
+      this.shippingFee = res.data?.totalPrice ?? 0;
+      this.totalPrice = this.shippingFee + Number(f.codValue || 0);
+    } catch (err) {
+      console.warn('Lỗi tính phí:', err);
+      this.shippingFee = 0;
+      this.totalPrice = Number(f.codValue || 0);
+    }
+  }
+
+  // submit() giữ nguyên như cũ của bạn
   submit() {
     if (this.orderForm.invalid) {
       this.orderForm.markAllAsTouched();
@@ -175,119 +316,5 @@ export class CreateOrder implements OnInit {
         });
       },
     });
-  }
-
-  setPickupLocation(pos: { lat: number; lng: number }) {
-    this.orderForm.patchValue({
-      pickupLat: pos.lat,
-      pickupLng: pos.lng,
-    });
-  }
-
-  setDeliveryLocation(pos: { lat: number; lng: number }) {
-    this.orderForm.patchValue({
-      deliveryLat: pos.lat,
-      deliveryLng: pos.lng,
-    });
-  }
-
-  updatePickupMap() {
-    const f = this.orderForm.value;
-
-    if (!f.pickupDetailAddress || !f.pickupProvinceId || !f.pickupCommuneId) return;
-
-    const fullAddress =
-      `${this.getCommuneName(f.pickupCommuneId)}, ` +
-      `${this.getProvinceName(f.pickupProvinceId)}, ` +
-      f.pickupDetailAddress;
-
-    this.geocoding.search(fullAddress).subscribe((res) => {
-      if (!res || res.length === 0) return;
-
-      const lat = parseFloat(res[0].lat);
-      const lng = parseFloat(res[0].lon);
-
-      this.orderForm.patchValue({ pickupLat: lat, pickupLng: lng });
-      if (this.pickupMap) this.pickupMap.setMarker(lat, lng);
-    });
-  }
-
-  updateDeliveryMap() {
-    const f = this.orderForm.value;
-
-    if (!f.deliveryDetailAddress || !f.deliveryProvinceId || !f.deliveryCommuneId) return;
-
-    const fullAddress =
-      `${this.getCommuneName(f.deliveryCommuneId)}, ` +
-      `${this.getProvinceName(f.deliveryProvinceId)}, ` +
-      f.deliveryDetailAddress;
-
-    this.geocoding.search(fullAddress).subscribe((res) => {
-      if (!res || res.length === 0) return;
-
-      const lat = parseFloat(res[0].lat);
-      const lng = parseFloat(res[0].lon);
-
-      this.orderForm.patchValue({ deliveryLat: lat, deliveryLng: lng });
-
-      if (this.deliveryMap) this.deliveryMap.setMarker(lat, lng);
-    });
-  }
-
-  getProvinceName(id: string) {
-    return this.provinces.find((p) => p._id === id)?.name || '';
-  }
-
-  getCommuneName(id: string) {
-    return (
-      this.pickupCommunes.find((c) => c._id === id)?.name ||
-      this.deliveryCommunes.find((c) => c._id === id)?.name ||
-      ''
-    );
-  }
-
-  async calculateShippingFee() {
-    const f = this.orderForm.value;
-
-    // Kiểm tra đủ dữ liệu
-    if (!f.pickupProvinceId || !f.deliveryProvinceId || !f.weightKg) {
-      this.shippingFee = 0;
-      this.totalPrice = Number(f.codValue || 0);
-      return;
-    }
-
-    const originProv = this.provinces.find(p => p._id === f.pickupProvinceId);
-    const destProv = this.provinces.find(p => p._id === f.deliveryProvinceId);
-
-    if (!originProv?.code || !destProv?.code) {
-      this.shippingFee = 0;
-      this.totalPrice = Number(f.codValue || 0);
-      return;
-    }
-
-    try {
-      const isSameProvince = f.pickupProvinceId && f.deliveryProvinceId
-        ? f.pickupProvinceId === f.deliveryProvinceId
-        : false;
-      const res: any = await firstValueFrom(
-        this.ordersService.calculateShippingFee({
-          originProvinceCode: originProv.code,
-          destProvinceCode: destProv.code,
-          serviceCode: f.serviceCode,
-          weightKg: Number(f.weightKg),
-          // isLocal: f.pickupProvinceId === f.deliveryProvinceId
-          isLocal: isSameProvince
-        })
-      );
-
-      console.log('RESPONSE FROM PRICING:', res);
-
-      this.shippingFee = res.data?.totalPrice ?? 0;
-      this.totalPrice = this.shippingFee + Number(f.codValue || 0);
-    } catch (err) {
-      console.warn('Lỗi tính phí:', err);
-      this.shippingFee = 0;
-      this.totalPrice = Number(f.codValue || 0);
-    }
   }
 }
