@@ -28,8 +28,7 @@
               "node_modules/owl.carousel/dist/assets/owl.carousel.min.css",
               "public/assets/css/styles.css",
               "node_modules/ngx-toastr/toastr.css",
-              "node_modules/leaflet/dist/leaflet.css",
-              "src/styles.css"
+              "node_modules/leaflet/dist/leaflet.css"
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",

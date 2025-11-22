@@ -2,7 +2,6 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LocationService } from '../services/location.service';
-import { normalizeAdministrativeData } from '../services/location-normalizer';
 import { Router } from '@angular/router';
 
 @Component({

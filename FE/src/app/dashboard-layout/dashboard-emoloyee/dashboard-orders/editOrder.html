@@ -5,7 +5,7 @@
   <div class="alert alert-info d-flex justify-content-between align-items-center">
     <div>
       <strong>Trạng thái:</strong>
-      <span class="badge bg-primary fs-5 ms-2">{{ statusText(order.status) }}</span>
+      <span class="badge bg-secondary fs-5 ms-2">{{ statusText(order.status) }}</span>
     </div>
     <div *ngIf="order.status === 'CANCELED'">
       <button class="btn btn-warning btn-sm" (click)="restoreOrder()">Khôi phục đơn</button>
@@ -118,9 +118,8 @@
       <div class="col-12 mt-4">
         <button type="submit" class="btn btn-success btn-lg me-2" [disabled]="loading || orderForm.invalid || !canSubmit()">
           <span *ngIf="!loading">Lưu thay đổi</span>
-          <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
         </button>
-        <button type="button" class="btn btn-secondary btn-lg" (click)="router.navigate(['..'])">Quay lại</button>
+        <button type="button" class="btn btn-success btn-lg me-2" (click)="router.navigate(['/employee/dashboard/order/list'])">Quay lại</button>
       </div>
     </div>
   </form>
