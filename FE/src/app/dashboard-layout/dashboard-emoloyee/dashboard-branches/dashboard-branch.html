@@ -1,0 +1,124 @@
+<div class="container mt-4">
+  <h2 class="mb-4 fw-bold">🏢 Danh sách chi nhánh / bưu cục</h2>
+
+  <!-- Filter Card -->
+  <div class="card mb-4 p-3 shadow-sm">
+    <form class="row g-3 align-items-end">
+      <!-- Tìm kiếm -->
+      <div class="col-md-4">
+        <label class="form-label">Tìm kiếm</label>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Mã chi nhánh / Tên / Địa chỉ"
+          [(ngModel)]="filters.search"
+          name="search"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+
+      <!-- Trạng thái -->
+      <div class="col-md-3">
+        <label class="form-label">Trạng thái</label>
+        <select
+          class="form-select"
+          [(ngModel)]="filters.isActive"
+          name="isActive"
+          (ngModelChange)="applyFilters()"
+        >
+          <option value="">Tất cả</option>
+          <option [value]="true">Hoạt động</option>
+          <option [value]="false">Tạm dừng</option>
+        </select>
+      </div>
+    </form>
+  </div>
+
+  <!-- Branch Table -->
+  <table class="table table-bordered table-hover align-middle text-center">
+    <thead class="table-light">
+      <tr>
+        <th>Mã</th>
+        <th>Tên chi nhánh</th>
+        <th>Địa chỉ</th>
+        <th>Điện thoại</th>
+        <th>Trạng thái</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <ng-container *ngFor="let b of pagedBranches()">
+        <tr (click)="toggleExpand(b._id)" style="cursor: pointer">
+          <td>{{ b.code }}</td>
+          <td>{{ b.name }}</td>
+          <td>{{ b.address }}</td>
+          <td>{{ b.phone }}</td>
+          <td>
+            <span class="badge" [ngClass]="b.isActive ? 'bg-success' : 'bg-secondary'">
+              {{ b.isActive ? 'Hoạt động' : 'Tạm dừng' }}
+            </span>
+          </td>
+        </tr>
+
+        <!-- Expand Detail -->
+        <tr *ngIf="expandedId === b._id">
+          <td colspan="5">
+            <div class="bg-dark text-white p-3 rounded-3">
+              <h6 class="fw-bold text-warning mb-3">Chi tiết chi nhánh</h6>
+
+              <p><strong class="text-warning">ID:</strong> {{ b._id }}</p>
+              <p><strong class="text-warning">Mã:</strong> {{ b.code }}</p>
+              <p><strong class="text-warning">Tên:</strong> {{ b.name }}</p>
+              <p><strong class="text-warning">Địa chỉ:</strong> {{ b.address }}</p>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong class="text-warning">Tỉnh:</strong> {{ b.provinceName || '---' }}</p>
+                  <p>
+                    <strong class="text-warning">Xã/Phường:</strong> {{ b.communeName || '---' }}
+                  </p>
+                </div>
+
+                <div class="col-md-6">
+                  <p><strong class="text-warning">Điện thoại:</strong> {{ b.phone }}</p>
+                  <p>
+                    <strong class="text-warning">Ngày tạo:</strong>
+                    {{ b.createdAt | date : 'dd/MM/yyyy' }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-2">
+                <strong class="text-warning">Trạng thái:</strong>
+                <span class="badge" [ngClass]="b.isActive ? 'bg-success' : 'bg-secondary'">
+                  {{ b.isActive ? 'Hoạt động' : 'Tạm dừng' }}
+                </span>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+
+  <div *ngIf="filteredBranches.length === 0" class="alert alert-info text-center mt-3">
+    Không có chi nhánh nào.
+  </div>
+
+  <!-- Pagination -->
+  <nav *ngIf="filteredBranches.length >= pageSize">
+    <ul class="pagination justify-content-center mt-3">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <button class="page-link" (click)="changePage(currentPage - 1)">Trước</button>
+      </li>
+
+      <li class="page-item" *ngFor="let p of totalPages()" [class.active]="p === currentPage">
+        <button class="page-link" (click)="changePage(p)">{{ p }}</button>
+      </li>
+
+      <li class="page-item" [class.disabled]="currentPage === totalPages().length">
+        <button class="page-link" (click)="changePage(currentPage + 1)">Sau</button>
+      </li>
+    </ul>
+  </nav>
+</div>

@@ -1,0 +1,176 @@
+<div class="d-flex">
+  <!-- Sidebar -->
+  <nav
+    class="bg-light border-end vh-100 position-fixed p-3 d-flex flex-column justify-content-between"
+    [class.d-none]="!sidebarOpen && innerWidth < 992"
+    style="width: 250px; transition: all 0.3s"
+  >
+    <div>
+      <div class="d-flex justify-content-center align-items-center border-bottom pb-2 mb-3">
+        <a [routerLink]="['/']" class="logo-white">
+          <img
+            src="../assets/images/logos/logo.png"
+            alt="logo"
+            class="img-fluid"
+            style="width: 100px; height: 100px"
+          />
+        </a>
+      </div>
+
+      <ul class="nav flex-column text-white">
+        <li class="nav-item mb-2">
+          <a
+            [routerLink]="['/employee/home']"
+            class="nav-link text-white d-flex align-items-center gap-2"
+          >
+            <iconify-icon
+              icon="mdi:home"
+              width="30"
+              height="30"
+              class="text-primary"
+            ></iconify-icon>
+            Trang chủ
+          </a>
+        </li>
+        <li class="nav-item mb-2">
+          <a
+            routerLink="/employee/order/create"
+            class="nav-link text-white d-flex align-items-center gap-2"
+          >
+            <iconify-icon
+              icon="mdi:package-variant"
+              width="30"
+              height="30"
+              class="text-primary"
+            ></iconify-icon>
+            Tạo đơn
+          </a>
+        </li>
+        <li class="nav-item mb-2">
+          <a
+            routerLink="/employee/order/list"
+            class="nav-link text-white d-flex align-items-center gap-2"
+          >
+            <iconify-icon
+              icon="mdi:clipboard-check"
+              width="30"
+              height="30"
+              class="text-primary"
+            ></iconify-icon>
+            Quản lý
+          </a>
+        </li>
+        <li class="nav-item mb-2">
+          <a
+            routerLink="/employee/branch"
+            class="nav-link text-white d-flex align-items-center gap-2"
+          >
+            <iconify-icon
+              icon="mdi:source-branch"
+              width="30"
+              height="30"
+              class="text-primary"
+            ></iconify-icon>
+            Chi nhánh bưu cục
+          </a>
+        </li>
+        <li class="nav-item mb-2">
+          <a
+            routerLink="/employee/pricing"
+            class="nav-link text-white d-flex align-items-center gap-2"
+          >
+            <iconify-icon
+              icon="mdi:magnify"
+              width="30"
+              height="30"
+              class="text-primary"
+            ></iconify-icon>
+            Bảng giá dịch vụ
+          </a>
+        </li>
+        <li class="nav-item mb-2">
+          <a
+            routerLink="/employee/profile"
+            class="nav-link text-white d-flex align-items-center gap-2"
+          >
+            <iconify-icon
+              icon="mdi:account-cog"
+              width="30"
+              height="30"
+              class="text-primary"
+            ></iconify-icon>
+            Cài đặt tài khoản
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="border-top pt-3 small text-muted">© 2025 App Post</div>
+  </nav>
+
+  <!-- Nội dung -->
+  <main
+    class="flex-grow-1 bg-white min-vh-100"
+    [ngStyle]="{ 'margin-left.px': sidebarOpen && innerWidth >= 992 ? 250 : 0 }"
+  >
+    <div class="p-3">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-outline-secondary d-lg-none" (click)="toggleSidebar()">
+            <iconify-icon icon="mdi:menu" width="20" height="20"></iconify-icon>
+          </button>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <div class="dropdown">
+            <button
+              class="btn btn-danger border-0 d-flex align-items-center gap-2 px-2 py-1"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <span class="fw-semibold">{{ user?.name ?? 'Tài khoản' }}</span>
+              <iconify-icon
+                icon="mdi:chevron-down"
+                width="16"
+                height="16"
+                class="text-dark"
+              ></iconify-icon>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow rounded-3 border-0 mt-2">
+              <li>
+                <a
+                  [routerLink]="['/employee/profile']"
+                  class="dropdown-item d-flex align-items-center gap-2 py-2"
+                >
+                  <iconify-icon
+                    icon="mdi:account-cog"
+                    width="30"
+                    height="30"
+                    class="text-primary"
+                  ></iconify-icon>
+                  Cài đặt tài khoản
+                </a>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <button
+                  (click)="logout()"
+                  class="dropdown-item d-flex align-items-center gap-2 text-danger py-2"
+                >
+                  <iconify-icon icon="mdi:logout" width="30" height="30"></iconify-icon>
+                  Đăng xuất
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 👇 Đây là phần trang con -->
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

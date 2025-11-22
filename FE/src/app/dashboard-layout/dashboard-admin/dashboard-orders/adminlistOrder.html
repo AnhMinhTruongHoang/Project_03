@@ -1,0 +1,258 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 fw-bold">📦 Danh sách đơn hàng của bạn</h2>
+    <!-- Nút Tạo đơn hàng mới -->
+    <a
+      routerLink="/admin/order/create"
+      class="btn btn-success btn-lg shadow-sm d-flex align-items-center gap-2"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        fill="currentColor"
+        class="bi bi-plus-circle"
+        viewBox="0 0 16 16"
+      >
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+        <path
+          d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+        />
+      </svg>
+      <span class="fw-semibold">Tạo đơn hàng mới</span>
+    </a>
+  </div>
+
+  <!-- Filter Card -->
+  <div class="card mb-4 p-3 shadow-sm">
+    <form class="row g-3 align-items-end">
+      <!-- Status pill -->
+      <div class="col-md-3">
+        <label class="form-label d-block mb-1">Trạng thái</label>
+        <div class="dropdown">
+          <button
+            class="btn btn-danger btn-sm btn-outline-secondary dropdown-toggle w-100"
+            type="button"
+            data-bs-toggle="dropdown"
+          >
+            Chọn trạng thái ({{ filters.status.length }})
+          </button>
+          <ul class="dropdown-menu p-2" style="min-width: 180px">
+            <li *ngFor="let s of statusOptions">
+              <div class="form-check mb-1">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [id]="s.value"
+                  [checked]="filters.status.includes(s.value)"
+                  (change)="toggleStatusFilter(s.value)"
+                />
+                <label class="form-check-label small" [for]="s.value">{{ s.label }}</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Các input lọc khác -->
+      <div class="col-md-2">
+        <label class="form-label">Từ ngày</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="filters.fromDate"
+          name="fromDate"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Đến ngày</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="filters.toDate"
+          name="toDate"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Giá từ</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="filters.minPrice"
+          name="minPrice"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Giá đến</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="filters.maxPrice"
+          name="maxPrice"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Tìm kiếm</label>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Mã đơn"
+          [(ngModel)]="filters.search"
+          name="search"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Người nhận</label>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Tên người nhận"
+          [(ngModel)]="filters.receiverName"
+          name="receiverName"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">SĐT người nhận</label>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="SĐT người nhận"
+          [(ngModel)]="filters.receiverPhone"
+          name="receiverPhone"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+    </form>
+  </div>
+
+  <!-- Orders Table -->
+  <table class="table table-bordered table-hover align-middle text-center">
+    <thead class="table-light">
+      <tr>
+        <th>Mã đơn</th>
+        <th>Người nhận</th>
+        <th>Điện thoại</th>
+        <th>Giá trị</th>
+        <th>Trạng thái</th>
+        <th>Ngày tạo</th>
+        <th>Ngày cập nhật</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let order of pagedOrders()">
+        <tr (click)="toggleExpand(order._id)" [class.table-primary]="expandedOrderId === order._id " style="cursor: pointer">
+          <td>{{ order._id }}</td>
+          <td>{{ order.receiverName }}</td>
+          <td>{{ order.receiverPhone }}</td>
+          <td>{{ order.totalPrice | number : '1.0-0' }}</td>
+          <td [ngClass]="statusClass(order.status)">{{ statusText(order.status) }}</td>
+          <td>{{ order.createdAt | date : 'short' }}</td>
+          <td>{{ order.updatedAt | date : 'short' }}</td>
+          <td>
+            <button
+              *ngIf="canEdit(order)"
+              class="btn btn-danger btn-sm py-2 px-3 me-1"
+              [routerLink]="['/admin/order/edit', order._id]"
+              (click)="$event.stopPropagation()"
+            >
+              Sửa
+            </button>
+            <button
+              *ngIf="canDelete(order)"
+              class="btn btn-danger btn-sm py-2 px-3"
+              (click)="deleteOrder(order._id, $event)"
+            >
+              Xóa
+            </button>
+          </td>
+        </tr>
+        <!-- Chi tiết mở rộng -->
+        <tr *ngIf="expandedOrderId === order._id">
+          <td colspan="8">
+            <div class="bg-dark text-white p-3 rounded-3">
+              <h6 class="fw-bold text-primary mb-3">Chi tiết đơn hàng</h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong class="text-warning">Người gửi:</strong> {{ order.senderName }}</p>
+                  <p>
+                    <strong class="text-warning">Địa chỉ lấy hàng:</strong>
+                    {{ order.pickupAddressId?.address }},
+                    {{ order.pickupAddressId?.communeId?.name }},
+                    {{ order.pickupAddressId?.provinceId?.name }}
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong class="text-warning">Người nhận:</strong> {{ order.receiverName }}</p>
+                  <p>
+                    <strong class="text-warning">Địa chỉ giao:</strong>
+                    {{ order.deliveryAddressId?.address }},
+                    {{ order.deliveryAddressId?.communeId?.name }},
+                    {{ order.deliveryAddressId?.provinceId?.name }}
+                  </p>
+                </div>
+              </div>
+              <hr class="border-secondary" />
+              <p>
+                <strong class="text-warning">Trạng thái:</strong>
+                <span [ngClass]="statusClass(order.status)"> {{ statusText(order.status) }} </span>
+              </p>
+              <p>
+                <strong>Dịch vụ:</strong> {{ order.serviceCode }} | <strong>COD:</strong>
+                {{ order.codValue | number }} đ | <strong>Phí ship:</strong>
+                {{ order.shippingFee | number }} đ | <strong>Trọng lượng:</strong>
+                {{ order.weightKg }} kg
+              </p>
+
+              <div *ngIf="order.items?.length">
+                <h6 class="mt-3 text-info">Danh sách hàng hóa</h6>
+                <table class="table table-sm table-bordered table-striped mt-2">
+                  <thead>
+                    <tr>
+                      <th>Tên sản phẩm</th>
+                      <th>Số lượng</th>
+                      <th>Đơn giá</th>
+                      <th>Thành tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let it of order.items">
+                      <td>{{ it.productName }}</td>
+                      <td>{{ it.quantity }}</td>
+                      <td>{{ it.price | number }} đ</td>
+                      <td>{{ it.quantity * it.price | number }} đ</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+
+  <div *ngIf="filteredOrders.length === 0" class="alert alert-info text-center mt-3">
+    Không tìm thấy đơn hàng nào.
+  </div>
+
+  <nav *ngIf="filteredOrders.length > pageSize">
+    <ul class="pagination justify-content-center mt-3">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <button class="page-link" (click)="changePage(currentPage - 1)">Trước</button>
+      </li>
+      <li class="page-item" *ngFor="let p of totalPages()" [class.active]="p === currentPage">
+        <button class="page-link" (click)="changePage(p)">{{ p }}</button>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages().length">
+        <button class="page-link" (click)="changePage(currentPage + 1)">Sau</button>
+      </li>
+    </ul>
+  </nav>
+</div>

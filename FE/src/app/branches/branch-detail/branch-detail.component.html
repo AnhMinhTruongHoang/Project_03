@@ -1,0 +1,64 @@
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">Chi tiết chi nhánh</h4>
+      <small class="text-muted">Thông tin chi nhánh / điểm giao dịch.</small>
+    </div>
+
+    <button class="btn btn-outline-secondary" (click)="backToList()">← Quay lại danh sách</button>
+  </div>
+
+  @if (isLoading) {
+  <div class="text-muted py-3">Đang tải dữ liệu...</div>
+  } @else if (error) {
+  <div class="alert alert-danger py-2">{{ error }}</div>
+  } @else if (branch) {
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="row">
+        <!-- Thông tin chính -->
+        <div class="col-md-6 mb-3">
+          <h5 class="fw-semibold mb-3">{{ branch.name }}</h5>
+
+          <p class="mb-2"><b>Mã chi nhánh:</b> {{ branch.code }}</p>
+          <p class="mb-2"><b>Điện thoại:</b> {{ branch.phone }}</p>
+          <p class="mb-2">
+            <b>Địa chỉ:</b><br />
+            {{ branch.address }}
+          </p>
+        </div>
+
+        <!-- Chỉ để trạng thái hoạt động -->
+        <div class="col-md-6 mb-3">
+          <p class="mb-2">
+            <b>Trạng thái:</b>
+            @if (branch.isActive) {
+            <span class="badge bg-success-subtle text-success ms-1">Hoạt động</span>
+            } @else {
+            <span class="badge bg-secondary-subtle text-secondary ms-1">Tạm dừng</span>
+            }
+          </p>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- Thông tin hệ thống -->
+      <div class="row text-muted small">
+        <div class="col-md-6">
+          <p class="mb-1">
+            <b>Ngày tạo:</b>
+            {{ branch.createdAt | date : 'dd/MM/yyyy HH:mm' }}
+          </p>
+        </div>
+        <div class="col-md-6">
+          <p class="mb-1">
+            <b>Cập nhật gần nhất:</b>
+            {{ branch.updatedAt | date : 'dd/MM/yyyy HH:mm' }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>

@@ -1,6 +1,6 @@
 <section class="min-vh-100 d-flex align-items-center justify-content-center">
   <div class="card shadow-lg p-4" style="max-width: 400px;">
-    <h3 class="text-center mb-3">Verify Account</h3>
+    <h3 class="text-center mb-3">Xác nhận tài khoản</h3>
 
     <form class="d-flex flex-column gap-3">
       <input
@@ -8,7 +8,7 @@
         class="form-control"
         [(ngModel)]="code"
         name="code"
-        placeholder="Enter activation code"
+        placeholder="Nhập mã xác nhận email"
       />
 
       @if (errorMessage) {
@@ -24,7 +24,7 @@
         class="btn btn-dark w-100"
         (click)="verifyCode()"
       >
-        Verify
+        Xác nhận
       </button>
     </form>
   </div>

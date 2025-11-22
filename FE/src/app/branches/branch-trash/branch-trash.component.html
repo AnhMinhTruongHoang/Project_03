@@ -1,0 +1,56 @@
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">Thùng rác chi nhánh</h4>
+      <small class="text-muted">Các chi nhánh đã xoá mềm.</small>
+    </div>
+
+    <a class="btn btn-outline-secondary" [routerLink]="['/admin/branch']"> ← Quay lại danh sách </a>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading) {
+  <div class="text-center text-muted py-4">Đang tải dữ liệu...</div>
+  } @else if (!isLoading && ((branches?.length ?? 0) === 0)) {
+  <!-- Empty -->
+  <div class="text-center text-muted py-4">Thùng rác trống.</div>
+  } @else {
+  <!-- Table -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 app-table">
+          <thead class="table-light text-center">
+            <tr>
+              <th style="width: 90px">Mã</th>
+              <th style="width: 200px">Tên chi nhánh</th>
+              <th style="width: 220px">Địa chỉ</th>
+              <th style="width: 150px">Điện thoại</th>
+              <th style="width: 250px" class="text-center">Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (b of branches ?? []; track b._id) {
+            <tr>
+              <td class="fw-semibold">{{ b.code }}</td>
+              <td>{{ b.name }}</td>
+              <td>
+                {{ b.address }} <br />
+                <small class="text-muted"> {{ b.city }}, {{ b.province }} </small>
+              </td>
+              <td>{{ b.phone }}</td>
+              <td class="text-end">
+                <button class="btn-sm btn-info me-2" (click)="restore(b._id)">Khôi phục</button>
+                <button class="btn-sm btn-delete" (click)="hardDelete(b._id)">Xoá vĩnh viễn</button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  }
+</div>

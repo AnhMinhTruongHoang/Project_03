@@ -1,18 +1,51 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from "@angular/core";
-import { RouterLink, RouterOutlet } from "@angular/router";
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { LocationService } from '../services/location.service';
+import { Router } from '@angular/router';
 
 @Component({
-    selector: 'home',
-    imports: [
-        RouterOutlet,
-        RouterLink
-    ],
-    templateUrl: './home.html',
-    schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  selector: 'app-home',
+  standalone: true,
+  templateUrl: './home.html',
+  imports: [CommonModule, FormsModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class Home implements OnInit {
+export class Home {
+  provinces: any[] = [];
+  communes: any[] = [];
 
-    ngOnInit() {
-    }
+  selectedProvince: any = null;
+  selectedCommune: any = null;
 
+  constructor(
+    private locationService: LocationService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+  }
+
+  // Khi chọn tỉnh, lấy xã/phường trực thuộc
+  onProvinceChange() {
+    this.selectedCommune = null;
+    if (!this.selectedProvince) return;
+  }
+
+  trackById(index: number, item: any) {
+    return item.id;
+  }
+
+  // ✅ Xử lý nút "Bắt đầu ngay"
+  // onStartClick() {
+  //   const token = localStorage.getItem('access_token');
+
+  //   if (token) {
+  //     // 🔑 Nếu đã đăng nhập
+  //     this.router.navigate(['/dashboard']);
+  //   } else {
+  //     // 🚪 Nếu chưa đăng nhập
+  //     this.router.navigate(['/login']);
+  //   }
+  // }
 }

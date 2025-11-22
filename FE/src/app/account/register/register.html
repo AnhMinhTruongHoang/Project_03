@@ -1,112 +1,59 @@
-<!--  Get in touch Section -->
+<!-- Register Section -->
 <section
-  class="bg-light-gray border-top border-primary border-4 d-flex align-items-center justify-content-center min-vh-100"
->
+  class="bg-light-gray border-top border-primary border-4 d-flex align-items-center justify-content-center min-vh-100">
   <div class="container py-3">
     <div class="sign-in card mx-auto shadow-lg">
       <div class="card-body py-8 px-lg-5">
-        <a href="index.html" class="mb-8 hstack justify-content-center">
-          <img src="../assets/images/logos/logo-dark.svg" alt="logo-dark" class="img-fluid" />
+        <a [routerLink]="['/']" class="mb-8 hstack justify-content-center">
+          <h2 class="img-fluid" style="color: black">Ap Post</h2>
         </a>
-        <div class="hstack gap-3">
-          <a
-            href="javascript:void(0)"
-            class="btn btn-outline-light bg-white px-3 py-2 fs-4 text-dark w-50 fw-medium hstack gap-2 lh-lg justify-content-center"
-            >Sign In
-            <img src="../assets/images/svgs/icon-google.svg" alt="google" class="img-fluid"
-          /></a>
-          <a
-            href="javascript:void(0)"
-            class="btn btn-outline-light bg-white px-3 py-2 fs-4 text-dark w-50 fw-medium hstack gap-2 lh-lg justify-content-center"
-            >Sign In
-            <img src="../assets/images/svgs/icon-github.svg" alt="github" class="img-fluid"
-          /></a>
-        </div>
-        <div class="position-relative hstack justify-content-center">
-          <hr class="my-8 w-100 d-block" />
-          <p class="mb-0 fs-3 bg-body px-3 position-absolute top-50 start-50 translate-middle">
-            OR
-          </p>
-        </div>
+
+        <h4 class="text-center mb-5 fw-medium">Đăng ký</h4>
+
+        <!-- FORM Register -->
         <form class="d-flex flex-column gap-3">
-          <input
-            type="text"
-            class="form-control border-bottom"
-            [(ngModel)]="name"
-            name="name"
-            placeholder="Name"
-          />
-          <input
-            type="number"
-            [(ngModel)]="age"
-            name="age"
-            class="form-control border-bottom"
-            placeholder="Age"
-          />
+          <div>
+            <input type="text" class="form-control border-bottom" [(ngModel)]="name" name="name" placeholder="Họ và tên"
+              required />
+          </div>
+          <div>
+            <input type="tel" class="form-control border-bottom" [(ngModel)]="phone" name="phone" placeholder="Số điện thoại"
+              required />
+          </div>
+          <div>
+            <input type="email" class="form-control border-bottom" [(ngModel)]="email" name="email" placeholder="Email"
+              required />
+          </div>
+          <div>
+            <input type="password" class="form-control border-bottom" [(ngModel)]="password" name="password"
+              placeholder="Mật khẩu" required />
+          </div>
 
-          <select [(ngModel)]="gender" name="gender" class="form-control border-bottom">
-            <option value="" disabled selected>Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
-
-          <input
-            type="text"
-            class="form-control border-bottom"
-            [(ngModel)]="address"
-            name="address"
-            placeholder="Address"
-          />
-          <input
-            type="tel"
-            class="form-control border-bottom"
-            [(ngModel)]="phone"
-            name="phone"
-            placeholder="Phone"
-          />
-          <input
-            type="email"
-            class="form-control border-bottom"
-            [(ngModel)]="email"
-            name="email"
-            placeholder="Email"
-          />
-          <input
-            type="password"
-            class="form-control border-bottom"
-            [(ngModel)]="password"
-            name="password"
-            placeholder="Password"
-          />
-          <!-- Thông báo lỗi -->
+          <!-- Thông báo -->
           @if (errorMessage) {
           <p class="text-danger text-center">{{ errorMessage }}</p>
+          } @if (successMessage) {
+          <p class="text-success text-center">{{ successMessage }}</p>
           }
-          <button
-            type="button" (click)="register()"
-            class="btn btn-dark w-100 justify-content-center py-2 fw-medium my-7 fs-4 lh-lg"
-          >
-            Sign Up
+
+          <button type="button" (click)="register()"
+            class="btn btn-dark w-100 justify-content-center py-2 fw-medium my-7 fs-4 lh-lg">
+            Đăng ký
           </button>
         </form>
-        <p class="text-center mb-1 d-block fw-medium">
-          By creating an account, you agree with our
-          <a class="text-dark" href="privacy-policy.html">Privacy</a> and
-          <a class="text-dark" href="privacy-policy.html">Policy</a>.
-        </p>
         <p class="mb-0 fw-medium text-center">
-          Already have an account? <a class="text-dark" [routerLink]="['/login']">Sign In</a>
+          Bạn đã có tài khoản?
+          <a class="text-dark" routerLink="/login">Đăng nhập</a>
         </p>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Scroll to top -->
 <div class="get-template hstack gap-2">
-  <button
-    class="btn bg-primary p-2 round-52 rounded-circle hstack justify-content-center flex-shrink-0"
-    id="scrollToTopBtn"
-  >
+  <button class="btn bg-primary p-2 round-52 rounded-circle hstack justify-content-center flex-shrink-0"
+    id="scrollToTopBtn">
     <iconify-icon icon="lucide:arrow-up" class="fs-7 text-dark"></iconify-icon>
   </button>
 </div>

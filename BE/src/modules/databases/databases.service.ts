@@ -86,9 +86,14 @@ export class DatabasesService implements OnModuleInit {
     if (this.config.get('SHOULD_INIT') !== 'true') return;
 
     await this.seedUsers();
+    
     const { hn, hcm } = await this.seedLocation34(); // 34 tỉnh + quận/huyện
     const { addrHn1, addrHcm1, addrHn2 } = await this.seedAddresses(hn, hcm); // địa chỉ lean
     const { branchHN, branchHCM } = await this.seedBranches(addrHn1, addrHcm1);
+    await this.userModel.updateOne(
+    { email: 'staff.hn@vtpost.local' },
+    { $set: { branchId: branchHN._id } }
+  );
     const { svcSTD, svcEXP } = await this.seedServices();
     await this.seedPricing(svcSTD._id, svcEXP._id);
     const { order1, customer } = await this.seedOrders(addrHn2, addrHcm1);
@@ -4069,6 +4074,9 @@ export class DatabasesService implements OnModuleInit {
         deliveryAddressId: new Types.ObjectId(deliveryAddr._id),
         totalPrice: 120000,
         status: OrderStatus.PENDING,
+        weightKg: 1.5,
+        shippingFee: 35000,
+        codValue: 155000,
       },
     ]);
 
@@ -4113,9 +4121,10 @@ export class DatabasesService implements OnModuleInit {
         destinationBranchId: branchHCM._id,
         serviceId: svcSTD._id,
         weightKg: 1.5,
+        shippingFee: fee,
+        codValue: 155000,
         chargeableWeightKg: 1.5,
         distanceKm: km,
-        shippingFee: fee,
         status: ShipmentStatus.PENDING,
         createdBy: customer._id as Types.ObjectId,
         timeline: [

@@ -1,28 +1,50 @@
-import { ProvinceCode, Region } from 'src/types/location.type';
+export type Region = 'North' | 'Central' | 'South';
+export type ProvinceCode = string;
 
-export const REGIONS: Record<Region, ProvinceCode[]> = {
-  North: [
-    'HN',
-    'HP',
-    'NB',
-    'TB',
-    'ND',
-    'VP',
-    'BG',
-    'BNH',
-    'LCI',
-    'LSN',
-    'CB',
-    'HG',
-    'TQ',
-  ],
-  Central: ['HUE', 'TH', 'NA', 'HT', 'QT', 'DNA', 'GL', 'KH', 'LD', 'DL'],
-  South: ['HCM', 'DN', 'CT', 'TN', 'DT', 'KG', 'BT', 'BL', 'CM', 'AG'],
+// Dùng object để tra cứu nhanh + dễ maintain
+export const PROVINCE_TO_REGION: Record<string, Region> = {
+  // === MIỀN BẮC ===
+  HN: 'North',     // Hà Nội
+  HP: 'North',     // Hải Phòng
+  HY: 'North',     // Hưng Yên
+  QNH: 'North',    // Quảng Ninh
+  NB: 'North',     // Ninh Bình
+  PTO: 'North',    // Phú Thọ
+  BNH: 'North',    // Bắc Ninh
+  LCI: 'North',    // Lào Cai
+  TNN: 'North',    // Thái Nguyên
+  LSN: 'North',    // Lạng Sơn
+  CB: 'North',     // Cao Bằng
+  TQ: 'North',     // Tuyên Quang
+  DBN: 'North',    // Điện Biên
+  LCU: 'North',    // Lai Châu
+  SLA: 'North',    // Sơn La
+
+  // === MIỀN TRUNG ===
+  DNA: 'Central',  // Đà Nẵng
+  HUE: 'Central',  // Huế
+  QN: 'Central',   // Quảng Ngãi
+  QT: 'Central',   // Quảng Trị
+  NA: 'Central',   // Nghệ An
+  HT: 'Central',   // Hà Tĩnh
+  TH: 'Central',   // Thanh Hóa
+
+  // === MIỀN NAM ===
+  HCM: 'South',    // TP Hồ Chí Minh
+  CT: 'South',     // Cần Thơ
+  TN: 'South',     // Tây Ninh
+  GL: 'South',     // Gia Lai
+  KH: 'South',     // Khánh Hòa
+  LD: 'South',     // Lâm Đồng
+  DL: 'South',     // Đắk Lắk
+  DN: 'South',     // Đồng Nai
+  DT: 'South',     // Đồng Tháp
+  CM: 'South',     // Cà Mau
+  VL: 'South',     // Vĩnh Long
+  AG: 'South',     // An Giang
 };
 
-export function getRegionByProvinceCode(code: ProvinceCode): Region | null {
-  if (REGIONS.North.includes(code)) return 'North';
-  if (REGIONS.Central.includes(code)) return 'Central';
-  if (REGIONS.South.includes(code)) return 'South';
-  return null;
-}
+export const getRegionByProvinceCode = (code: string): Region | null => {
+  const upperCode = code.toUpperCase().trim();
+  return PROVINCE_TO_REGION[upperCode] || null;
+};

@@ -1,0 +1,29 @@
+<section class="d-flex align-items-center justify-content-center min-vh-100 bg-light-gray">
+  <div class="container py-3">
+    <div class="card shadow-lg mx-auto p-5" style="max-width: 400px;">
+      <h3 class="text-center fw-bold mb-4">Mã xác nhận đổi mật khẩu</h3>
+
+      <form (ngSubmit)="verifyResetCode()">
+        <input
+          type="text"
+          class="form-control mb-3"
+          placeholder="Nhập mã xác nhận"
+          [(ngModel)]="code"
+          name="code"
+          required
+        />
+
+        <button type="submit" class="btn btn-dark w-100 py-2 fw-medium">
+          xác nhận
+        </button>
+      </form>
+
+      @if (successMessage) {
+        <p class="text-success text-center mt-3">{{ successMessage }}</p>
+      }
+      @if (errorMessage) {
+        <p class="text-danger text-center mt-3">{{ errorMessage }}</p>
+      }
+    </div>
+  </div>
+</section>

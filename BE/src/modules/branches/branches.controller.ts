@@ -42,6 +42,12 @@ export class BranchesController {
     return this.branchesService.findAll(page, limit, query || {});
   }
 
+  // GET /branches/trash
+  @Get('trash')
+  findTrash() {
+    return this.branchesService.findTrash();
+  }
+
   @Public()
   @Get(':id')
   @ResponseMessage('Chi tiết chi nhánh')

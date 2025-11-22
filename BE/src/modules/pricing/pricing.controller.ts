@@ -50,14 +50,17 @@ export class PricingController {
   @Public()
   @Get()
   @ResponseMessage('Danh sách bảng giá')
-  findAll(
+  async findAll(
     @Query('current') current?: string,
     @Query('pageSize') limit?: string,
     @Query() query?: any,
   ) {
     const page = current ? Number(current) : 1;
     const size = limit ? Number(limit) : 10;
-    return this.pricingService.findAll(page, size, query || {});
+
+    const data = await this.pricingService.findAll(page, size, query || {});
+
+    return data;
   }
 
   @Public()

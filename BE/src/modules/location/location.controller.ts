@@ -15,6 +15,7 @@ import { Public } from 'src/health/decorator/customize';
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
+  
   @Public()
   @Get('provinces')
   getProvinces() {

@@ -20,13 +20,6 @@ export class User {
   @Prop({ enum: ['MALE', 'FEMALE', 'OTHER'], required: false })
   gender: string;
 
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Branch',
-    required: false,
-  })
-  BranchId: Types.ObjectId;
-
   @Prop()
   address: string;
 
@@ -77,6 +70,10 @@ export class User {
 
   createdAt: Date;
   updatedAt: Date;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' })
+  branchId: mongoose.Schema.Types.ObjectId;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

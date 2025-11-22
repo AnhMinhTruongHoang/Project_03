@@ -22,6 +22,6 @@ import { Address, AddressSchema } from '../location/schemas/address.schema';
   ],
   controllers: [PricingController],
   providers: [PricingService],
-  exports: [MongooseModule],
+  exports: [MongooseModule, PricingService],
 })
 export class PricingModule {}

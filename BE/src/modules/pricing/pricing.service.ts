@@ -48,15 +48,15 @@ export class PricingService {
       .find(filter)
       .sort(sort as any)
       .skip(skip)
-      .limit(size);
-    if (population) q.populate(population as any);
+      .limit(size)
+      .populate('serviceId')
     const results = await q.exec();
 
     return { meta: { current: page, pageSize: size, pages, total }, results };
   }
 
   async findOne(id: string) {
-    const doc = await this.pricingModel.findById(id);
+    const doc = await this.pricingModel.findById(id).populate('serviceId');;
     if (!doc || doc.isDeleted) throw new NotFoundException('Pricing not found');
     return doc;
   }
@@ -91,6 +91,12 @@ export class PricingService {
     weightKg: number,
     isLocal: boolean,
   ) {
+    // console.log('Region check:', {
+    //   originCode: originProvinceCode,
+    //   originRegion: getRegionByProvinceCode(originProvinceCode),
+    //   destCode: destProvinceCode,
+    //   destRegion: getRegionByProvinceCode(destProvinceCode)
+    // });
     // 1) Nội thành + gần kho
     if (isLocal) {
       return {

@@ -48,7 +48,6 @@ export class AuthController {
 
   //////////////jwt
   @Public()
-  @UseGuards(AuthGuard('jwt'))
   @ResponseMessage('Register a new user')
   @Post('/register')
   handleRegister(@Body() registerUserDto: RegisterUserDto) {
@@ -110,6 +109,13 @@ export class AuthController {
     return 'ok';
   }
 
+  @Public()
+  @ResponseMessage('verify reset password code')
+  @Post('verify-reset')
+  verifyReset(@Body() data: CodeAuthDto) {
+    return this.authService.checkCode(data);
+  }
+
   // re-send mail
   @Public()
   @ResponseMessage('re-verify register code')
@@ -131,5 +137,12 @@ export class AuthController {
   @Post('change-password')
   changePassword(@Body() data: ChangePasswordDto) {
     return this.authService.changePassword(data);
+  }
+
+  // Bổ sung đổi mật khẩu (FE)
+  @Public()
+  @Post('reset-password')
+  async resetPassword(@Body() body: { _id: string; newPassword: string }) {
+    return this.authService.resetPassword(body);
   }
 }

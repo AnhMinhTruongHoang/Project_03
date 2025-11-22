@@ -98,4 +98,9 @@ export class BranchesService {
     }
     return { message: 'Đã xóa vĩnh viễn chi nhánh' };
   }
+
+  async findTrash() {
+    // Lấy toàn bộ chi nhánh đã xóa mềm
+    return this.branchModel.findDeleted();
+  }
 }

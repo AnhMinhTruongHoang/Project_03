@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Commune } from 'src/modules/location/schemas/Commune.schema';
-import { Province } from 'src/modules/location/schemas/province.schema';
+import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
 
 export type BranchDocument = HydratedDocument<Branch> & {
   createdAt: Date;
@@ -46,6 +45,7 @@ export class Branch {
 
 export const BranchSchema = SchemaFactory.createForClass(Branch);
 
+BranchSchema.plugin(softDeletePlugin);
 BranchSchema.index({ code: 1 }, { unique: true });
 BranchSchema.index({ name: 1 });
 BranchSchema.index({ isDeleted: 1 });

@@ -1,7 +1,7 @@
 import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -19,14 +19,25 @@ export class Verify {
   constructor(
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     if (isPlatformBrowser(this.platformId)) {
-      this.userId = localStorage.getItem('pending_user_id') || '';
+      this.route.queryParams.subscribe((params) => {
+        const fromQuery = params['user'];
+        const fromStorage = localStorage.getItem('pending_user_id');
+        this.userId = fromQuery || fromStorage || '';
+        console.log('✅ Loaded userId:', this.userId);
+      });
+    } else {
+      this.userId = '';
     }
   }
 
   verifyCode() {
+    console.log('userId:', this.userId);
+    console.log('code:', this.code);
+
     if (!this.code || !this.userId) {
       this.errorMessage = 'Missing user or code!';
       return;
