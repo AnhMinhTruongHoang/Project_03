@@ -49,14 +49,14 @@ export class PricingService {
       .sort(sort as any)
       .skip(skip)
       .limit(size)
-      .populate('serviceId')
+      .populate('serviceId');
     const results = await q.exec();
 
     return { meta: { current: page, pageSize: size, pages, total }, results };
   }
 
   async findOne(id: string) {
-    const doc = await this.pricingModel.findById(id).populate('serviceId');;
+    const doc = await this.pricingModel.findById(id).populate('serviceId');
     if (!doc || doc.isDeleted) throw new NotFoundException('Pricing not found');
     return doc;
   }
@@ -91,17 +91,28 @@ export class PricingService {
     weightKg: number,
     isLocal: boolean,
   ) {
-    // console.log('Region check:', {
-    //   originCode: originProvinceCode,
-    //   originRegion: getRegionByProvinceCode(originProvinceCode),
-    //   destCode: destProvinceCode,
-    //   destRegion: getRegionByProvinceCode(destProvinceCode)
-    // });
-    // 1) Nội thành + gần kho
+    // 1) Phụ phí > 5kg (dùng chung cho cả local & non-local)
+    const overweightFee = weightKg > 5 ? 5000 : 0;
+
+    // 2) Nếu nội thành/gần kho
     if (isLocal) {
       return {
-        totalPrice: 0,
-        description: 'Free ship (nội thành/gần kho)',
+        totalPrice: 0 + overweightFee,
+        description:
+          overweightFee > 0
+            ? 'Free ship nội thành, chỉ thu phụ phí quá cân'
+            : 'Free ship (nội thành/gần kho)',
+        breakdown: {
+          originProvinceCode,
+          destProvinceCode,
+          originRegion: null,
+          destRegion: null,
+          serviceCode,
+          baseServicePrice: 0,
+          regionFee: 0,
+          overweightFee,
+          isLocal,
+        },
       };
     }
 
@@ -112,7 +123,7 @@ export class PricingService {
       throw new NotFoundException('Province code không hợp lệ');
     }
 
-    // 2) Giá dịch vụ
+    // 3) Giá dịch vụ
     const SERVICE_BASE_PRICE: Record<'STD' | 'EXP', number> = {
       STD: 20000,
       EXP: 40000,
@@ -123,7 +134,7 @@ export class PricingService {
       throw new NotFoundException('Service code không hợp lệ');
     }
 
-    // 3) Phụ phí theo vùng
+    // 4) Phụ phí theo vùng
     let regionFee = 0;
     const pair = new Set<Region>([originRegion, destRegion]);
 
@@ -133,10 +144,7 @@ export class PricingService {
       regionFee = 15000;
     } else if (pair.has('South') && pair.has('Central')) {
       regionFee = 10000;
-    } // cùng vùng = 0 theo spec hiện tại
-
-    // 4) Phụ phí > 5kg
-    const overweightFee = weightKg > 5 ? 5000 : 0;
+    }
 
     const totalPrice = baseServicePrice + regionFee + overweightFee;
 
