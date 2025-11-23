@@ -36,6 +36,7 @@ import { ListBranch } from './dashboard-layout/dashboard-emoloyee/dashboard-bran
 import { TrackingComponent } from './dashboard-layout/dashboard-tracking/dashboard-tracking';
 
 export const routes: Routes = [
+  { path: 'tracking', component: TrackingComponent },
   // ----- USER LAYOUT -----
   {
     path: '',
@@ -81,7 +82,6 @@ export const routes: Routes = [
       { path: 'order/create', component: AdmninCreateOrder },
       { path: 'orders/list', component: AdminListOrder },
       { path: 'order/edit/:id', component: AdminEditOrder },
-      { path: 'tracking', component: TrackingComponent },
       {
         path: 'branch',
         children: [

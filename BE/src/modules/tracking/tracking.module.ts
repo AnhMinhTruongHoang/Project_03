@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Tracking, TrackingSchema } from './schemas/tracking.schemas';
 import { Shipment, ShipmentSchema } from '../shipments/schemas/shipment.schema';
 import { Branch, BranchSchema } from '../branches/schemas/branch.schemas';
+import { OrdersModule } from '../orders/orders.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { Branch, BranchSchema } from '../branches/schemas/branch.schemas';
       { name: Shipment.name, schema: ShipmentSchema },
       { name: Branch.name, schema: BranchSchema },
     ]),
+    OrdersModule
   ],
   controllers: [TrackingController],
   providers: [TrackingService],
