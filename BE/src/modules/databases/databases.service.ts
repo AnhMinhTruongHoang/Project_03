@@ -4042,12 +4042,12 @@ export class DatabasesService implements OnModuleInit {
   private async seedOrders(
     pickupAddr: SeedAddress,
     deliveryAddr: SeedAddress,
-  ): Promise<{ order1: OrderDocument; customer: UserDocument }> {
+  ): Promise<{ orders: OrderDocument[]; customer: UserDocument }> {
     // Nếu đã có order thì dùng lại
     if (await this.orderModel.countDocuments()) {
       const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
-      const order1 = await this.orderModel.findOne({ userId: customer?._id });
-      return { order1, customer };
+      const orders = await this.orderModel.find({ userId: customer?._id });
+      return { orders, customer };
     }
 
     const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
@@ -4064,7 +4064,7 @@ export class DatabasesService implements OnModuleInit {
       this.ensureLine1(deliveryAddr),
     ]);
 
-    const [order1] = await this.orderModel.insertMany([
+    const ordersData = [
       {
         userId: customer._id,
         senderName: 'Nguyễn Văn A',
@@ -4075,13 +4075,67 @@ export class DatabasesService implements OnModuleInit {
         totalPrice: 120000,
         status: OrderStatus.PENDING,
         weightKg: 1.5,
-        shippingFee: 35000,
+        shippingFee: 20000,
         codValue: 155000,
       },
-    ]);
+      {
+        userId: customer._id,
+        senderName: 'Nguyễn Văn C',
+        receiverName: 'Phạm Thị D',
+        receiverPhone: '0987654321',
+        pickupAddressId: new Types.ObjectId(pickupAddr._id),
+        deliveryAddressId: new Types.ObjectId(deliveryAddr._id),
+        totalPrice: 200000,
+        status: OrderStatus.CONFIRMED,
+        weightKg: 7,
+        shippingFee: 40000,
+        codValue: 240000,
+      },
+      {
+        userId: customer._id,
+        senderName: 'Nguyễn Văn E',
+        receiverName: 'Lê Thị F',
+        receiverPhone: '0909090909',
+        pickupAddressId: new Types.ObjectId(pickupAddr._id),
+        deliveryAddressId: new Types.ObjectId(deliveryAddr._id),
+        totalPrice: 180000,
+        status: OrderStatus.SHIPPING,
+        weightKg: 1.2,
+        shippingFee: 20000,
+        codValue: 210000,
+      },
+      {
+        userId: customer._id,
+        senderName: 'Nguyễn Văn G',
+        receiverName: 'Đỗ Thị H',
+        receiverPhone: '0933333333',
+        pickupAddressId: new Types.ObjectId(pickupAddr._id),
+        deliveryAddressId: new Types.ObjectId(deliveryAddr._id),
+        totalPrice: 150000,
+        status: OrderStatus.COMPLETED,
+        weightKg: 1.0,
+        shippingFee: 20000,
+        codValue: 175000,
+      },
+      {
+        userId: customer._id,
+        senderName: 'Nguyễn Văn I',
+        receiverName: 'Hoàng Thị K',
+        receiverPhone: '0977777777',
+        pickupAddressId: new Types.ObjectId(pickupAddr._id),
+        deliveryAddressId: new Types.ObjectId(deliveryAddr._id),
+        totalPrice: 100000,
+        status: OrderStatus.CANCELED,
+        weightKg: 8,
+        shippingFee: 40000,
+        codValue: 120000,
+      },
+    ];
 
-    this.logger.log('>>> INIT ORDERS DONE');
-    return { order1, customer };
+    const orders = await this.orderModel.insertMany(ordersData);
+
+    this.logger.log('>>> INIT MULTIPLE ORDERS DONE');
+    return { orders, customer };
   }
 
   /* ---------------- SHIPMENTS ---------------- */

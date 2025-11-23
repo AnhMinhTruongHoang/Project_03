@@ -8,18 +8,20 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import mongoose, { Connection, Types } from 'mongoose';
 import { CreateTrackingDto } from './dto/create-tracking.dto';
-import { UpdateTrackingDto } from './dto/update-tracking.dto';
 import {
   Tracking,
   TrackingDocument,
   TrackingStatus,
 } from './schemas/tracking.schemas';
+import { Order, OrderDocument } from '../orders/schemas/order.schemas';
 
 @Injectable()
 export class TrackingService {
   constructor(
     @InjectModel(Tracking.name)
     private readonly trackingModel: SoftDeleteModel<TrackingDocument>,
+    @InjectModel(Order.name)
+    private readonly orderModel: SoftDeleteModel<OrderDocument>,
     @InjectConnection() private readonly connection: Connection,
   ) {}
 
@@ -99,29 +101,64 @@ export class TrackingService {
   }
 
   async findOne(id: string) {
-    const tracking = await this.trackingModel.findById(id);
-    if (!tracking || tracking.isDeleted)
-      throw new NotFoundException('Tracking not found');
-    return tracking;
-  }
+    const input = id.trim().toUpperCase();
 
-  async update(id: string, dto: UpdateTrackingDto) {
-    const tracking = await this.trackingModel.findByIdAndUpdate(id, dto, {
-      new: true,
-    });
-    if (!tracking || tracking.isDeleted)
-      throw new NotFoundException('Tracking not found');
+    let order;
 
-    // nếu đổi status → cập nhật Shipment
-    if (dto.status) {
-      await this.touchShipmentTimeline(
-        String(tracking.shipmentId),
-        dto.status,
-        dto.note,
-      );
+    // Ưu tiên tìm bằng waybill (khách hàng nhập)
+    if (/^[A-Z]{2}[0-9]{9}[A-Z]{2}$/.test(input)) {
+      order = await this.orderModel.findOne({
+        waybill: input,
+        isDeleted: false,
+      });
+    } else {
+      // Nếu không phải định dạng waybill → thử tìm bằng ObjectId (admin dùng)
+      order = await this.orderModel.findById(input);
     }
-    return tracking;
+
+    if (!order || order.isDeleted) {
+      throw new NotFoundException('Không tìm thấy vận đơn');
+    }
+
+    const timeline = await this.trackingModel
+      .find({ orderId: order._id, isDeleted: false })
+      .sort({ timestamp: 1 })
+      .populate('branchId', 'name')
+      .lean()
+      .exec();
+
+    if (timeline.length === 0) {
+      throw new NotFoundException('Vận đơn chưa có hành trình');
+    }
+
+    return {
+      waybill: order.waybill,
+      currentStatus: timeline[timeline.length - 1].status,
+      updatedAt: timeline[timeline.length - 1].timestamp,
+      senderName: order.senderName,
+      receiverName: order.receiverName,
+      receiverPhone: order.receiverPhone,
+      timeline,
+    };
   }
+
+  // async update(id: string, dto: UpdateTrackingDto) {
+  //   const tracking = await this.trackingModel.findByIdAndUpdate(id, dto, {
+  //     new: true,
+  //   });
+  //   if (!tracking || tracking.isDeleted)
+  //     throw new NotFoundException('Tracking not found');
+
+  //   // nếu đổi status → cập nhật Shipment
+  //   if (dto.status) {
+  //     await this.touchShipmentTimeline(
+  //       String(tracking.shipmentId),
+  //       dto.status,
+  //       dto.note,
+  //     );
+  //   }
+  //   return tracking;
+  // }
 
   // SOFT DELETE
   async remove(id: string, user: { _id: string; email: string }) {

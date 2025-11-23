@@ -68,9 +68,19 @@ export class Order {
     required: false,
   })
   branchId: Types.ObjectId;
+
+  @Prop({
+    required: true,
+    unique: true,
+    uppercase: true,
+    trim: true,
+    match: /^[A-Z]{2}[0-9]{9}[A-Z]{2}$/,
+  })
+  waybill: string;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
+OrderSchema.index({ waybill: 1 });
 OrderSchema.index({ userId: 1, createdAt: -1 });
 OrderSchema.index({ status: 1, isDeleted: 1 });
 OrderSchema.index({ branchId: 1, createdAt: -1 });

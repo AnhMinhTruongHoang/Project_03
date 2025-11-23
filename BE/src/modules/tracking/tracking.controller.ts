@@ -56,11 +56,11 @@ export class TrackingController {
     return this.trackingService.findOne(id);
   }
 
-  @Patch(':id')
-  @ResponseMessage('Cập nhật tracking')
-  update(@Param('id') id: string, @Body() dto: UpdateTrackingDto) {
-    return this.trackingService.update(id, dto);
-  }
+  // @Patch(':id')
+  // @ResponseMessage('Cập nhật tracking')
+  // update(@Param('id') id: string, @Body() dto: UpdateTrackingDto) {
+  //   return this.trackingService.update(id, dto);
+  // }
 
   @Delete(':id')
   @ResponseMessage('Xóa (soft) tracking')

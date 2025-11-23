@@ -67,6 +67,7 @@ export class OrdersService {
 
   // Tạo order
   async create(dto: CreateOrderDto, user: IUser) {
+    const waybill = await this.generateUniqueWaybill();
     // 1. Lấy province + code
     const originProv = await this.provinceModel
       .findById(dto.pickupAddress.provinceId)
@@ -127,6 +128,7 @@ export class OrdersService {
       totalPrice,
       serviceCode: dto.serviceCode || 'STD',
       weightKg: dto.weightKg,
+      waybill,
     });
 
     try {
@@ -145,7 +147,23 @@ export class OrdersService {
     return order;
   }
 
-  ///
+  private async generateUniqueWaybill(): Promise<string> {
+    let waybill: string;
+    let exists: boolean;
+
+    do {
+      const prefix = 'BD';
+      const numbers = Math.floor(100000000 + Math.random() * 900000000);
+      const suffix = 'VN';
+      waybill = `${prefix}${numbers}${suffix}`;
+
+      const found = await this.orderModel.findOne({ waybill });
+      exists = !!found;
+    } while (exists);
+
+    return waybill;
+  }
+
   async findAll(user: IUser, currentPage = 1, limit = 10, queryObj: any = {}) {
     const { filter, sort } = aqp(queryObj);
 

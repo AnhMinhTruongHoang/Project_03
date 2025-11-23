@@ -1,34 +1,125 @@
-<div class="stepper">
-  <div
-    class="step"
-    *ngFor="let step of items; let i = index"
-    [class.active]="i === activeIndex"
-    [class.completed]="i < activeIndex"
-    (click)="onActiveIndexChange(i)"
-  >
-    <div class="circle">{{ i + 1 }}</div>
-    <div class="label">{{ step.label }}</div>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+
+      <!-- Tiêu đề -->
+      <div class="text-center mb-5">
+        <h2 class="fw-bold text-primary">Tra cứu vận đơn</h2>
+        <p class="text-muted">Nhập mã vận đơn để theo dõi hành trình giao hàng</p>
+      </div>
+
+      <!-- Form tra cứu -->
+      <div class="card shadow-sm border-0 mb-5">
+        <div class="card-body p-4">
+          <form (ngSubmit)="search()" class="row g-3 align-items-center">
+            <div class="col-md-9 col-12">
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                placeholder="Nhập mã vận đơn (ví dụ: SP123456)"
+                [(ngModel)]="shipmentId"
+                name="shipmentId"
+                required
+                autofocus
+                [disabled]="loading"
+              />
+            </div>
+            <div class="col-md-3 col-12">
+              <button
+                type="submit"
+                class="btn btn-primary btn-lg w-100"
+                [disabled]="!shipmentId || loading"
+              >
+                <span *ngIf="!loading">Tra cứu</span>
+                <span *ngIf="loading">
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  Đang tìm...
+                </span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Thông báo lỗi -->
+          <div *ngIf="error" class="alert alert-danger mt-3 mb-0">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ error }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Kết quả tra cứu -->
+      <ng-container *ngIf="trackingEvents.length > 0">
+        <!-- Thông tin đơn hàng (nếu có populate shipment) -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-body">
+            <div class="row text-center text-md-start">
+              <div class="col-md-4 mb-3">
+                <small class="text-muted">Mã vận đơn</small>
+                <h5 class="fw-bold">{{ shipmentId }}</h5>
+              </div>
+              <div class="col-md-4 mb-3">
+                <small class="text-muted">Trạng thái hiện tại</small>
+                <h5 class="fw-bold" [ngClass]="getCurrentStatusColor()">
+                  {{ getCurrentStatusLabel() }}
+                </h5>
+              </div>
+              <div class="col-md-4 mb-3">
+                <small class="text-muted">Cập nhật lúc</small>
+                <h6>{{ latestUpdate | date:'HH:mm, dd/MM/yyyy' }}</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline hành trình -->
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white border-0 py-3">
+            <h5 class="fw-bold mb-0 text-primary">
+              <i class="bi bi-truck me-2"></i>Hành trình vận đơn
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="timeline-modern">
+              <div
+                class="timeline-item"
+                *ngFor="let event of trackingEvents; let i = index; let isLast = last"
+              >
+                <div class="timeline-connector" [class.completed]="i < currentStepIndex"></div>
+                <div class="timeline-dot"
+                     [class.active]="i === currentStepIndex"
+                     [class.completed]="i < currentStepIndex">
+                  <i [class]="getStatusIcon(event.status) + ' text-white'"></i>
+                </div>
+                <div class="timeline-content" [class.active]="i === currentStepIndex">
+                  <h6 class="fw-bold mb-1" [ngClass]="getStatusTextClass(event.status)">
+                    {{ getStatusLabel(event.status) }}
+                  </h6>
+                  <p class="text-muted small mb-2">
+                    {{ event.timestamp | date:'HH:mm, ngày dd/MM/yyyy' }}
+                  </p>
+                  <p class="mb-1" *ngIf="event.location">
+                    <i class="bi bi-geo-alt me-1"></i>
+                    <strong>Địa điểm:</strong> {{ event.location }}
+                  </p>
+                  <p class="mb-1" *ngIf="event.branchId">
+                    <i class="bi bi-building me-1"></i>
+                    <strong>Chi nhánh:</strong> {{ event.branchId.name || 'Chi nhánh xử lý' }}
+                  </p>
+                  <p class="mb-0 text-muted" *ngIf="event.note">
+                    <strong>Ghi chú:</strong> {{ event.note }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Khi chưa tra cứu -->
+      <div *ngIf="!trackingEvents.length && !loading && shipmentId && !error" class="text-center py-5">
+        <i class="bi bi-search display-1 text-muted"></i>
+        <p class="text-muted mt-3">Nhập mã vận đơn và nhấn "Tra cứu" để xem kết quả</p>
+      </div>
+    </div>
   </div>
-
-  <div
-    class="line"
-    *ngFor="let step of items; let i = index"
-    [class.completed]="i < activeIndex - 1"
-  ></div>
-</div>
-
-<div class="step-content mt-4">
-  <h3>{{ items[activeIndex].label }}</h3>
-
-  @switch (activeIndex) { @case (0) {
-  <p>This is the Login step. Enter your account to continue.</p>
-  } @case (1) {
-  <p>Choose your shipping method to proceed.</p>
-  } @case (2) {
-  <p>Select your preferred payment method.</p>
-  } @case (3) {
-  <p>Review and confirm your order.</p>
-  } @default {
-  <p>Invalid step</p>
-  } }
 </div>

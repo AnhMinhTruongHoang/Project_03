@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { OrdersService } from '../../../services/dashboard/orders.service';
 import { LocationService } from '../../../services/location.service';
@@ -14,7 +14,7 @@ import { MapPickerComponent } from '../../../shared/map-picker/map-picker';
 @Component({
   selector: 'app-edit-order',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MapPickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, MapPickerComponent, RouterModule],
   templateUrl: './editOrder.html',
 })
 export class EditOrder implements OnInit {
@@ -416,5 +416,24 @@ export class EditOrder implements OnInit {
         location.reload();
       });
     }
+  }
+
+  // Thêm 2 hàm này vào class EditOrder
+  copyWaybill() {
+    const waybill = this.order.waybill || this.order._id;
+    navigator.clipboard.writeText(waybill);
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: 'Đã sao chép mã vận đơn!',
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  }
+
+  printLabel() {
+    const waybill = this.order.waybill || this.order._id;
+    window.open(`/print-label/${waybill}`, '_blank');
   }
 }
