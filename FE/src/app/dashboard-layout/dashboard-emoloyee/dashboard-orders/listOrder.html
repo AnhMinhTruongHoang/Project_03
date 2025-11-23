@@ -1,7 +1,6 @@
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0 fw-bold">📦 Danh sách đơn hàng của bạn</h2>
-    <!-- Nút Tạo đơn hàng mới -->
+    <h2 class="mb-0 fw-bold">Danh sách đơn hàng của bạn</h2>
     <a
       routerLink="/employee/order/create"
       class="btn btn-success btn-lg shadow-sm d-flex align-items-center gap-2"
@@ -22,21 +21,21 @@
       <span class="fw-semibold">Tạo đơn hàng mới</span>
     </a>
   </div>
+
   <!-- Filter Card -->
   <div class="card mb-4 p-3 shadow-sm">
     <form class="row g-3 align-items-end">
-      <!-- Status pill -->
       <div class="col-md-3">
         <label class="form-label d-block mb-1">Trạng thái</label>
         <div class="dropdown">
           <button
-            class="btn btn-danger btn-sm btn-outline-secondary dropdown-toggle w-100"
+            class="btn btn-outline-secondary dropdown-toggle w-100 btn-sm"
             type="button"
             data-bs-toggle="dropdown"
           >
             Chọn trạng thái ({{ filters.status.length }})
           </button>
-          <ul class="dropdown-menu p-2" style="min-width: 180px">
+          <ul class="dropdown-menu p-2" style="min-width: 200px">
             <li *ngFor="let s of statusOptions">
               <div class="form-check mb-1">
                 <input
@@ -53,7 +52,6 @@
         </div>
       </div>
 
-      <!-- Các input khác -->
       <div class="col-md-2">
         <label class="form-label">Từ ngày</label>
         <input
@@ -95,11 +93,11 @@
         />
       </div>
       <div class="col-md-3">
-        <label class="form-label">Tìm kiếm</label>
+        <label class="form-label">Tìm kiếm mã vận đơn</label>
         <input
           type="text"
           class="form-control"
-          placeholder="Mã đơn"
+          placeholder="VD: HN123456..."
           [(ngModel)]="filters.search"
           name="search"
           (ngModelChange)="applyFilters()"
@@ -121,7 +119,7 @@
         <input
           type="text"
           class="form-control"
-          placeholder="SĐT người nhận"
+          placeholder="SĐT"
           [(ngModel)]="filters.receiverPhone"
           name="receiverPhone"
           (ngModelChange)="applyFilters()"
@@ -134,7 +132,7 @@
   <table class="table table-bordered table-hover align-middle text-center">
     <thead class="table-light">
       <tr>
-        <th>Mã đơn</th>
+        <th>Mã vận đơn</th>
         <th>Người nhận</th>
         <th>Điện thoại</th>
         <th>Giá trị</th>
@@ -151,7 +149,44 @@
           [class.table-primary]="expandedOrderId === order._id"
           style="cursor: pointer"
         >
-          <td>{{ order._id }}</td>
+          <!-- Cột Mã vận đơn + Copy -->
+          <td class="position-relative">
+            <div class="d-flex align-items-center justify-content-center gap-2">
+              <span class="fw-bold fs-5 text-warning">{{ order.waybill || '—' }}</span>
+              <button
+                *ngIf="order.waybill"
+                class="btn btn-sm btn-dark p-1"
+                title="Copy mã vận đơn"
+                (click)="copyWaybill(order.waybill, $event)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"
+                  />
+                  <path
+                    d="M9.5 1a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-4z"
+                  />
+                </svg>
+              </button>
+            </div>
+            <small class="text-muted d-block">({{ order._id }})</small>
+
+            <!-- Hiệu ứng "Đã copy!" -->
+            <div
+              *ngIf="copiedWaybill === order.waybill"
+              class="position-absolute top-50 start-100 translate-middle badge rounded-pill bg-success shadow-sm"
+              style="font-size: 0.75rem; z-index: 10"
+            >
+              Đã copy!
+            </div>
+          </td>
+
           <td>{{ order.receiverName }}</td>
           <td>{{ order.receiverPhone }}</td>
           <td>{{ order.totalPrice | number }} đ</td>
@@ -160,72 +195,85 @@
           </td>
           <td>{{ order.createdAt | date : 'dd/MM/yyyy HH:mm' }}</td>
           <td>{{ order.updatedAt | date : 'dd/MM/yyyy HH:mm' }}</td>
-          <td>
+
+          <!-- Thao tác -->
+          <td (click)="$event.stopPropagation()">
             <button
               *ngIf="canEdit(order)"
-              class="btn btn-danger btn-sm py-2 px-3 me-1"
+              class="btn btn-warning btn-sm py-2 px-3 me-1"
               [routerLink]="['/employee/order/edit', order._id]"
-              (click)="$event.stopPropagation()"
             >
               Sửa
             </button>
 
             <button
               *ngIf="canDelete(order)"
-              class="btn btn-danger btn-sm py-2 px-3"
+              class="btn btn-danger btn-sm py-2 px-3 me-1"
               (click)="deleteOrder(order._id, $event)"
             >
               Xóa
             </button>
+
+            <!-- Nút In -->
+            <button
+              class="btn btn-info btn-sm py-2 px-3 text-white"
+              (click)="printOrder(order)"
+              title="In vận đơn"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z" />
+                <path
+                  d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5z"
+                />
+              </svg>
+              In
+            </button>
           </td>
         </tr>
 
-        <!-- Chi tiết -->
+        <!-- Chi tiết mở rộng -->
         <tr *ngIf="expandedOrderId === order._id">
           <td colspan="8">
-            <div class="bg-dark text-white p-3 rounded-3">
+            <div class="bg-dark text-white p-4 rounded-3">
               <h6 class="fw-bold text-warning mb-3">Chi tiết đơn hàng</h6>
               <div class="row">
                 <div class="col-md-6">
                   <p><strong class="text-warning">Người gửi:</strong> {{ order.senderName }}</p>
                   <p>
-                    <strong class="text-warning">Địa chỉ lấy hàng:</strong>
-                    {{ order.pickupAddressId?.address }},
-                    {{ order.pickupAddressId?.communeId?.name }},
-                    {{ order.pickupAddressId?.provinceId?.name }}
+                    <strong class="text-warning">Lấy hàng:</strong>
+                    {{ formatAddress(order.pickupAddressId) }}
                   </p>
                 </div>
                 <div class="col-md-6">
                   <p><strong class="text-warning">Người nhận:</strong> {{ order.receiverName }}</p>
                   <p>
-                    <strong class="text-warning">Địa chỉ giao:</strong>
-                    {{ order.deliveryAddressId?.address }},
-                    {{ order.deliveryAddressId?.communeId?.name }},
-                    {{ order.deliveryAddressId?.provinceId?.name }}
+                    <strong class="text-warning">Giao hàng:</strong>
+                    {{ formatAddress(order.deliveryAddressId) }}
                   </p>
                 </div>
               </div>
               <hr class="border-secondary" />
               <p>
-                <strong class="text-warning">Trạng thái:</strong>
-                <span [ngClass]="statusClass(order.status)"> {{ statusText(order.status) }} </span>
-              </p>
-              <p>
                 <strong>Dịch vụ:</strong> {{ order.serviceCode }} | <strong>COD:</strong>
                 {{ order.codValue | number }} đ | <strong>Phí ship:</strong>
-                {{ order.shippingFee | number }} đ | <strong>Trọng lượng:</strong>
-                {{ order.weightKg }} kg
+                {{ order.shippingFee | number }} đ | <strong>KL:</strong> {{ order.weightKg }} kg
               </p>
-              <!-- Danh sách sản phẩm trong đơn -->
+
               <div *ngIf="order.items?.length">
-                <h6 class="mt-3 text-info">🧾 Danh sách hàng hóa</h6>
+                <h6 class="mt-3 text-info">Danh sách hàng hóa</h6>
                 <table
                   class="table table-sm table-bordered table-striped mt-2 bg-secondary bg-opacity-25 text-white"
                 >
                   <thead class="table-secondary text-dark">
                     <tr>
-                      <th>Tên sản phẩm</th>
-                      <th>Số lượng</th>
+                      <th>Tên SP</th>
+                      <th>SL</th>
                       <th>Đơn giá</th>
                       <th>Thành tiền</th>
                     </tr>

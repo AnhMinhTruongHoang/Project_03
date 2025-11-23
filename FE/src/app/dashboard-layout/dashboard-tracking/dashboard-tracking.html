@@ -16,21 +16,24 @@
               <input
                 type="text"
                 class="form-control form-control-lg"
-                placeholder="Nhập mã vận đơn (ví dụ: SP123456)"
-                [(ngModel)]="shipmentId"
-                name="shipmentId"
+                placeholder="Nhập mã vận đơn (VD: VN123456789VN)"
+                [(ngModel)]="waybill"
+                name="waybill"
                 required
                 autofocus
                 [disabled]="loading"
+                uppercase
               />
             </div>
             <div class="col-md-3 col-12">
               <button
                 type="submit"
                 class="btn btn-primary btn-lg w-100"
-                [disabled]="!shipmentId || loading"
+                [disabled]="!waybill || loading"
               >
-                <span *ngIf="!loading">Tra cứu</span>
+                <span *ngIf="!loading">
+                  <i class="bi bi-search me-2"></i>Tra cứu
+                </span>
                 <span *ngIf="loading">
                   <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                   Đang tìm...
@@ -41,7 +44,7 @@
 
           <!-- Thông báo lỗi -->
           <div *ngIf="error" class="alert alert-danger mt-3 mb-0">
-            <i class="bi bi-exclamation-triangle me-2"></i>
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
             {{ error }}
           </div>
         </div>
@@ -49,23 +52,23 @@
 
       <!-- Kết quả tra cứu -->
       <ng-container *ngIf="trackingEvents.length > 0">
-        <!-- Thông tin đơn hàng (nếu có populate shipment) -->
+        <!-- Thông tin tổng quan -->
         <div class="card shadow-sm border-0 mb-4">
           <div class="card-body">
             <div class="row text-center text-md-start">
               <div class="col-md-4 mb-3">
-                <small class="text-muted">Mã vận đơn</small>
-                <h5 class="fw-bold">{{ shipmentId }}</h5>
+                <small class="text-muted text-uppercase">Mã vận đơn</small>
+                <h5 class="fw-bold text-primary">{{ trackingData?.waybill || waybill }}</h5>
               </div>
               <div class="col-md-4 mb-3">
-                <small class="text-muted">Trạng thái hiện tại</small>
+                <small class="text-muted text-uppercase">Trạng thái hiện tại</small>
                 <h5 class="fw-bold" [ngClass]="getCurrentStatusColor()">
                   {{ getCurrentStatusLabel() }}
                 </h5>
               </div>
               <div class="col-md-4 mb-3">
-                <small class="text-muted">Cập nhật lúc</small>
-                <h6>{{ latestUpdate | date:'HH:mm, dd/MM/yyyy' }}</h6>
+                <small class="text-muted text-uppercase">Cập nhật lúc</small>
+                <h6 class="mb-0">{{ latestUpdate | date:'HH:mm, ngày dd/MM/yyyy' }}</h6>
               </div>
             </div>
           </div>
@@ -84,12 +87,19 @@
                 class="timeline-item"
                 *ngFor="let event of trackingEvents; let i = index; let isLast = last"
               >
+                <!-- Đường nối -->
                 <div class="timeline-connector" [class.completed]="i < currentStepIndex"></div>
-                <div class="timeline-dot"
-                     [class.active]="i === currentStepIndex"
-                     [class.completed]="i < currentStepIndex">
+
+                <!-- Điểm tròn trạng thái -->
+                <div
+                  class="timeline-dot"
+                  [class.active]="i === currentStepIndex"
+                  [class.completed]="i < currentStepIndex"
+                >
                   <i [class]="getStatusIcon(event.status) + ' text-white'"></i>
                 </div>
+
+                <!-- Nội dung -->
                 <div class="timeline-content" [class.active]="i === currentStepIndex">
                   <h6 class="fw-bold mb-1" [ngClass]="getStatusTextClass(event.status)">
                     {{ getStatusLabel(event.status) }}
@@ -97,15 +107,18 @@
                   <p class="text-muted small mb-2">
                     {{ event.timestamp | date:'HH:mm, ngày dd/MM/yyyy' }}
                   </p>
+
                   <p class="mb-1" *ngIf="event.location">
-                    <i class="bi bi-geo-alt me-1"></i>
+                    <i class="bi bi-geo-alt-fill me-1"></i>
                     <strong>Địa điểm:</strong> {{ event.location }}
                   </p>
-                  <p class="mb-1" *ngIf="event.branchId">
-                    <i class="bi bi-building me-1"></i>
-                    <strong>Chi nhánh:</strong> {{ event.branchId.name || 'Chi nhánh xử lý' }}
+
+                  <p class="mb-1" *ngIf="event.branchId?.name">
+                    <i class="bi bi-building-fill me-1"></i>
+                    <strong>Chi nhánh:</strong> {{ event.branchId.name }}
                   </p>
-                  <p class="mb-0 text-muted" *ngIf="event.note">
+
+                  <p class="mb-0 text-muted small" *ngIf="event.note">
                     <strong>Ghi chú:</strong> {{ event.note }}
                   </p>
                 </div>
@@ -115,11 +128,24 @@
         </div>
       </ng-container>
 
-      <!-- Khi chưa tra cứu -->
-      <div *ngIf="!trackingEvents.length && !loading && shipmentId && !error" class="text-center py-5">
-        <i class="bi bi-search display-1 text-muted"></i>
-        <p class="text-muted mt-3">Nhập mã vận đơn và nhấn "Tra cứu" để xem kết quả</p>
+      <!-- Trạng thái: Chưa nhập mã hoặc chưa tra cứu -->
+      <div
+        *ngIf="!trackingEvents.length && !loading && !error && waybill"
+        class="text-center py-5"
+      >
+        <i class="bi bi-search display-1 text-muted opacity-50"></i>
+        <p class="text-muted mt-4 fs-5">Nhấn nút <strong>Tra cứu</strong> để xem hành trình</p>
       </div>
+
+      <!-- Trạng thái: Chưa nhập gì -->
+      <div
+        *ngIf="!waybill && !loading && !error"
+        class="text-center py-5 text-muted"
+      >
+        <i class="bi bi-box-seam display-1 opacity-25"></i>
+        <p class="mt-4 fs-4">Nhập mã vận đơn để bắt đầu tra cứu</p>
+      </div>
+
     </div>
   </div>
 </div>

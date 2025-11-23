@@ -19,7 +19,6 @@ import { Public, ResponseMessage, Users } from 'src/health/decorator/customize';
 import { IUser } from 'src/types/user.interface';
 
 @ApiTags('tracking')
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('tracking')
 export class TrackingController {
   constructor(private readonly trackingService: TrackingService) {}
@@ -42,18 +41,25 @@ export class TrackingController {
     const size = pageSize ? Number(pageSize) : 10;
     return this.trackingService.findAll(page, size, query || {});
   }
-  @Public()
-  @Get('shipment/:shipmentId')
-  @ResponseMessage('Lấy timeline tracking theo shipment')
-  findByShipment(@Param('shipmentId') shipmentId: string) {
-    return this.trackingService.findByShipment(shipmentId);
-  }
+  // @Public()
+  // @Get('shipment/:shipmentId')
+  // @ResponseMessage('Lấy timeline tracking theo shipment')
+  // findByShipment(@Param('shipmentId') shipmentId: string) {
+  //   return this.trackingService.findByShipment(shipmentId);
+  // }
 
   @Public()
   @Get(':id')
   @ResponseMessage('Chi tiết tracking')
   findOne(@Param('id') id: string) {
     return this.trackingService.findOne(id);
+  }
+
+  @Public()
+  @Get('waybill/:waybill')
+  @ResponseMessage('Lấy hành trình theo mã vận đơn (waybill)')
+  async findByWaybill(@Param('waybill') waybill: string) {
+    return this.trackingService.findByWaybill(waybill);
   }
 
   // @Patch(':id')

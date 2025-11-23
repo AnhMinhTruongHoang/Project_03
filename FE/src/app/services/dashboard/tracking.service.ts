@@ -8,39 +8,43 @@ import { env } from '../../environments/environment';
 
 export interface TrackingEvent {
   _id: string;
-  shipmentId: string;
+  orderId: string; // ← Đổi từ shipmentId → orderId
   status: string;
   timestamp: string;
   location?: string;
-  branchId?: {
-    _id: string;
-    name: string;
-  };
+  branchId?: { _id: string; name: string };
   note?: string;
-  createdBy?: {
-    email: string;
-  };
+}
+export interface TrackingResponse {
+  waybill: string;
+  currentStatus: string;
+  updatedAt: string;
+  senderName: string;
+  receiverName: string;
+  receiverPhone: string;
+  codValue?: number;
+  shippingFee?: number;
+  timeline: TrackingEvent[];
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TrackingPublicService {
   private apiUrl = `${env.baseUrl}/tracking`;
 
   constructor(private http: HttpClient) {}
 
-  getTrackingByShipmentId(shipmentId: string): Observable<TrackingEvent[]> {
-    if (!shipmentId?.trim()) {
-      return throwError(() => new Error('Mã vận đơn không được để trống'));
+  getTrackingByWaybill(waybill: string): Observable<TrackingResponse> {
+    if (!waybill?.trim()) {
+      return throwError(() => new Error('Vui lòng nhập mã vận đơn'));
     }
 
-    return this.http.get<TrackingEvent[]>(
-      `${this.apiUrl}/shipment/${shipmentId.trim()}`
-    ).pipe(
-      catchError(err => {
-        const message = err.error?.message || 'Không tìm thấy vận đơn hoặc lỗi hệ thống';
-        return throwError(() => new Error(message));
+    const cleaned = waybill.trim().toUpperCase();
+    return this.http.get<TrackingResponse>(`${this.apiUrl}/waybill/${cleaned}`).pipe(
+      catchError((err) => {
+        const msg = err.error?.message || 'Không tìm thấy vận đơn';
+        return throwError(() => new Error(msg));
       })
     );
   }

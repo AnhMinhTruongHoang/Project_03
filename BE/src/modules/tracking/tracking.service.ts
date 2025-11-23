@@ -179,4 +179,56 @@ export class TrackingService {
     }
     return { message: 'Tracking restored' };
   }
+
+  async findByWaybill(waybill: string): Promise<any> {
+    const input = waybill.trim().toUpperCase();
+
+    // Validate format waybill (tùy chọn, nhưng tốt cho UX)
+    if (!/^[A-Z]{2}[0-9]{9}[A-Z]{2}$/.test(input)) {
+      throw new BadRequestException(
+        'Mã vận đơn không đúng định dạng (VD: VN123456789VN)',
+      );
+    }
+
+    // Tìm Order theo waybill
+    const order = await this.orderModel
+      .findOne({
+        waybill: input,
+        isDeleted: false,
+      })
+      .lean();
+
+    if (!order) {
+      throw new NotFoundException(`Không tìm thấy vận đơn với mã: ${input}`);
+    }
+
+    // Lấy timeline tracking theo orderId
+    const timeline = await this.trackingModel
+      .find({ orderId: order._id, isDeleted: false })
+      .sort({ timestamp: 1 })
+      .populate('branchId', 'name') // Populate tên chi nhánh
+      .lean()
+      .exec();
+
+    if (timeline.length === 0) {
+      throw new NotFoundException(
+        `Vận đơn ${input} chưa có hành trình tracking`,
+      );
+    }
+
+    // Trả về response chuẩn cho frontend
+    const latest = timeline[timeline.length - 1];
+    return {
+      waybill: order.waybill,
+      currentStatus: latest.status,
+      updatedAt: latest.timestamp,
+      senderName: order.senderName,
+      receiverName: order.receiverName,
+      receiverPhone: order.receiverPhone,
+      // Thêm thông tin khác nếu cần (COD, phí ship, v.v.)
+      codValue: order.codValue,
+      shippingFee: order.shippingFee,
+      timeline, // Array các event tracking
+    };
+  }
 }
