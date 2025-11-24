@@ -48,7 +48,7 @@ export class EditOrder implements OnInit {
     this.orderId = this.route.snapshot.params['id'];
     if (!this.orderId) {
       Swal.fire('Lỗi', 'Không tìm thấy ID đơn hàng', 'error');
-      this.router.navigate(['/employee/order/list']);
+      this.router.navigate(['/employee/orders/list']);
       return;
     }
 
@@ -411,11 +411,19 @@ export class EditOrder implements OnInit {
 
   // ================== KHÔI PHỤC ĐƠN HỦY ==================
   restoreOrder() {
-    if (confirm('Khôi phục đơn hàng về trạng thái Chờ xác nhận?')) {
-      this.ordersService.updateStatus(this.orderId, 'PENDING').subscribe(() => {
-        location.reload();
-      });
-    }
+    Swal.fire({
+      title: 'Khôi phục đơn hàng?',
+      text: 'Đơn sẽ trở về trạng thái "Chờ xác nhận"',
+      icon: 'question',
+      showCancelButton: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.ordersService.updateStatus(this.orderId, 'PENDING').subscribe(() => {
+          Swal.fire('Thành công!', 'Đơn hàng đã được khôi phục', 'success');
+          location.reload();
+        });
+      }
+    });
   }
 
   // Thêm 2 hàm này vào class EditOrder

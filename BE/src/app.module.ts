@@ -23,6 +23,7 @@ import { TrackingModule } from './modules/tracking/tracking.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { LocationModule } from './modules/location/location.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -90,6 +91,7 @@ import { LocationModule } from './modules/location/location.module';
     TrackingModule,
     NotificationsModule,
     LocationModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

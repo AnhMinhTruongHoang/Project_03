@@ -16,6 +16,8 @@
   width: 2px;
   background: #e9ecef;
   &.completed { background: #198754; }
+  
+  left: 20px;
 }
 
 .timeline-dot {
@@ -31,10 +33,13 @@
   justify-content: center;
   font-size: 1.2rem;
   transition: all 0.3s;
+  font-size: 1.4rem !important;
+  z-index: 10;
 
   &.completed {
     background: #198754;
   }
+
   &.active {
     background: #0d6efd;
     transform: scale(1.2);
@@ -47,11 +52,18 @@
   padding: 15px;
   background: #f8f9fa;
   border-radius: 8px;
+  margin-left: 60px !important;
+
   &.active {
     background: #e3f2fd;
     border-left: 4px solid #0d6efd;
   }
 }
 
-.text-orange { color: #fd7e14; }
-.text-purple { color: #6f42c1; }
+.text-orange {
+  color: #fd7e14;
+}
+
+.text-purple {
+  color: #6f42c1;
+}

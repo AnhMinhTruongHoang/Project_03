@@ -8,14 +8,23 @@
         <!-- Người gửi -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Người gửi</label>
-          <input type="text" class="form-control" formControlName="senderName" placeholder="Nhập tên người gửi" />
+          <input
+            type="text"
+            class="form-control"
+            formControlName="senderName"
+            placeholder="Nhập tên người gửi"
+          />
         </div>
 
         <!-- Pickup -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Địa chỉ lấy hàng</label>
 
-          <select class="form-select mb-2" formControlName="pickupProvinceId" (change)="onPickupProvinceChange()">
+          <select
+            class="form-select mb-2"
+            formControlName="pickupProvinceId"
+            (change)="onPickupProvinceChange()"
+          >
             <option value="">-- Chọn tỉnh/thành phố --</option>
             <option *ngFor="let p of provinces" [value]="p._id">{{ p.name }}</option>
           </select>
@@ -25,8 +34,13 @@
             <option *ngFor="let c of pickupCommunes" [value]="c._id">{{ c.name }}</option>
           </select>
 
-          <input type="text" class="form-control" formControlName="pickupDetailAddress" (input)="updatePickupMap()"
-            placeholder="Nhập địa chỉ chi tiết" />
+          <input
+            type="text"
+            class="form-control"
+            formControlName="pickupDetailAddress"
+            (input)="updatePickupMap()"
+            placeholder="Nhập địa chỉ chi tiết"
+          />
 
           <label class="form-label fw-semibold mt-3">📍 Chọn vị trí lấy hàng trên bản đồ</label>
           <app-map-picker #pickupMap (locationSelect)="setPickupLocation($event)"> </app-map-picker>
@@ -38,20 +52,34 @@
         <!-- Người nhận -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Người nhận</label>
-          <input type="text" class="form-control" formControlName="receiverName" placeholder="Nhập tên người nhận" />
+          <input
+            type="text"
+            class="form-control"
+            formControlName="receiverName"
+            placeholder="Nhập tên người nhận"
+          />
         </div>
 
         <!-- SĐT người nhận -->
         <div class="mb-3">
           <label class="form-label fw-semibold">SĐT người nhận</label>
-          <input type="text" class="form-control" formControlName="receiverPhone" placeholder="Nhập số điện thoại" />
+          <input
+            type="text"
+            class="form-control"
+            formControlName="receiverPhone"
+            placeholder="Nhập số điện thoại"
+          />
         </div>
 
         <!-- Delivery -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Địa chỉ giao hàng</label>
 
-          <select class="form-select mb-2" formControlName="deliveryProvinceId" (change)="onDeliveryProvinceChange()">
+          <select
+            class="form-select mb-2"
+            formControlName="deliveryProvinceId"
+            (change)="onDeliveryProvinceChange()"
+          >
             <option value="">-- Chọn tỉnh/thành phố --</option>
             <option *ngFor="let p of provinces" [value]="p._id">{{ p.name }}</option>
           </select>
@@ -61,8 +89,12 @@
             <option *ngFor="let c of deliveryCommunes" [value]="c._id">{{ c.name }}</option>
           </select>
 
-          <input type="text" class="form-control" formControlName="deliveryDetailAddress"
-            placeholder="Nhập địa chỉ chi tiết" />
+          <input
+            type="text"
+            class="form-control"
+            formControlName="deliveryDetailAddress"
+            placeholder="Nhập địa chỉ chi tiết"
+          />
 
           <label class="form-label fw-semibold mt-3">📍 Chọn vị trí giao hàng trên bản đồ</label>
           <app-map-picker #deliveryMap (locationSelect)="setDeliveryLocation($event)">
@@ -80,30 +112,45 @@
         <!-- Cân nặng -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Khối lượng (kg)</label>
-          <input type="number" step="0.1" min="0.01" class="form-control" formControlName="weightKg" placeholder="1">
+          <input
+            type="number"
+            step="0.1"
+            min="0.01"
+            class="form-control"
+            formControlName="weightKg"
+            placeholder="1"
+          />
         </div>
 
         <!-- Giá trị hàng hóa (COD) -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Giá trị hàng hóa (VNĐ)</label>
-          <input type="number" min="0" class="form-control" formControlName="codValue" placeholder="0">
+          <input
+            type="number"
+            min="0"
+            class="form-control"
+            formControlName="codValue"
+            placeholder="0"
+          />
         </div>
 
         <!-- Kết quả tự động tính -->
         <div class="alert alert-info mt-3">
-          <strong>Phí vận chuyển: {{ shippingFee | number:'1.0-0' }} ₫</strong>
+          <strong>Phí vận chuyển: {{ shippingFee | number : '1.0-0' }} ₫</strong>
         </div>
 
         <div class="alert alert-success fs-4 fw-bold">
-          Tổng tiền khách trả: {{ totalPrice | number:'1.0-0' }} ₫
+          Tổng tiền khách trả: {{ totalPrice | number : '1.0-0' }} ₫
         </div>
       </div>
 
-      <!-- Submit -->
-      <div class="col-12 mt-3">
-        <button class="btn btn-danger" [disabled]="loading || orderForm.invalid">
+      <div class="col-12 mt-4">
+        <button class="btn btn-danger btn-lg px-5" [disabled]="loading || orderForm.invalid">
           <span *ngIf="!loading">Tạo đơn hàng</span>
-          <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+          <span *ngIf="loading">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Đang tạo...
+          </span>
         </button>
       </div>
     </div>

@@ -14,6 +14,7 @@ import {
   TrackingStatus,
 } from './schemas/tracking.schemas';
 import { Order, OrderDocument } from '../orders/schemas/order.schemas';
+import { IUser } from 'src/types/user.interface';
 
 @Injectable()
 export class TrackingService {
@@ -23,44 +24,62 @@ export class TrackingService {
     @InjectModel(Order.name)
     private readonly orderModel: SoftDeleteModel<OrderDocument>,
     @InjectConnection() private readonly connection: Connection,
-  ) {}
+  ) { }
 
-  private async touchShipmentTimeline(
-    shipmentId: string,
-    status: TrackingStatus,
-    note?: string,
-  ) {
-    const ShipmentModel = this.connection.model('Shipment');
-    const shipment: any = await ShipmentModel.findById(shipmentId);
-    if (!shipment) throw new NotFoundException('Shipment not found');
+  // private async touchShipmentTimeline(
+  //   shipmentId: string,
+  //   status: TrackingStatus,
+  //   note?: string,
+  // ) {
+  //   const ShipmentModel = this.connection.model('Shipment');
+  //   const shipment: any = await ShipmentModel.findById(shipmentId);
+  //   if (!shipment) throw new NotFoundException('Shipment not found');
 
-    // cập nhật status + deliveredAt nếu cần
-    shipment.status = status;
-    if (status === 'DELIVERED') shipment.deliveredAt = new Date();
-    if (status === 'FAILED')
-      shipment.failedReason = note ?? shipment.failedReason;
+  //   // cập nhật status + deliveredAt nếu cần
+  //   shipment.status = status;
+  //   if (status === 'DELIVERED') shipment.deliveredAt = new Date();
+  //   if (status === 'FAILED')
+  //     shipment.failedReason = note ?? shipment.failedReason;
 
-    shipment.timeline.push({ status, timestamp: new Date(), note });
-    await shipment.save();
-  }
+  //   shipment.timeline.push({ status, timestamp: new Date(), note });
+  //   await shipment.save();
+  // }
 
-  async create(dto: CreateTrackingDto, user: { _id: string; email: string }) {
-    // đảm bảo shipment tồn tại
-    const ShipmentModel = this.connection.model('Shipment');
-    const shipmentExists = await ShipmentModel.exists({
-      _id: dto.shipmentId,
-      isDeleted: false,
-    });
-    if (!shipmentExists) throw new BadRequestException('Shipment không hợp lệ');
+  async create(dto: CreateTrackingDto, user: IUser) {
+    // Kiểm tra order có tồn tại không
+    const order = await this.orderModel.findById(dto.orderId);
+    if (!order || order.isDeleted) {
+      throw new BadRequestException('Đơn hàng không tồn tại hoặc đã bị xóa');
+    }
 
+    // Tạo tracking mới
     const tracking = await this.trackingModel.create({
-      ...dto,
+      orderId: new Types.ObjectId(dto.orderId),
+      status: dto.status,
+      location: dto.location,
+      branchId: dto.branchId ? new Types.ObjectId(dto.branchId) : undefined,
+      note: dto.note,
       timestamp: new Date(),
       createdBy: { _id: new Types.ObjectId(user._id), email: user.email },
     });
 
-    // đồng bộ vào Shipment.timeline + status
-    await this.touchShipmentTimeline(dto.shipmentId, dto.status, dto.note);
+    // CẬP NHẬT STATUS + TIMELINE CỦA ORDER (rất quan trọng!)
+    await this.orderModel.updateOne(
+      { _id: dto.orderId },
+      {
+        $set: { status: dto.status },
+        $push: {
+          timeline: {
+            status: dto.status,
+            timestamp: new Date(),
+            location: dto.location,
+            branchId: dto.branchId,
+            note: dto.note,
+            createdBy: { _id: user._id, email: user.email },
+          },
+        },
+      },
+    );
 
     return tracking;
   }
@@ -180,55 +199,60 @@ export class TrackingService {
     return { message: 'Tracking restored' };
   }
 
-  async findByWaybill(waybill: string): Promise<any> {
-    const input = waybill.trim().toUpperCase();
+async findByWaybill(waybill: string): Promise<any> {
+  const input = waybill.trim().toUpperCase();
 
-    // Validate format waybill (tùy chọn, nhưng tốt cho UX)
-    if (!/^[A-Z]{2}[0-9]{9}[A-Z]{2}$/.test(input)) {
-      throw new BadRequestException(
-        'Mã vận đơn không đúng định dạng (VD: VN123456789VN)',
-      );
-    }
-
-    // Tìm Order theo waybill
-    const order = await this.orderModel
-      .findOne({
-        waybill: input,
-        isDeleted: false,
-      })
-      .lean();
-
-    if (!order) {
-      throw new NotFoundException(`Không tìm thấy vận đơn với mã: ${input}`);
-    }
-
-    // Lấy timeline tracking theo orderId
-    const timeline = await this.trackingModel
-      .find({ orderId: order._id, isDeleted: false })
-      .sort({ timestamp: 1 })
-      .populate('branchId', 'name') // Populate tên chi nhánh
-      .lean()
-      .exec();
-
-    if (timeline.length === 0) {
-      throw new NotFoundException(
-        `Vận đơn ${input} chưa có hành trình tracking`,
-      );
-    }
-
-    // Trả về response chuẩn cho frontend
-    const latest = timeline[timeline.length - 1];
-    return {
-      waybill: order.waybill,
-      currentStatus: latest.status,
-      updatedAt: latest.timestamp,
-      senderName: order.senderName,
-      receiverName: order.receiverName,
-      receiverPhone: order.receiverPhone,
-      // Thêm thông tin khác nếu cần (COD, phí ship, v.v.)
-      codValue: order.codValue,
-      shippingFee: order.shippingFee,
-      timeline, // Array các event tracking
-    };
+  if (!/^[A-Z]{2}[0-9]{9}[A-Z]{2}$/.test(input)) {
+    throw new BadRequestException('Mã vận đơn không đúng định dạng (VD: VN123456789VN)');
   }
+
+  // Tìm Order theo waybill, dùng .lean() để tối ưu tốc độ
+  const order = await this.orderModel
+    .findOne({ waybill: input, isDeleted: false })
+    .lean(); // <-- vẫn dùng .lean() cho nhanh
+
+  if (!order) {
+    throw new NotFoundException(`Không tìm thấy vận đơn ${input}`);
+  }
+
+  // Lấy timeline tracking
+  const timeline = await this.trackingModel
+    .find({ orderId: order._id, isDeleted: false })
+    .sort({ timestamp: 1 })
+    .populate('branchId', 'name address')
+    .lean();
+
+  // Xác định trạng thái mới nhất (nếu chưa có tracking → dùng CREATED)
+  const latestTracking = timeline.length > 0 ? timeline[timeline.length - 1] : null;
+
+  const currentStatus = latestTracking?.status || 'CREATED';
+  const updatedAt = latestTracking?.timestamp || order.createdAt || new Date();
+
+  return {
+    waybill: order.waybill,
+    currentStatus,
+    updatedAt,
+
+    // Thông tin người gửi / nhận (ưu tiên field trực tiếp, fallback về populate nếu có)
+    senderName: order.senderName,
+    receiverName: order.receiverName,
+    receiverPhone: order.receiverPhone,
+
+    // Các thông tin khác
+    codValue: order.codValue || 0,
+    shippingFee: order.shippingFee || 0,
+    weightKg: order.weightKg || 0,        // ← đúng tên field
+    serviceCode: order.serviceCode || 'STD', // ← dùng serviceCode thay vì service
+
+    // Hành trình chi tiết
+    timeline: timeline.length > 0 ? timeline : [
+      {
+        status: 'CREATED',
+        timestamp: order.createdAt || new Date(),
+        location: 'Khách hàng đặt hàng online',
+        note: 'Đơn hàng được tạo thành công',
+      },
+    ],
+  };
+}
 }

@@ -1,8 +1,7 @@
-// tracking.schema.ts - ĐÃ SỬA HOÀN CHỈNH CHO HỆ THỐNG BƯU ĐIỆN
-
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
+import { OrderStatus } from '../../orders/schemas/order.schemas';
 
 export type TrackingDocument = HydratedDocument<Tracking>;
 
@@ -19,16 +18,15 @@ export enum TrackingStatus {
 
 @Schema({ timestamps: true })
 export class Tracking {
-  // ĐỔI TỪ shipmentId → orderId (vì Order chính là vận đơn!)
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Order',                  // ← Đổi thành Order
+    ref: 'Order',
     required: true,
   })
   orderId: Types.ObjectId;
 
-  @Prop({ required: true, enum: TrackingStatus })
-  status: TrackingStatus;
+  @Prop({ required: true, enum: OrderStatus })
+  status: OrderStatus;
 
   @Prop() location?: string;
 

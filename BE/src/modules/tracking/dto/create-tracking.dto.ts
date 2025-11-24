@@ -12,7 +12,7 @@ export class CreateTrackingDto {
   @ApiProperty({ example: '652f03bc6db3430b5c1f26a2' })
   @IsNotEmpty()
   @IsMongoId()
-  shipmentId: string;
+  orderId: string;
 
   @ApiProperty({ example: TrackingStatus.IN_TRANSIT })
   @IsEnum(TrackingStatus)

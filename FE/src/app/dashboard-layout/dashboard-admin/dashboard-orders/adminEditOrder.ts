@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { OrdersService } from '../../../services/dashboard/orders.service';
 import { LocationService } from '../../../services/location.service';
@@ -14,7 +14,7 @@ import { MapPickerComponent } from '../../../shared/map-picker/map-picker';
 @Component({
   selector: 'app-edit-order',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MapPickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, MapPickerComponent, RouterModule],
   templateUrl: './adminEditOrder.html',
 })
 export class AdminEditOrder implements OnInit {
@@ -48,7 +48,7 @@ export class AdminEditOrder implements OnInit {
     this.orderId = this.route.snapshot.params['id'];
     if (!this.orderId) {
       Swal.fire('Lỗi', 'Không tìm thấy ID đơn hàng', 'error');
-      this.router.navigate(['/admin/order/list']);
+      this.router.navigate(['/admin/orders/list']);
       return;
     }
 
@@ -411,10 +411,37 @@ export class AdminEditOrder implements OnInit {
 
   // ================== KHÔI PHỤC ĐƠN HỦY ==================
   restoreOrder() {
-    if (confirm('Khôi phục đơn hàng về trạng thái Chờ xác nhận?')) {
-      this.ordersService.updateStatus(this.orderId, 'PENDING').subscribe(() => {
-        location.reload();
-      });
-    }
+    Swal.fire({
+      title: 'Khôi phục đơn hàng?',
+      text: 'Đơn sẽ trở về trạng thái "Chờ xác nhận"',
+      icon: 'question',
+      showCancelButton: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.ordersService.updateStatus(this.orderId, 'PENDING').subscribe(() => {
+          Swal.fire('Thành công!', 'Đơn hàng đã được khôi phục', 'success');
+          location.reload();
+        });
+      }
+    });
+  }
+
+  // Thêm 2 hàm này vào class EditOrder
+  copyWaybill() {
+    const waybill = this.order.waybill || this.order._id;
+    navigator.clipboard.writeText(waybill);
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: 'Đã sao chép mã vận đơn!',
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  }
+
+  printLabel() {
+    const waybill = this.order.waybill || this.order._id;
+    window.open(`/print-label/${waybill}`, '_blank');
   }
 }

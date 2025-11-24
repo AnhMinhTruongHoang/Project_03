@@ -25,7 +25,6 @@ export class Order {
 
   @Prop({ required: false }) email: string;
 
-  // dùng Address chuẩn hoá
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Address',
@@ -77,6 +76,18 @@ export class Order {
     match: /^[A-Z]{2}[0-9]{9}[A-Z]{2}$/,
   })
   waybill: string;
+
+  @Prop({ default: Date.now })
+  createdAt?: Date;
+
+  @Prop()
+  updatedAt?: Date;
+
+  @Prop({
+    type: { _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, email: String },
+    required: false,
+  })
+  createdBy?: { _id: Types.ObjectId; email: string };
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

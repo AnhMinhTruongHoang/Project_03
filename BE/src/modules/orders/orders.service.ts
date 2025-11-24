@@ -3,10 +3,10 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { Types } from 'mongoose';
+import { Connection, Types } from 'mongoose';
 
 import { IUser } from 'src/types/user.interface';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -20,9 +20,11 @@ import {
 } from '../location/schemas/province.schema';
 import { PricingService } from '../pricing/pricing.service';
 import { ProvinceCode } from 'src/types/location.type';
+import { Tracking, TrackingStatus } from '../tracking/schemas/tracking.schemas';
 
 @Injectable()
 export class OrdersService {
+  private trackingModel: any;
   constructor(
     @InjectModel(Order.name)
     private readonly orderModel: SoftDeleteModel<OrderDocument>,
@@ -32,8 +34,11 @@ export class OrdersService {
     private readonly communeModel: SoftDeleteModel<CommuneDocument>,
     @InjectModel(Province.name)
     private readonly provinceModel: SoftDeleteModel<ProvinceDocument>,
+    @InjectConnection() private connection: Connection,
     private pricingService: PricingService,
-  ) {}
+  ) {
+    this.trackingModel = this.connection.model(Tracking.name);
+  }
 
   // orders.service.ts
   async create(dto: CreateOrderDto, user: IUser) {
@@ -96,21 +101,37 @@ export class OrdersService {
     }
 
     // 5. Tạo đơn hàng
-    return this.orderModel.create({
+    const newOrder = await this.orderModel.create({
       ...dto,
       pickupAddressId: pickupAddr._id,
       deliveryAddressId: deliveryAddr._id,
       userId: new Types.ObjectId(user._id),
-
-      branchId, // ← giờ đã xử lý hoàn hảo cho mọi role
-
+      branchId,
       codValue: dto.codValue,
       shippingFee,
       totalPrice,
       serviceCode: dto.serviceCode || 'STD',
       weightKg: dto.weightKg,
-      waybill
+      waybill,
+      status: OrderStatus.PENDING,
+      createdBy: { _id: new Types.ObjectId(user._id), email: user.email },
     });
+
+    try {
+      await this.trackingModel.create({
+        orderId: newOrder._id,
+        status: OrderStatus.PENDING,
+        timestamp: new Date(),
+        location: originProv?.name || 'Khách hàng đặt hàng online',
+        note: 'Đơn hàng được tạo thành công',
+        createdBy: newOrder.createdBy || (user ? { _id: user._id, email: user.email } : null),
+      });
+      console.log('TRACKING ĐÃ TẠO THÀNH CÔNG CHO ORDER:', newOrder._id);
+    } catch (error) {
+      console.error('Lỗi tạo tracking:', error);
+    }
+
+    return newOrder;
   }
 
   private async generateUniqueWaybill(): Promise<string> {
@@ -260,45 +281,93 @@ export class OrdersService {
       throw new NotFoundException('Order not found');
     return order;
   }
+  // orders.service.ts
   async update(id: string, dto: UpdateOrderDto) {
     const order = await this.orderModel.findById(id);
-    if (!order || order.isDeleted)
+    if (!order || order.isDeleted) {
       throw new NotFoundException('Order not found');
+    }
 
-    if (dto.status) order.status = dto.status;
+    let needRecalculateFee = false;
+    let newShippingFee = order.shippingFee;
 
-    // Update pickup address
+    // Kiểm tra xem có thay đổi gì liên quan đến phí không
+    if (
+      dto.pickupAddress?.provinceId ||
+      dto.deliveryAddress?.provinceId ||
+      dto.serviceCode ||
+      dto.weightKg !== undefined
+    ) {
+      needRecalculateFee = true;
+    }
+
+    // Nếu có thay đổi địa chỉ, dịch vụ, cân nặng → tính lại phí
+    if (needRecalculateFee) {
+      const pickupProvinceId = dto.pickupAddress?.provinceId ||
+        (await this.addressModel.findById(order.pickupAddressId).lean()).provinceId;
+      const deliveryProvinceId = dto.deliveryAddress?.provinceId ||
+        (await this.addressModel.findById(order.deliveryAddressId).lean()).provinceId;
+
+      const originProv = await this.provinceModel.findById(pickupProvinceId).lean();
+      const destProv = await this.provinceModel.findById(deliveryProvinceId).lean();
+
+      if (!originProv?.code || !destProv?.code) {
+        throw newShippingFee = 0;
+      } else {
+        const calcResult = await this.pricingService.calculateShipping(
+          originProv.code as ProvinceCode,
+          destProv.code as ProvinceCode,
+          dto.serviceCode || order.serviceCode || 'STD',
+          dto.weightKg || order.weightKg || 1,
+          originProv.code === destProv.code,
+        );
+        newShippingFee = typeof calcResult.totalPrice === 'number' ? calcResult.totalPrice : 0;
+      }
+    }
+
+    // Cập nhật địa chỉ nếu có
     if (dto.pickupAddress) {
       await this.addressModel.findByIdAndUpdate(order.pickupAddressId, {
         provinceId: dto.pickupAddress.provinceId,
         communeId: dto.pickupAddress.communeId,
         address: dto.pickupAddress.address,
+        lat: dto.pickupAddress.lat || null,
+        lng: dto.pickupAddress.lng || null,
       });
     }
 
-    // Update delivery address
     if (dto.deliveryAddress) {
       await this.addressModel.findByIdAndUpdate(order.deliveryAddressId, {
         provinceId: dto.deliveryAddress.provinceId,
         communeId: dto.deliveryAddress.communeId,
         address: dto.deliveryAddress.address,
+        lat: dto.deliveryAddress.lat || null,
+        lng: dto.deliveryAddress.lng || null,
       });
     }
 
-    // Update order fields (không bao gồm address)
-    const updateData = { ...dto };
-    delete (updateData as any).pickupAddress;
-    delete (updateData as any).deliveryAddress;
+    // Cập nhật các field khác + phí mới
+    const updateData: any = {
+      ...dto,
+      shippingFee: newShippingFee,
+      totalPrice: (dto.codValue || order.codValue || 0) + newShippingFee,
+    };
 
-    const updatedOrder = await this.orderModel.findByIdAndUpdate(
-      id,
-      updateData,
-      {
+    // Xóa các field address để không ghi đè nhầm
+    delete updateData.pickupAddress;
+    delete updateData.deliveryAddress;
+
+    if (dto.status && dto.status !== order.status) {
+      await this.updateStatus(id, dto.status as OrderStatus);
+    } else {
+      const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateData, {
         new: true,
-      },
-    );
-
-    return updatedOrder;
+      }).populate({
+        path: 'pickupAddressId deliveryAddressId',
+        populate: { path: 'provinceId communeId' }
+      });
+      return updatedOrder;
+    }
   }
 
   async remove(id: string, user: IUser) {
@@ -316,14 +385,41 @@ export class OrdersService {
     return { message: 'Order soft-deleted' };
   }
 
-  async updateStatus(id: string, status: OrderStatus) {
-    const order = await this.orderModel.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true },
-    );
-    if (!order || order.isDeleted)
+  async updateStatus(id: string, status: OrderStatus, user?: IUser) {
+    const order = await this.orderModel.findById(id);
+    if (!order || order.isDeleted) {
       throw new NotFoundException('Order not found');
+    }
+    if (user && ['CONFIRMED', 'SHIPPING', 'COMPLETED'].includes(status)) {
+      order.createdBy = { _id: new Types.ObjectId(user._id), email: user.email };
+      await order.save();
+    }
+
+    // Cập nhật trạng thái
+    order.status = status;
+    await order.save();
+
+    const display = {
+      PENDING: { location: 'Đơn hàng đang chờ xác nhận', note: 'Khách hàng đã đặt hàng' },
+      CONFIRMED: { location: 'Bưu cục tiếp nhận', note: 'Nhân viên đã xác nhận đơn' },
+      SHIPPING: { location: 'Đang vận chuyển', note: 'Đã giao cho shipper' },
+      COMPLETED: { location: 'Giao hàng thành công', note: 'Khách đã nhận hàng' },
+      CANCELED: { location: 'Đã hủy', note: 'Đơn hàng bị hủy' },
+    };
+
+    const actionPerformer = user
+      ? { _id: new Types.ObjectId(user._id), email: user.email }
+      : order.createdBy;
+
+    await this.trackingModel.create({
+      orderId: order._id,
+      status: status,
+      timestamp: new Date(),
+      location: display[status]?.location || 'Cập nhật trạng thái',
+      note: display[status]?.note || '',
+      createdBy: actionPerformer || null,
+    });
+
     return order;
   }
   async getStatistics(month?: number, year?: number, user?: IUser | null) {

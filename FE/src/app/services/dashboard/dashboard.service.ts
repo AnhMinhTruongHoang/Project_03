@@ -7,8 +7,11 @@ import { env } from '../../environments/environment';
 export class DashboardService {
   private readonly API_URL = `${env.baseUrl}/orders/statistics`;
 
-  constructor(private http: HttpClient) {}
+  private readonly API_URL_ADMIN = `${env.baseUrl}/dashboard/system`
 
+  constructor(private http: HttpClient) { }
+
+  // dành cho nhân viên, muốn tách admin ra
   getStatistics(month?: number, year?: number): Observable<any> {
     const token = localStorage.getItem('access_token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
@@ -18,5 +21,16 @@ export class DashboardService {
     if (month) params.month = month;
 
     return this.http.get(this.API_URL, { headers, params });
+  }
+
+  getSystemStatistics(month?: number, year?: number): Observable<any> {
+    const token = localStorage.getItem('access_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    const params: any = {};
+    if (year) params.year = year;
+    if (month) params.month = month;
+
+    return this.http.get(this.API_URL_ADMIN, { headers, params });
   }
 }

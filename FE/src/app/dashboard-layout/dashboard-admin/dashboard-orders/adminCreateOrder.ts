@@ -31,6 +31,8 @@ export class AdmninCreateOrder implements OnInit {
   shippingFee = 0;
   totalPrice = 0;
 
+  createdWaybill: string = '';
+
   constructor(
     private fb: FormBuilder,
     private ordersService: OrdersService,
@@ -38,13 +40,12 @@ export class AdmninCreateOrder implements OnInit {
     private router: Router,
     private geocoding: GeocodingService,
     private http: HttpClient
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initForm();
     this.loadProvinces();
 
-    // Giảm debounce xuống 800ms (nhạy hơn), chỉ search khi >=3 ký tự
     this.orderForm
       .get('pickupDetailAddress')!
       .valueChanges.pipe(debounceTime(800))
@@ -107,8 +108,6 @@ export class AdmninCreateOrder implements OnInit {
       codValue: [0, [Validators.required, Validators.min(0)]],
     });
   }
-
-  // ... các hàm loadProvinces, onPickupProvinceChange, onDeliveryProvinceChange, submit ... giữ nguyên như cũ
 
   loadProvinces() {
     this.locationService.getProvinces().subscribe({
@@ -259,7 +258,6 @@ export class AdmninCreateOrder implements OnInit {
     }
   }
 
-  // submit() giữ nguyên như cũ của bạn
   submit() {
     if (this.orderForm.invalid) {
       this.orderForm.markAllAsTouched();
@@ -269,52 +267,119 @@ export class AdmninCreateOrder implements OnInit {
     this.loading = true;
     const f = this.orderForm.value;
 
-    const pickupAddress = {
-      provinceId: f.pickupProvinceId,
-      communeId: f.pickupCommuneId,
-      address: f.pickupDetailAddress,
-      lat: f.pickupLat,
-      lng: f.pickupLng,
-    };
-
-    const deliveryAddress = {
-      provinceId: f.deliveryProvinceId,
-      communeId: f.deliveryCommuneId,
-      address: f.deliveryDetailAddress,
-      lat: f.deliveryLat,
-      lng: f.deliveryLng,
-    };
-
     const data = {
       senderName: f.senderName,
       receiverName: f.receiverName,
       receiverPhone: f.receiverPhone,
-      pickupAddress,
-      deliveryAddress,
+      pickupAddress: {
+        provinceId: f.pickupProvinceId,
+        communeId: f.pickupCommuneId,
+        address: f.pickupDetailAddress,
+        lat: f.pickupLat,
+        lng: f.pickupLng,
+      },
+      deliveryAddress: {
+        provinceId: f.deliveryProvinceId,
+        communeId: f.deliveryCommuneId,
+        address: f.deliveryDetailAddress,
+        lat: f.deliveryLat,
+        lng: f.deliveryLng,
+      },
       codValue: Number(f.codValue) || 0,
       weightKg: Number(f.weightKg) || 1,
       serviceCode: f.serviceCode || 'STD',
     };
 
     this.ordersService.createOrder(data).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.loading = false;
+        this.createdWaybill = res.data?.waybill || res.data?._id;
+
         Swal.fire({
           icon: 'success',
-          title: 'Tạo đơn hàng thành công!',
-          timer: 1500,
-          showConfirmButton: false,
+          title: 'Tạo đơn thành công!',
+          html: `
+              <div class="text-center">
+                <p class="mb-3 fs-5">Mã vận đơn của bạn là:</p>
+                <h1 class="display-3 fw-bold text-secondary mb-4">${this.createdWaybill}</h1>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                  <button id="copyBtn" type="button" class="btn btn-success btn-lg px-4">
+                    Sao chép mã
+                  </button>
+                  <a routerLink="/tracking/${this.createdWaybill}" target="_blank" class="btn btn-success btn-lg px-4">
+                    Xem hành trình
+                  </a>
+                  <button id="printBtn" type="button" class="btn btn-success btn-lg px-4">
+                    In tem vận đơn
+                  </button>
+                </div>
+                <p class="text-muted mt-4 small">
+                  Khách hàng có thể tra cứu tại: <strong>yourdomain.com/tracking</strong>
+                </p>
+              </div>
+            `,
+          allowOutsideClick: false,
+          showConfirmButton: true,
+          confirmButtonText: 'Tạo đơn mới',
+          didOpen: () => {
+            const copyBtn = document.getElementById('copyBtn');
+            const printBtn = document.getElementById('printBtn');
+
+            // BẮT BUỘC DÙNG CẢ 3: preventDefault + stopPropagation + stopImmediatePropagation
+            copyBtn?.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              this.copyWaybill();
+            });
+
+            printBtn?.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              window.open(`/print-label/${res.data._id || this.createdWaybill}`, '_blank');
+            });
+
+            // Đặt type="button" để chắc chắn không submit
+            if (copyBtn) copyBtn.setAttribute('type', 'button');
+            if (printBtn) printBtn.setAttribute('type', 'button');
+          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.orderForm.reset();
+            this.orderForm.patchValue({ serviceCode: 'STD', weightKg: 1, codValue: 0 });
+            this.pickupCommunes = [];
+            this.deliveryCommunes = [];
+            this.shippingFee = 0;
+            this.totalPrice = 0;
+            this.createdWaybill = '';
+          }
         });
-        this.router.navigate(['/admin/orders/list']);
       },
       error: (err) => {
         this.loading = false;
-        Swal.fire({
-          icon: 'error',
-          title: 'Tạo đơn hàng thất bại!',
-          text: err.error?.message || 'Vui lòng thử lại.',
-        });
+        Swal.fire('Lỗi!', err.error?.message || 'Không thể tạo đơn hàng', 'error');
       },
     });
+  }
+
+  copyWaybill() {
+    if (!this.createdWaybill) return;
+
+    navigator.clipboard.writeText(this.createdWaybill);
+
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: 'Đã sao chép mã vận đơn!',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    });
+  }
+
+  printLabel() {
+    window.open(`/print-label/${this.createdWaybill}`, '_blank');
   }
 }

@@ -1,51 +1,21 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, AfterViewInit, ViewChild, ElementRef, NgZone } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import Chart from 'chart.js/auto';
-import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import Chart from 'chart.js/auto';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dashboard-admin.component.html',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class DashboardAdmin implements AfterViewInit {
-  private orderChart!: Chart;
-  private statusChart!: Chart<'doughnut', number[], string>;
+export class DashboardAdmin implements AfterViewInit, OnDestroy {
+  @ViewChild('revenueOrderChart') revenueOrderChart!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('statusChart') statusChartEl!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('topEmployeesChart') topEmployeesChart!: ElementRef<HTMLCanvasElement>;
 
-  private readonly STATUS_ORDER = [
-    'PENDING',
-    'CONFIRMED',
-    'SHIPPING',
-    'COMPLETED',
-    'CANCELED',
-  ] as const;
-  private readonly STATUS_LABELS: Record<string, string> = {
-    PENDING: 'Chờ xác nhận',
-    CONFIRMED: 'Đã xác nhận',
-    SHIPPING: 'Đang giao',
-    COMPLETED: 'Hoàn tất',
-    CANCELED: 'Đã hủy',
-  };
-  private readonly STATUS_COLORS: Record<string, string> = {
-    PENDING: '#6c757d',
-    CONFIRMED: '#0d6efd',
-    SHIPPING: '#20c997',
-    COMPLETED: '#198754',
-    CANCELED: '#dc3545',
-  };
-
-  @ViewChild('orderChartCanvas') orderChartCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('statusChartCanvas') statusChartCanvas!: ElementRef<HTMLCanvasElement>;
-
-  deliveredCount = 0;
-  returnedCount = 0;
-  totalOrders = 0;
-  estimatedRevenue = 0;
+  private charts: Chart[] = [];
 
   selectedMonth = new Date().getMonth() + 1;
   selectedYear = new Date().getFullYear();
@@ -56,162 +26,190 @@ export class DashboardAdmin implements AfterViewInit {
     value: i + 1,
   }));
 
-  yearOptions = (() => {
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 5 }, (_, i) => currentYear - i);
-  })();
+  yearOptions = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i);
 
-  summaryCards = [
-    {
-      label: 'Đã giao thành công',
-      value: 0,
-      icon: 'bi bi-truck text-success',
-      textClass: 'text-success',
-    },
-    {
-      label: 'Đã hoàn / Bị hủy',
-      value: 0,
-      icon: 'bi bi-arrow-repeat text-danger',
-      textClass: 'text-danger',
-    },
-    {
-      label: 'Tổng đơn trong tháng',
-      value: 0,
-      icon: 'bi bi-box-seam text-primary',
-      textClass: 'text-primary',
-    },
-    {
-      label: 'Doanh thu ước tính',
-      value: '0₫',
-      icon: 'bi bi-currency-dollar text-warning',
-      textClass: 'text-warning',
-    },
-  ];
+  summaryCards: any[] = [];
 
-  constructor(private ngZone: NgZone, private dashboardService: DashboardService) {}
+  private STATUS_LABELS: Record<string, string> = {
+    PENDING: 'Chờ xác nhận',
+    CONFIRMED: 'Đã xác nhận',
+    SHIPPING: 'Đang giao',
+    COMPLETED: 'Hoàn tất',
+    CANCELED: 'Đã hủy',
+  };
+
+  private STATUS_COLORS: Record<string, string> = {
+    PENDING: '#6c757d',
+    CONFIRMED: '#0d6efd',
+    SHIPPING: '#20c997',
+    COMPLETED: '#198754',
+    CANCELED: '#dc3545',
+  };
+
+  constructor(private dashboardService: DashboardService) { }
 
   ngAfterViewInit(): void {
-    this.fetchStatistics();
+    this.loadData();
   }
 
-  onMonthOrYearChange() {
-    console.log(
-      'Thay đổi tháng/năm:',
-      this.selectedMonth,
-      this.selectedYear,
-      'Toàn năm:',
-      this.viewAllYear
-    );
-    this.fetchStatistics();
+  onFilterChange() {
+    this.loadData();
   }
 
-  private fetchStatistics(): void {
+  private loadData() {
     const month = this.viewAllYear ? undefined : this.selectedMonth;
     const year = this.selectedYear;
 
-    console.log('📡 Gọi API với month =', month, 'year =', year);
-
-    this.dashboardService.getStatistics(month, year).subscribe((res: any) => {
-      const data = res?.data || {};
-
-      this.deliveredCount = data.statusCounts?.COMPLETED ?? 0;
-      this.returnedCount = data.statusCounts?.CANCELED ?? 0;
-      this.totalOrders = data.totalOrders ?? 0;
-      this.estimatedRevenue = data.estimatedRevenue ?? 0;
-
-      this.summaryCards[0].value = this.deliveredCount;
-      this.summaryCards[1].value = this.returnedCount;
-      this.summaryCards[2].value = this.totalOrders;
-      this.summaryCards[3].value = `${this.estimatedRevenue.toLocaleString()}₫`;
-
-      this.renderCharts(data);
+    this.dashboardService.getSystemStatistics(month, year).subscribe({
+      next: (res) => {
+        // Xử lý linh hoạt: res.data (nếu có wrapper) hoặc res trực tiếp
+        const data = (res as any).data || res; 
+        if (data) {
+          this.updateSummaryCards(data.summary);
+          this.renderCharts(data);
+        }
+      },
+      error: (err) => {
+        console.error('Load dashboard failed', err);
+      },
     });
   }
 
-  private renderCharts(data: any): void {
-    const dayOrder = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    const labels = dayOrder.filter((k) => data.ordersByDay?.[k]);
+  private updateSummaryCards(summary: any) {
+    if (!summary) return;
+    this.summaryCards = [
+      { label: 'Tổng đơn hàng', value: summary.totalOrders?.toLocaleString() || '0', icon: 'bi bi-box-seam text-primary', textClass: 'text-primary' },
+      { label: 'Đã giao thành công', value: summary.deliveredOrders?.toLocaleString() || '0', icon: 'bi bi-truck text-success', textClass: 'text-success' },
+      { label: 'Đã hủy / Hoàn', value: summary.canceledOrders?.toLocaleString() || '0', icon: 'bi bi-x-circle text-danger', textClass: 'text-danger' },
+      { label: 'Đơn hôm nay', value: summary.todayOrders || 0, icon: 'bi bi-lightning-charge text-warning', textClass: 'text-warning' },
+      { label: 'Doanh thu hôm nay', value: `${(summary.todayRevenue || 0).toLocaleString()}₫`, icon: 'bi bi-currency-dollar text-success', textClass: 'text-success' },
+      { label: 'Nhân viên hoạt động', value: summary.activeEmployees || 0, sub: `/ ${summary.totalEmployees || 0} tổng`, icon: 'bi bi-people text-info', textClass: 'text-info' },
+      { label: 'Tỷ lệ COD', value: (summary.codRate || 0) + '%', icon: 'bi bi-cash-stack text-purple', textClass: 'text-purple' },
+      { label: 'Tỷ lệ giao thành công', value: (summary.successRate || 0) + '%', icon: 'bi bi-check2-all text-success', textClass: 'text-success' },
+      { label: 'Đơn kẹt > 48h', value: summary.stuckOrders48h || 0, icon: 'bi bi-exclamation-triangle text-danger', textClass: 'text-danger' },
+      { label: 'Bảng giá đang áp dụng', value: summary.activePricingTables || 0, icon: 'bi bi-table text-secondary', textClass: 'text-secondary' },
+    ];
+  }
 
-    const statusKeys: string[] = Object.keys(data.statusCounts || {});
-    const statuses = statusKeys.length ? statusKeys : this.STATUS_ORDER;
+  private renderCharts(data: any) {
+    this.destroyAllCharts();
 
-    const datasets = statuses.map((st) => ({
-      label: this.STATUS_LABELS[st],
-      data: labels.map((d) => data.ordersByDay?.[d]?.[st] ?? 0),
-      tension: 0.3,
-      fill: false,
-      borderColor: this.STATUS_COLORS[st],
-      backgroundColor: this.STATUS_COLORS[st],
-    }));
+    if (!data.charts) return;
 
-    if (this.orderChart) this.orderChart.destroy();
-    this.orderChart = new Chart(this.orderChartCanvas.nativeElement, {
+    // 1. Doanh thu + Số đơn theo ngày
+    const days = data.charts.dailyLabels || [];
+    const labels = days.map((d: number) => `Ngày ${d}`);
+
+    this.charts.push(new Chart(this.revenueOrderChart.nativeElement, {
       type: 'line',
-      data: { labels, datasets },
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Số đơn',
+            data: data.charts.dailyOrders || [],
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            yAxisID: 'y',
+            tension: 0.3,
+            fill: true,
+          },
+          {
+            label: 'Doanh thu (₫)',
+            data: data.charts.dailyRevenue || [],
+            borderColor: '#198754',
+            backgroundColor: 'rgba(25, 135, 84, 0.1)',
+            yAxisID: 'y1',
+            tension: 0.3,
+          },
+        ],
+      },
       options: {
         responsive: true,
-        plugins: {
-          legend: { position: 'top' },
-          tooltip: {
-            callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}` },
-          },
+        plugins: { legend: { position: 'top' } },
+        scales: {
+          y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Số đơn' } },
+          y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Doanh thu' } },
         },
-        interaction: { mode: 'index', intersect: false },
-        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
       },
-    });
+    }));
 
-    const statusCounts = data.statusDistribution || data.statusCounts || {};
-    const doughnutLabelsVN = this.STATUS_ORDER.filter((st) => statusCounts[st] !== undefined).map(
-      (st) => this.STATUS_LABELS[st]
-    );
-    const doughnutValues = this.STATUS_ORDER.filter((st) => statusCounts[st] !== undefined).map(
-      (st) => Number(statusCounts[st] || 0)
-    );
-    const doughnutColors = this.STATUS_ORDER.filter((st) => statusCounts[st] !== undefined).map(
-      (st) => this.STATUS_COLORS[st]
-    );
+    // 2. Tỷ lệ trạng thái
+    const statusData = data.charts.statusDistribution || {};
+    const statusLabels = Object.keys(statusData).filter(k => statusData[k] > 0);
+    const statusValues = statusLabels.map(k => statusData[k]);
+    const statusColors = statusLabels.map(k => this.STATUS_COLORS[k] || '#ccc');
 
-    if (this.statusChart) this.statusChart.destroy();
+    this.charts.push(new Chart(this.statusChartEl.nativeElement, {
+      type: 'doughnut',
+      data: {
+        labels: statusLabels.map(k => this.STATUS_LABELS[k] || k),
+        datasets: [{ data: statusValues, backgroundColor: statusColors }],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+      },
+    }));
 
-    if (doughnutLabelsVN.length === 0 || doughnutValues.every((v) => v === 0)) {
-      const ctx = this.statusChartCanvas.nativeElement.getContext('2d');
+    // 3. Top 10 nhân viên
+    const topEmp = data.charts?.topEmployees || [];
+
+    if (topEmp.length === 0) {
+      const ctx = this.topEmployeesChart.nativeElement.getContext('2d');
       if (ctx) {
-        ctx.clearRect(
-          0,
-          0,
-          this.statusChartCanvas.nativeElement.width,
-          this.statusChartCanvas.nativeElement.height
-        );
-        ctx.font = '16px sans-serif';
-        ctx.fillStyle = 'gray';
-        ctx.textAlign = 'center';
-        ctx.fillText('Không có dữ liệu', this.statusChartCanvas.nativeElement.width / 2, 60);
+          ctx.clearRect(0, 0, this.topEmployeesChart.nativeElement.width, this.topEmployeesChart.nativeElement.height);
+          ctx.font = '14px Inter';
+          ctx.fillStyle = '#6c757d';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(
+            'Chưa có dữ liệu nhân viên',
+            this.topEmployeesChart.nativeElement.width / 2,
+            this.topEmployeesChart.nativeElement.height / 2
+          );
       }
-      return;
-    }
-
-    this.statusChart = new Chart<'doughnut', number[], string>(
-      this.statusChartCanvas.nativeElement,
-      {
-        type: 'doughnut',
+    } else {
+      this.charts.push(new Chart(this.topEmployeesChart.nativeElement, {
+        type: 'bar',
         data: {
-          labels: doughnutLabelsVN,
-          datasets: [{ data: doughnutValues, backgroundColor: doughnutColors }],
+          labels: topEmp.map((e: any) => e.name),
+          datasets: [{
+            label: 'Số đơn giao thành công',
+            data: topEmp.map((e: any) => e.completed),
+            backgroundColor: '#198754',
+            barThickness: 20,
+          }],
         },
         options: {
+          indexAxis: 'y',
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom' },
-            tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed}` } },
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${ctx.raw} đơn hoàn tất`,
+              },
+            },
+          },
+          scales: { 
+            x: { 
+                beginAtZero: true, 
+                ticks: { stepSize: 1 } 
+            } 
           },
         },
-      }
-    );
+      }));
+    }
+  }
+
+  private destroyAllCharts() {
+    this.charts.forEach(c => c.destroy());
+    this.charts = [];
   }
 
   ngOnDestroy(): void {
-    this.orderChart?.destroy();
-    this.statusChart?.destroy();
+    this.destroyAllCharts();
   }
 }

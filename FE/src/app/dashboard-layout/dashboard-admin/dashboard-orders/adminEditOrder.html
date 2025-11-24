@@ -8,7 +8,7 @@
       <span class="badge bg-secondary fs-5 ms-2">{{ statusText(order.status) }}</span>
     </div>
     <div *ngIf="order.status === 'CANCELED'">
-      <button class="btn btn-warning btn-sm" (click)="restoreOrder()">Khôi phục đơn</button>
+      <button class="btn btn-danger btn-sm" (click)="restoreOrder()">Khôi phục đơn</button>
     </div>
   </div>
 
@@ -119,7 +119,7 @@
         <button type="submit" class="btn btn-success btn-lg me-2" [disabled]="loading || orderForm.invalid || !canSubmit()">
           <span *ngIf="!loading">Lưu thay đổi</span>
         </button>
-        <button type="button" class="btn btn-success btn-lg me-2" (click)="router.navigate(['/employee/order/list'])">Quay lại</button>
+        <button type="button" class="btn btn-success btn-lg me-2" (click)="router.navigate(['/admin/orders/list'])">Quay lại</button>
       </div>
     </div>
   </form>
