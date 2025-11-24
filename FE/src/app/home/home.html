@@ -1,6 +1,6 @@
 <!-- Banner -->
 <section
-  class="position-relative d-flex align-items-end min-vh-100 text-white bg-dark overflow-hidden"
+  class="position-relative d-flex align-items-center min-vh-100 text-white bg-dark overflow-hidden"
 >
   <!-- Carousel nền -->
   <div
@@ -13,52 +13,96 @@
       <div class="carousel-item active h-100">
         <img
           src="../assets/images/backgrounds/pic_1.jpg"
-          class="d-block w-100 h-100 object-fit-cover opacity-75"
+          class="d-block w-100 h-100 object-fit-cover"
+          style="filter: brightness(0.4)"
           alt="Background 1"
         />
       </div>
       <div class="carousel-item h-100">
         <img
           src="../assets/images/backgrounds/pic_2.jpg"
-          class="d-block w-100 h-100 object-fit-cover opacity-75"
+          class="d-block w-100 h-100 object-fit-cover"
+          style="filter: brightness(0.4)"
           alt="Background 2"
         />
       </div>
       <div class="carousel-item h-100">
         <img
           src="../assets/images/backgrounds/pic_3.jpg"
-          class="d-block w-100 h-100 object-fit-cover opacity-75"
+          class="d-block w-100 h-100 object-fit-cover"
+          style="filter: brightness(0.4)"
           alt="Background 3"
         />
       </div>
     </div>
   </div>
 
-  <!-- Lớp phủ tối giúp chữ nổi bật -->
-  <div class="position-absolute top-0 start-0 w-100 h-100 bg-black opacity-50"></div>
+  <!-- Lớp phủ gradient -->
+  <div
+    class="position-absolute top-0 start-0 w-100 h-100"
+    style="
+      background: radial-gradient(circle at top left, rgba(250, 204, 21, 0.25), transparent 55%),
+        linear-gradient(to bottom right, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95));
+    "
+  ></div>
 
-  <!-- Nội dung chữ trắng (góc trái dưới) -->
-  <div class="container position-relative z-1 mb-5">
-    <div class="col-lg-6">
-      <h1 class="fw-bold display-4 text-uppercase text-white mb-3">
-        Gửi hàng dễ dàng với <br />
-        <span class="text-warning">Ap Post</span>
-      </h1>
-      <p class="lead fw-semibold text-white-50 mb-4">
-        Ứng dụng giúp bạn gửi hàng nhanh chóng, tiện lợi và chính xác
-      </p>
-      <a [routerLink]="['/tracking']" class="text-primary fw-semibold fs-6"> Tra cứu đơn hàng </a>
-      <br />
-      <br />
-      <a [routerLink]="['/calculator']" class="text-warning fw-semibold fs-6">
-        Tra cứu giá thành
-      </a>
-      <!-- <button
-        class="btn btn-warning btn-lg rounded-pill px-4 py-2 fw-semibold"
-        (click)="onStartClick()"
-      >
-        Bắt đầu ngay <i class="bi bi-arrow-up-right ms-2"></i>
-      </button> -->
+  <!-- Nội dung -->
+  <div class="container position-relative z-1">
+    <div class="row justify-content-start">
+      <div class="col-lg-6 col-md-8 col-sm-10 py-5">
+        <!-- badge nhỏ -->
+        <span
+          class="badge rounded-pill bg-warning text-dark mb-3 px-3 py-2 text-uppercase fw-semibold"
+          style="font-size: 0.75rem; letter-spacing: 0.08em"
+        >
+          Giải pháp vận chuyển toàn quốc
+        </span>
+
+        <h1 class="fw-bold display-5 text-white mb-3">
+          Gửi hàng dễ dàng với
+          <span class="text-warning">AP Post</span>
+        </h1>
+
+        <p class="lead text-white-50 mb-4">
+          Tạo, quản lý và theo dõi đơn hàng nhanh chóng, chính xác. Tối ưu chi phí và thời gian giao
+          nhận cho cá nhân & doanh nghiệp.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+          <a
+            [routerLink]="['/tracking']"
+            class="btn btn-warning text-dark fw-semibold px-4 py-2 rounded-pill d-inline-flex align-items-center"
+            title="Tra cứu trạng thái đơn hàng"
+          >
+            Tra cứu đơn hàng
+            <i class="bi bi-search ms-2"></i>
+          </a>
+
+          <a
+            [routerLink]="['/calculator']"
+            class="btn btn-outline-dark fw-semibold px-4 py-2 rounded-pill d-inline-flex align-items-center"
+            title="Ước tính cước vận chuyển"
+          >
+            Tra cứu giá thành
+            <i class="bi bi-cash-coin ms-2"></i>
+          </a>
+        </div>
+
+        <div class="d-flex flex-wrap gap-3 text-white-50" style="font-size: 0.9rem">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            <span>Giao nhanh nội tỉnh & liên tỉnh</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            <span>Theo dõi đơn hàng theo thời gian thực</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            <span>Ước tính cước minh bạch</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>

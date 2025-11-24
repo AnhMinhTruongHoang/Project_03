@@ -1,7 +1,11 @@
 <div class="shipping-page">
   <div class="shipping-card">
+    <a href="/" class="btn btn-sm btn-success" target="_self">
+      <i class="bi bi-arrow-left me-1"></i>
+    </a>
     <div class="shipping-card-header">
       <h2>Ước tính cước vận chuyển</h2>
+
       <p>
         Nhập thông tin để tính thử phí ship dựa trên
         <strong>bảng giá hiện tại</strong>.
@@ -11,6 +15,7 @@
     <div class="shipping-card-body">
       <!-- ================= FORM ================= -->
       <div class="form-grid">
+        <!-- Origin -->
         <div class="form-group">
           <label for="origin" title="Chọn tỉnh gửi hàng">Tỉnh gửi *</label>
           <select id="origin" [(ngModel)]="formData.originProvinceCode" name="originProvinceCode">

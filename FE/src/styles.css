@@ -1,4 +1,4 @@
-@import "~leaflet/dist/leaflet.css";
+@import '~leaflet/dist/leaflet.css';
 .nav-link {
   padding: 8px 10px;
   border-radius: 6px;
