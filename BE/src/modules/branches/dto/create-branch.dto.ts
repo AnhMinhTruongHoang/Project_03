@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 
 export class CreateBranchDto {
   @ApiProperty({ example: 'HNI001', description: 'Mã chi nhánh' })
@@ -19,12 +26,13 @@ export class CreateBranchDto {
 
   @ApiProperty({
     example: '0987654321',
-    description: 'Số điện thoại',
-    required: false,
+    description: 'Số điện thoại (10 số, bắt đầu bằng 0)',
+    required: true,
   })
-  @IsOptional()
-  @IsString()
-  phone?: string;
+  @IsNotEmpty({ message: 'Số điện thoại là bắt buộc' })
+  @IsString({ message: 'Số điện thoại phải là chuỗi' })
+  @Matches(/^[0-9]{9,11}$/)
+  phone: string;
 
   @ApiProperty({
     example: 'Hà Nội',
@@ -35,21 +43,40 @@ export class CreateBranchDto {
   @IsString()
   city?: string;
 
-  @ApiProperty({
-    required: false,
-    example: '653f2a2bb70f7a1f4fa22222',
-    description: 'ProvinceId (Mongo ObjectId)',
-  })
+  // @ApiProperty({
+  //   required: false,
+  //   example: '653f2a2bb70f7a1f4fa22222',
+  //   description: 'ProvinceId (Mongo ObjectId)',
+  // })
+  // @IsOptional()
+  // @IsMongoId()
+  // provinceId?: string;
+
+  // @ApiProperty({
+  //   required: false,
+  //   example: '653f2a2bb70f7a1f4fa33333',
+  //   description: 'CommuneId (Mongo ObjectId)',
+  // })
+  // @IsOptional()
+  // @IsMongoId()
+  // communeId?: string;
+
+  @ApiProperty({ required: false, example: 'Hà Nội' })
   @IsOptional()
-  @IsMongoId()
-  provinceId?: string;
+  @IsString()
+  provinceName?: string;
+
+  @ApiProperty({ required: false, example: 'Phường Hoàn Kiếm' })
+  @IsOptional()
+  @IsString()
+  communeName?: string;
 
   @ApiProperty({
+    example: true,
+    description: 'Chi nhánh đang hoạt động hay không',
     required: false,
-    example: '653f2a2bb70f7a1f4fa33333',
-    description: 'CommuneId (Mongo ObjectId)',
   })
   @IsOptional()
-  @IsMongoId()
-  communeId?: string;
+  @IsBoolean()
+  isActive?: boolean;
 }

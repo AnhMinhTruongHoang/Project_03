@@ -47,11 +47,17 @@
               <div class="col-md-6">
                 <label class="form-label"> Số điện thoại <span class="text-danger">*</span> </label>
                 <input type="text" class="form-control" formControlName="phone" />
+
                 <div
                   class="text-danger small"
-                  *ngIf="addForm.get('phone')?.invalid && addForm.get('phone')?.touched"
+                  *ngIf="addForm.get('phone')?.touched && addForm.get('phone')?.invalid"
                 >
-                  Vui lòng nhập số điện thoại
+                  <ng-container *ngIf="addForm.get('phone')?.errors?.['required']">
+                    Vui lòng nhập số điện thoại
+                  </ng-container>
+                  <ng-container *ngIf="addForm.get('phone')?.errors?.['pattern']">
+                    Số điện thoại không hợp lệ (phải có 9-11 số và bắt đầu bằng 0)
+                  </ng-container>
                 </div>
               </div>
 

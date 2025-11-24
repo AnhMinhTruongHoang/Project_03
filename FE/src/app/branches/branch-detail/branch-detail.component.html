@@ -1,64 +1,98 @@
 <div class="container-fluid">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h4 class="fw-bold mb-1">Chi tiết chi nhánh</h4>
-      <small class="text-muted">Thông tin chi nhánh / điểm giao dịch.</small>
-    </div>
-
-    <button class="btn btn-outline-secondary" (click)="backToList()">← Quay lại danh sách</button>
-  </div>
-
-  @if (isLoading) {
-  <div class="text-muted py-3">Đang tải dữ liệu...</div>
-  } @else if (error) {
-  <div class="alert alert-danger py-2">{{ error }}</div>
-  } @else if (branch) {
-  <div class="card border-0 shadow-sm">
-    <div class="card-body">
-      <div class="row">
-        <!-- Thông tin chính -->
-        <div class="col-md-6 mb-3">
-          <h5 class="fw-semibold mb-3">{{ branch.name }}</h5>
-
-          <p class="mb-2"><b>Mã chi nhánh:</b> {{ branch.code }}</p>
-          <p class="mb-2"><b>Điện thoại:</b> {{ branch.phone }}</p>
-          <p class="mb-2">
-            <b>Địa chỉ:</b><br />
-            {{ branch.address }}
-          </p>
+  <div class="row justify-content-center">
+    <div class="col-xl-9 col-lg-10">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold mb-1">Chi tiết chi nhánh</h4>
+          <small class="text-muted">Thông tin chi nhánh / điểm giao dịch.</small>
         </div>
 
-        <!-- Chỉ để trạng thái hoạt động -->
-        <div class="col-md-6 mb-3">
-          <p class="mb-2">
-            <b>Trạng thái:</b>
-            @if (branch.isActive) {
-            <span class="badge bg-success-subtle text-success ms-1">Hoạt động</span>
-            } @else {
-            <span class="badge bg-secondary-subtle text-secondary ms-1">Tạm dừng</span>
-            }
-          </p>
-        </div>
+        <button class="btn btn-outline-secondary" (click)="backToList()">
+          ← Quay lại danh sách
+        </button>
       </div>
 
-      <hr />
+      @if (isLoading) {
+      <div class="text-muted py-3">Đang tải dữ liệu...</div>
+      } @else if (error) {
+      <div class="alert alert-danger py-2">{{ error }}</div>
+      } @else if (branch) {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <!-- Tiêu đề nhánh + trạng thái -->
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h5 class="fw-semibold mb-1">{{ branch.name }}</h5>
+              <div class="text-muted small">
+                Mã chi nhánh: <span class="fw-semibold">{{ branch.code }}</span>
+              </div>
+            </div>
 
-      <!-- Thông tin hệ thống -->
-      <div class="row text-muted small">
-        <div class="col-md-6">
-          <p class="mb-1">
-            <b>Ngày tạo:</b>
-            {{ branch.createdAt | date : 'dd/MM/yyyy HH:mm' }}
-          </p>
-        </div>
-        <div class="col-md-6">
-          <p class="mb-1">
-            <b>Cập nhật gần nhất:</b>
-            {{ branch.updatedAt | date : 'dd/MM/yyyy HH:mm' }}
-          </p>
+            <div class="text-end">
+              <div class="small text-muted mb-1">Trạng thái</div>
+              @if (branch.isActive) {
+              <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
+                Hoạt động
+              </span>
+              } @else {
+              <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill">
+                Tạm dừng
+              </span>
+              }
+            </div>
+          </div>
+
+          <hr class="my-3" />
+
+          <div class="row">
+            <!-- Thông tin liên hệ / địa chỉ -->
+            <div class="col-md-7 mb-3">
+              <p class="mb-2">
+                <span class="text-muted">Điện thoại:</span>
+                <span class="fw-semibold ms-1">{{ branch.phone }}</span>
+              </p>
+
+              <p class="mb-2">
+                <span class="text-muted">Tỉnh / Thành phố:</span>
+                <span class="fw-semibold ms-1">{{ branch.provinceName || '-' }}</span>
+              </p>
+
+              <p class="mb-2">
+                <span class="text-muted">Phường / Xã:</span>
+                <span class="fw-semibold ms-1">{{ branch.communeName || '-' }}</span>
+              </p>
+
+              <p class="mb-0">
+                <span class="text-muted d-block mb-1">Địa chỉ:</span>
+                <span>{{ branch.address }}</span>
+              </p>
+            </div>
+
+            <!-- Thông tin hệ thống -->
+            <div class="col-md-5 mb-3 border-start">
+              <div class="ps-md-3">
+                <div class="text-muted small mb-2">Thông tin hệ thống</div>
+
+                <p class="mb-2 small">
+                  <span class="text-muted">Ngày tạo:</span><br />
+                  <span class="fw-semibold">
+                    {{ branch.createdAt | date : 'dd/MM/yyyy HH:mm' }}
+                  </span>
+                </p>
+
+                <p class="mb-0 small">
+                  <span class="text-muted">Cập nhật gần nhất:</span><br />
+                  <span class="fw-semibold">
+                    {{ branch.updatedAt | date : 'dd/MM/yyyy HH:mm' }}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      }
     </div>
   </div>
-  }
 </div>

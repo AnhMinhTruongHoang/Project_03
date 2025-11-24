@@ -1,75 +1,89 @@
 <div class="container-fluid">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h4 class="fw-bold mb-1">Chi tiết nhân viên</h4>
-      <small class="text-muted">Thông tin tài khoản / nhân viên chi nhánh.</small>
-    </div>
+  <div class="row justify-content-center">
+    <div class="col-xl-9 col-lg-10">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold mb-1">Chi tiết nhân viên</h4>
+          <small class="text-muted">Thông tin tài khoản / nhân viên chi nhánh.</small>
+        </div>
 
-    <button class="btn btn-outline-secondary" (click)="backToList()">← Quay lại danh sách</button>
-  </div>
+        <button class="btn btn-outline-secondary" (click)="backToList()">
+          ← Quay lại danh sách
+        </button>
+      </div>
 
-  @if (isLoading) {
-  <div class="text-muted py-3">Đang tải dữ liệu...</div>
-  } @else if (error) {
-  <div class="alert alert-danger py-2">{{ error }}</div>
-  } @else if (staff) {
-  <div class="card border-0 shadow-sm">
-    <div class="card-body">
-      <div class="row">
-        <!-- Thông tin chính -->
-        <div class="col-md-7 mb-3 d-flex">
-          <div class="flex-grow-1">
-            <p class="mb-1">
-              <b>Tên nhân viên:</b>
-              <span class="ms-1">{{ staff.name }}</span>
-            </p>
-            <p class="mb-1">
-              <b>Vai trò:</b>
-              <span class="ms-1">{{ staff.role }}</span>
-            </p>
-            <p class="mb-1">
-              <b>Email:</b>
-              <span class="ms-1">{{ staff.email }}</span>
-            </p>
+      @if (isLoading) {
+      <div class="text-muted py-3">Đang tải dữ liệu...</div>
+      } @else if (error) {
+      <div class="alert alert-danger py-2">{{ error }}</div>
+      } @else if (staff) {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <!-- Hàng trên: tên + vai trò + email / chi nhánh + trạng thái -->
+          <div class="d-flex flex-column flex-md-row justify-content-between mb-3">
+            <!-- Thông tin chính -->
+            <div class="mb-3 mb-md-0">
+              <h5 class="fw-semibold mb-2">{{ staff.name }}</h5>
+
+              <p class="mb-1">
+                <span class="text-muted">Vai trò:</span>
+                <span class="fw-semibold ms-1">{{ staff.role }}</span>
+              </p>
+              <p class="mb-1">
+                <span class="text-muted">Email:</span>
+                <span class="ms-1">{{ staff.email }}</span>
+              </p>
+            </div>
+
+            <!-- Chi nhánh + trạng thái -->
+            <div class="text-md-end">
+              <p class="mb-2">
+                <span class="text-muted">Chi nhánh làm việc:</span><br />
+                <span class="fw-semibold">
+                  {{ staff.branchId?.name || '—' }}
+                </span>
+              </p>
+
+              <p class="mb-0">
+                <span class="text-muted">Trạng thái tài khoản:</span><br />
+                @if (staff.isActive) {
+                <span
+                  class="badge bg-success-subtle text-success px-3 py-2 rounded-pill mt-1 d-inline-block"
+                >
+                  Hoạt động
+                </span>
+                } @else {
+                <span
+                  class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill mt-1 d-inline-block"
+                >
+                  Tạm khóa
+                </span>
+                }
+              </p>
+            </div>
+          </div>
+
+          <hr />
+
+          <!-- Thông tin hệ thống -->
+          <div class="row text-muted small">
+            <div class="col-md-6">
+              <p class="mb-1">
+                <b>Ngày tạo:</b>
+                {{ staff.createdAt | date : 'dd/MM/yyyy HH:mm' }}
+              </p>
+            </div>
+            <div class="col-md-6 text-md-end">
+              <p class="mb-1">
+                <b>Cập nhật gần nhất:</b>
+                {{ staff.updatedAt | date : 'dd/MM/yyyy HH:mm' }}
+              </p>
+            </div>
           </div>
         </div>
-
-        <!-- Thông tin chi nhánh + trạng thái -->
-        <div class="col-md-5 mb-3">
-          <p class="mb-2">
-            <b>Chi nhánh làm việc:</b><br />
-            <span>{{ staff.branchId?.name || '—' }}</span>
-          </p>
-
-          <p class="mb-2">
-            <b>Trạng thái tài khoản:</b>
-            @if (staff.isActive) {
-            <span class="badge bg-success-subtle text-success ms-1">Hoạt động</span>
-            } @else {
-            <span class="badge bg-secondary-subtle text-secondary ms-1">Tạm khóa</span>
-            }
-          </p>
-        </div>
       </div>
-
-      <hr />
-
-      <!-- Thông tin hệ thống -->
-      <div class="row text-muted small">
-        <div class="col-md-6">
-          <p class="mb-1">
-            <b>Ngày tạo:</b>
-            {{ staff.createdAt | date : 'dd/MM/yyyy HH:mm' }}
-          </p>
-        </div>
-        <div class="col-md-6">
-          <p class="mb-1">
-            <b>Cập nhật gần nhất:</b>
-            {{ staff.updatedAt | date : 'dd/MM/yyyy HH:mm' }}
-          </p>
-        </div>
-      </div>
+      }
     </div>
   </div>
-  }
 </div>

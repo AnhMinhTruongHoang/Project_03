@@ -26,7 +26,6 @@
         <table class="table table-hover align-middle mb-0 app-table">
           <thead class="table-light text-center">
             <tr>
-              <th style="width: 90px">Mã NV</th>
               <th style="width: 200px">Họ tên</th>
               <th style="width: 220px">Email</th>
               <th style="width: 200px">Chi nhánh</th>
@@ -37,11 +36,6 @@
           <tbody>
             @for (s of staffs ?? []; track s._id; let i = $index) {
             <tr>
-              <!-- Mã nhân viên -->
-              <td class="fw-semibold text-center">
-                {{ s.code || 'NV-' + (i + 1) }}
-              </td>
-
               <!-- Họ tên -->
               <td>
                 <div class="fw-semibold">{{ s.name }}</div>

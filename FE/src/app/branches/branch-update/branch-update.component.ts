@@ -37,37 +37,45 @@ export class BranchUpdateComponent implements OnInit {
     private toastr: ToastrService
   ) {}
 
-  async ngOnInit() {
-    // Lấy id từ url
+  ngOnInit(): void {
     this.branchId = this.route.snapshot.paramMap.get('id') || '';
 
-    // Khởi tạo form (giống create)
+    // Khởi tạo form
     this.editForm = this.formBuilder.group({
       code: ['', Validators.required],
       name: ['', Validators.required],
       address: ['', Validators.required],
-
-      phone: ['', Validators.required],
-      // không có email
-
+      phone: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[0-9]{9,11}$/), // 9–11 chữ số
+        ],
+      ],
       province: ['', Validators.required],
       ward: ['', Validators.required],
-
       note: [''],
       isActive: [true],
     });
 
-    // Load danh sách tỉnh
-    const provinceRes: any = await this.locationService.getProvinces();
-    this.provinces = provinceRes?.data || provinceRes || [];
+    // Load danh sách tỉnh trước, xong rồi mới load chi nhánh
+    this.locationService.getProvinces().subscribe({
+      next: (res: any) => {
+        this.provinces = res?.data || res || [];
 
-    // Khi province thay đổi → load phường
-    this.editForm.get('province')?.valueChanges.subscribe((provinceId) => {
-      this.onProvinceChange(provinceId);
+        // Khi đổi tỉnh -> load phường
+        this.editForm.get('province')?.valueChanges.subscribe((provinceId) => {
+          this.onProvinceChange(provinceId);
+        });
+
+        // Sau khi có provinces mới load branch
+        this.loadBranch();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Không tải được danh sách tỉnh/thành phố');
+      },
     });
-
-    // Load thông tin chi nhánh cần sửa
-    await this.loadBranch();
   }
 
   /** Load data chi nhánh theo id rồi patch vào form */
@@ -79,12 +87,13 @@ export class BranchUpdateComponent implements OnInit {
       const branch: any = await this.branchService.findById(this.branchId);
       console.log('BRANCH FROM API = ', branch);
 
-      // province / ward có thể là object hoặc id
-      const provinceId =
-        typeof branch.province === 'string' ? branch.province : branch.province?._id;
-      const wardId = typeof branch.ward === 'string' ? branch.ward : branch.ward?._id;
+      // Map provinceName -> provinceId
+      let provinceId: string | '' = '';
+      if (branch.provinceName) {
+        const p = this.provinces.find((x) => x.name === branch.provinceName);
+        provinceId = p?._id || '';
+      }
 
-      // Patch các field cơ bản + province trước
       this.editForm.patchValue({
         code: branch.code,
         name: branch.name,
@@ -95,12 +104,25 @@ export class BranchUpdateComponent implements OnInit {
         isActive: branch.isActive ?? true,
       });
 
-      // Nếu có province → load wards rồi set ward
+      // Nếu có province -> load wards rồi set ward theo communeName
       if (provinceId) {
-        await this.onProvinceChange(provinceId);
-        if (wardId) {
-          this.editForm.patchValue({ ward: wardId });
-        }
+        this.locationService.getCommunes(provinceId).subscribe({
+          next: (res: any) => {
+            this.wards = res?.data || res || [];
+
+            if (branch.communeName) {
+              const w = this.wards.find((x) => x.name === branch.communeName);
+              const wardId = w?._id || '';
+              if (wardId) {
+                this.editForm.patchValue({ ward: wardId });
+              }
+            }
+          },
+          error: (err) => {
+            console.error(err);
+            this.toastr.error('Không tải được danh sách phường/xã');
+          },
+        });
       }
     } catch (err) {
       console.error(err);
@@ -111,19 +133,21 @@ export class BranchUpdateComponent implements OnInit {
   }
 
   /** Khi đổi tỉnh: reset ward + load API phường */
-  async onProvinceChange(provinceId: string) {
+  onProvinceChange(provinceId: string) {
     this.wards = [];
     this.editForm.get('ward')?.setValue('');
 
     if (!provinceId) return;
 
-    try {
-      const res: any = await this.locationService.getCommunes(provinceId);
-      this.wards = res?.data || res || [];
-    } catch (err) {
-      console.error(err);
-      this.toastr.error('Không tải được danh sách phường/xã');
-    }
+    this.locationService.getCommunes(provinceId).subscribe({
+      next: (res: any) => {
+        this.wards = res?.data || res || [];
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Không tải được danh sách phường/xã');
+      },
+    });
   }
 
   /** Cập nhật chi nhánh */
@@ -139,13 +163,17 @@ export class BranchUpdateComponent implements OnInit {
 
     const formValue = this.editForm.value;
 
+    // Tìm tên tỉnh / phường từ id đang chọn
+    const selectedProvince = this.provinces.find((p) => p._id === formValue.province);
+    const selectedWard = this.wards.find((w) => w._id === formValue.ward);
+
     const payload: any = {
       code: formValue.code?.trim(),
       name: formValue.name?.trim(),
       address: formValue.address?.trim(),
       phone: formValue.phone?.trim(),
-      province: formValue.province,
-      ward: formValue.ward,
+      provinceName: selectedProvince?.name,
+      communeName: selectedWard?.name,
       note: formValue.note?.trim() || undefined,
       isActive: formValue.isActive,
     };
@@ -159,7 +187,6 @@ export class BranchUpdateComponent implements OnInit {
 
     try {
       const res: any = await this.branchService.update(this.branchId, payload);
-
       this.toastr.success(res?.message || 'Cập nhật chi nhánh thành công');
       this.router.navigate(['/admin/branch']);
     } catch (err: any) {
@@ -167,7 +194,6 @@ export class BranchUpdateComponent implements OnInit {
 
       let msg = 'Cập nhật chi nhánh thất bại';
       const raw = err?.error?.message || err?.message;
-
       msg = Array.isArray(raw) ? raw.join('\n') : raw;
 
       this.msg = msg;

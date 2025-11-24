@@ -34,13 +34,19 @@ export class BranchCreateComponent implements OnInit {
     private toastr: ToastrService
   ) {}
 
-  async ngOnInit() {
+  ngOnInit(): void {
     // Khởi tạo form
     this.addForm = this.formBuilder.group({
       code: ['', Validators.required],
       name: ['', Validators.required],
       address: ['', Validators.required],
-      phone: ['', Validators.required],
+      phone: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[0-9]{9,11}$/), // 9–11 chữ số
+        ],
+      ],
       province: ['', Validators.required],
       ward: ['', Validators.required],
       note: [''],
@@ -48,29 +54,54 @@ export class BranchCreateComponent implements OnInit {
     });
 
     // Load danh sách tỉnh
-    const provinceRes: any = await this.locationService.getProvinces();
-    this.provinces = provinceRes?.data || provinceRes || [];
+    this.loadProvinces();
 
-    // Khi province thay đổi → load phường
+    // Khi province thay đổi → load phường/xã
     this.addForm.get('province')?.valueChanges.subscribe((provinceId) => {
       this.onProvinceChange(provinceId);
     });
   }
 
-  /** Khi đổi tỉnh: reset ward + load API phường */
-  async onProvinceChange(provinceId: string) {
+  /** Gọi API lấy danh sách tỉnh */
+  private loadProvinces(): void {
+    this.locationService.getProvinces().subscribe({
+      next: (res: any) => {
+        // Nếu BE trả { data: [...] } thì lấy res.data, còn không thì lấy thẳng res
+        this.provinces = Array.isArray(res?.data) ? res.data : res;
+
+        if (!Array.isArray(this.provinces)) {
+          console.error('API provinces không trả về mảng:', this.provinces);
+          this.provinces = [];
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Không tải được danh sách tỉnh/thành phố');
+      },
+    });
+  }
+
+  /** Khi đổi tỉnh: reset ward + load API phường/xã */
+  onProvinceChange(provinceId: string): void {
     this.wards = [];
     this.addForm.get('ward')?.setValue('');
 
     if (!provinceId) return;
 
-    try {
-      const res: any = await this.locationService.getCommunes(provinceId);
-      this.wards = res?.data || res || [];
-    } catch (err) {
-      console.error(err);
-      this.toastr.error('Không tải được danh sách phường/xã');
-    }
+    this.locationService.getCommunes(provinceId).subscribe({
+      next: (res: any) => {
+        this.wards = Array.isArray(res?.data) ? res.data : res;
+
+        if (!Array.isArray(this.wards)) {
+          console.error('API communes không trả về mảng:', this.wards);
+          this.wards = [];
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Không tải được danh sách phường/xã');
+      },
+    });
   }
 
   /** Lưu chi nhánh */
@@ -86,18 +117,21 @@ export class BranchCreateComponent implements OnInit {
 
     const formValue = this.addForm.value;
 
+    const selectedProvince = this.provinces.find((p) => p._id === formValue.province);
+    const selectedWard = this.wards.find((w) => w._id === formValue.ward);
+
     const payload: any = {
       code: formValue.code?.trim(),
       name: formValue.name?.trim(),
       address: formValue.address?.trim(),
       phone: formValue.phone?.trim(),
-      province: formValue.province,
-      ward: formValue.ward,
+      provinceName: selectedProvince?.name,
+      communeName: selectedWard?.name,
       note: formValue.note?.trim() || undefined,
       isActive: formValue.isActive,
     };
 
-    // Remove undefined
+    // Remove undefined / ''
     Object.keys(payload).forEach((key) => {
       if (payload[key] === undefined || payload[key] === '') {
         delete payload[key];
@@ -105,7 +139,7 @@ export class BranchCreateComponent implements OnInit {
     });
 
     try {
-      const res: any = await this.branchService.create(payload);
+      const res: any = await this.branchService.create(payload); // create nhiều khả năng vẫn trả Promise
 
       this.toastr.success(res?.message || 'Tạo chi nhánh mới thành công');
       this.router.navigate(['/admin/branch']);
