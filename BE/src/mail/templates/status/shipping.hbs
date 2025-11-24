@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Đơn hàng đang giao đến bạn!</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f6f9fc; padding: 20px; margin: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #ffc107, #fd7e14); color: white; padding: 40px 30px; text-align: center; }
+    .header h1 { margin: 0; font-size: 28px; }
+    .content { padding: 35px; line-height: 1.8; color: #333; }
+    .waybill { font-size: 32px; font-weight: bold; color: #fd7e14; letter-spacing: 2px; }
+    .btn { display: inline-block; padding: 14px 30px; background: #fd7e14; color: white; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 20px 0; }
+    .footer { background: #343a40; color: #adb5bd; padding: 25px; text-align: center; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Đơn hàng đang trên đường!</h1>
+    </div>
+    <div class="content">
+      <p>Xin chào <strong>{{name}}</strong>,</p>
+      <p>Shiper đã nhận hàng và đang mang đến cho bạn rồi đây!</p>
+      
+      <div style="text-align: center; margin: 30px 0;">
+        <div class="waybill">{{waybill}}</div>
+      </div>
+
+      <div style="background: #fff3cd; padding: 20px; border-radius: 10px; border-left: 5px solid #ffc107;">
+        <p>Thời gian dự kiến giao: <strong>trong 1-2 giờ tới</strong></p>
+        <p>Vui lòng giữ điện thoại để shipper liên lạc nhé!</p>
+      </div>
+
+      <div style="text-align: center;">
+        <a href="{{trackingUrl}}" class="btn">Xem vị trí shipper</a>
+      </div>
+    </div>
+    <div class="footer">
+      BD Express – Nhanh như chớp, chắc như đinh!
+    </div>
+  </div>
+</body>
+</html>

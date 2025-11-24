@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Đơn hàng đã bị hủy</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f6f9fc; padding: 20px; margin: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 40px 30px; text-align: center; }
+    .content { padding: 35px; line-height: 1.8; color: #333; }
+    .waybill { font-size: 28px; font-weight: bold; color: #dc3545; }
+    .footer { background: #343a40; color: #adb5bd; padding: 25px; text-align: center; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Đơn hàng đã bị hủy</h1>
+    </div>
+    <div class="content">
+      <p>Xin chào <strong>{{name}}</strong>,</p>
+      <p>Chúng tôi rất tiếc phải thông báo rằng đơn hàng của bạn đã bị hủy.</p>
+      
+      <p><strong>Mã vận đơn:</strong> <span class="waybill">{{waybill}}</span></p>
+      
+      <div style="background: #f8d7da; padding: 20px; border-radius: 10px; border-left: 5px solid #dc3545;">
+        <p>Nếu bạn cần hỗ trợ hoặc muốn đặt lại đơn hàng, vui lòng liên hệ:</p>
+        <p>Hotline: <strong>1900 1234</strong><br>
+        Email: support@yourdomain.com</p>
+      </div>
+      
+      <p>Xin lỗi vì sự bất tiện này. Hy vọng được phục vụ bạn trong tương lai gần!</p>
+    </div>
+    <div class="footer">
+      BD Express • Chân thành xin lỗi và cảm ơn
+    </div>
+  </div>
+</body>
+</html>

@@ -9,7 +9,7 @@ export class OrdersService {
   private readonly API_URL = `${env.baseUrl}/orders`;
   private readonly PRICING_URL = `${env.baseUrl}/pricing/calculate`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private getHeaders() {
     const token = localStorage.getItem('access_token') || '';
@@ -81,5 +81,10 @@ export class OrdersService {
     isLocal: boolean;
   }): Observable<any> {
     return this.http.post(this.PRICING_URL, payload, { headers: this.getHeaders() });
+  }
+
+  resendWelcomeEmail(orderId: string) {
+    // Thay thế đường dẫn API thích hợp của bạn
+    return this.http.post(`${this.API_URL}/${orderId}/resend-email`, {});
   }
 }

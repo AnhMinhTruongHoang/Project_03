@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Giao hàng thành công!</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f6f9fc; padding: 20px; margin: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #007bff, #6610f2); color: white; padding: 40px 30px; text-align: center; }
+    .header h1 { margin: 0; font-size: 28px; }
+    .content { padding: 35px; line-height: 1.8; color: #333; text-align: center; }
+    .waybill { font-size: 32px; font-weight: bold; color: #007bff; letter-spacing: 2px; }
+    .btn { display: inline-block; padding: 14px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 20px 0; }
+    .footer { background: #343a40; color: #adb5bd; padding: 25px; text-align: center; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Giao hàng thành công!</h1>
+    </div>
+    <div class="content">
+      <p>Xin chào <strong>{{name}}</strong>,</p>
+      <p>Cảm ơn bạn đã nhận hàng thành công!</p>
+      
+      <div style="font-size: 60px; margin: 30px 0;">Checkmark</div>
+      
+      <p>Mã vận đơn: <strong class="waybill">{{waybill}}</strong></p>
+      
+      <p>Hy vọng bạn hài lòng với dịch vụ của chúng tôi!</p>
+      
+      <a href="{{trackingUrl}}" class="btn">Đánh giá dịch vụ</a>
+      
+      <p>Chúc bạn một ngày vui vẻ!</p>
+    </div>
+    <div class="footer">
+      BD Express • Luôn đồng hành cùng bạn
+    </div>
+  </div>
+</body>
+</html>

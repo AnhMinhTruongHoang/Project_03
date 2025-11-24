@@ -106,6 +106,8 @@ export class AdmninCreateOrder implements OnInit {
       serviceCode: ['STD'],
       weightKg: [1, [Validators.required, Validators.min(0.01)]],
       codValue: [0, [Validators.required, Validators.min(0)]],
+
+      email: ['']
     });
   }
 
@@ -271,6 +273,7 @@ export class AdmninCreateOrder implements OnInit {
       senderName: f.senderName,
       receiverName: f.receiverName,
       receiverPhone: f.receiverPhone,
+      email: f.email?.trim() || null,
       pickupAddress: {
         provinceId: f.pickupProvinceId,
         communeId: f.pickupCommuneId,
@@ -298,52 +301,21 @@ export class AdmninCreateOrder implements OnInit {
         Swal.fire({
           icon: 'success',
           title: 'Tạo đơn thành công!',
+          // 1. Thêm nút tắt ở góc trên bên phải
+          showCloseButton: true,
           html: `
-              <div class="text-center">
-                <p class="mb-3 fs-5">Mã vận đơn của bạn là:</p>
-                <h1 class="display-3 fw-bold text-secondary mb-4">${this.createdWaybill}</h1>
-                <div class="d-flex gap-3 justify-content-center flex-wrap">
-                  <button id="copyBtn" type="button" class="btn btn-success btn-lg px-4">
-                    Sao chép mã
-                  </button>
-                  <a routerLink="/tracking/${this.createdWaybill}" target="_blank" class="btn btn-success btn-lg px-4">
-                    Xem hành trình
-                  </a>
-                  <button id="printBtn" type="button" class="btn btn-success btn-lg px-4">
-                    In tem vận đơn
-                  </button>
-                </div>
-                <p class="text-muted mt-4 small">
-                  Khách hàng có thể tra cứu tại: <strong>yourdomain.com/tracking</strong>
-                </p>
-              </div>
-            `,
+            <div class="text-center">
+            <p class="mb-3 fs-5">Mã vận đơn của bạn là:</p>
+            <h2 class="display-5 fw-bold text-secondary mb-4">${this.createdWaybill}</h2>
+            <p class="text-muted mt-4 small">
+            Khách hàng có thể tra cứu tại: <strong>yourdomain.com/tracking</strong>
+            </p>
+            </div>
+              `,
           allowOutsideClick: false,
           showConfirmButton: true,
           confirmButtonText: 'Tạo đơn mới',
-          didOpen: () => {
-            const copyBtn = document.getElementById('copyBtn');
-            const printBtn = document.getElementById('printBtn');
-
-            // BẮT BUỘC DÙNG CẢ 3: preventDefault + stopPropagation + stopImmediatePropagation
-            copyBtn?.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-              this.copyWaybill();
-            });
-
-            printBtn?.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-              window.open(`/print-label/${res.data._id || this.createdWaybill}`, '_blank');
-            });
-
-            // Đặt type="button" để chắc chắn không submit
-            if (copyBtn) copyBtn.setAttribute('type', 'button');
-            if (printBtn) printBtn.setAttribute('type', 'button');
-          },
+          // Xóa didOpen vì không còn các nút cần xử lý sự kiện
         }).then((result) => {
           if (result.isConfirmed) {
             this.orderForm.reset();

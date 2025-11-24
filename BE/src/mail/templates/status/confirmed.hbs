@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Đơn hàng đã được xác nhận</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f6f9fc; padding: 20px; margin: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 40px 30px; text-align: center; }
+    .header h1 { margin: 0; font-size: 28px; }
+    .content { padding: 35px; line-height: 1.8; color: #333; }
+    .waybill { font-size: 32px; font-weight: bold; color: #28a745; letter-spacing: 2px; }
+    .btn { display: inline-block; padding: 14px 30px; background: #28a745; color: white; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 20px 0; box-shadow: 0 4px 15px rgba(40,167,69,0.4); }
+    .info { background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
+    .footer { background: #343a40; color: #adb5bd; padding: 25px; text-align: center; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Đơn hàng đã được xác nhận</h1>
+    </div>
+    <div class="content">
+      <p>Xin chào <strong>{{name}}</strong>,</p>
+      <p>Chúng tôi rất vui thông báo đơn hàng của bạn đã được <strong>xác nhận thành công!</strong></p>
+      
+      <div style="text-align: center; margin: 30px 0;">
+        <div class="waybill">{{waybill}}</div>
+        <p><strong>Mã vận đơn của bạn</strong></p>
+      </div>
+
+      <div class="info">
+        <p>Nhân viên bưu cục đã tiếp nhận và đang đóng gói hàng hóa.</p>
+        <p>Hàng sẽ được giao trong hôm nay hoặc ngày mai.</p>
+      </div>
+
+      <div style="text-align: center;">
+        <a href="{{trackingUrl}}" class="btn">Theo dõi hành trình ngay</a>
+      </div>
+
+      <p>Nếu có thắc mắc, vui lòng liên hệ hotline: <strong>1900 1234</strong></p>
+      <p>Cảm ơn bạn đã sử dụng dịch vụ của <strong>BD Express</strong>!</p>
+    </div>
+    <div class="footer">
+      © 2025 BD Express • Giao nhanh – Nhận tiền liền tay<br>
+      Website: yourdomain.com | Email: support@yourdomain.com
+    </div>
+  </div>
+</body>
+</html>

@@ -23,7 +23,8 @@ export class Order {
 
   @Prop({ required: true }) receiverPhone: string;
 
-  @Prop({ required: false }) email: string;
+  @Prop({ trim: true, lowercase: true })
+  email?: string;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

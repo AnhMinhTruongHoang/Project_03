@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsEmail,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -50,7 +51,9 @@ export class CreateOrderDto {
   @IsString()
   receiverPhone: string;
 
+  @ApiProperty({ example: 'khachhang@gmail.com', required: false })
   @IsOptional()
+  @IsEmail()
   email: string;
 
   @ApiProperty({ type: AddressDto })

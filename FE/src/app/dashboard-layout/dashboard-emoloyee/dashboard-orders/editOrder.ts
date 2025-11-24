@@ -336,6 +336,35 @@ export class EditOrder implements OnInit {
     );
   }
 
+  resendWelcomeEmail() {
+    if (!this.orderId || !this.order.email) {
+      Swal.fire('Lỗi', 'Không tìm thấy ID đơn hàng hoặc email người nhận.', 'warning');
+      return;
+    }
+
+    Swal.fire({
+      title: 'Xác nhận gửi lại Email?',
+      text: `Gửi lại email chào mừng/thông báo cho ${this.order.email}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Gửi lại',
+      cancelButtonText: 'Hủy',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Thực hiện cuộc gọi API để gửi lại email
+        this.ordersService.resendWelcomeEmail(this.orderId).subscribe({
+          next: () => {
+            Swal.fire('Thành công!', 'Email thông báo đã được gửi lại.', 'success');
+          },
+          error: (err) => {
+            console.error('Lỗi gửi lại email:', err);
+            Swal.fire('Lỗi!', err.error?.message || 'Không thể gửi lại email thông báo.', 'error');
+          },
+        });
+      }
+    });
+  }
+
   // ================== SUBMIT ==================
   submit() {
     if (this.orderForm.invalid || !this.canSubmit()) {

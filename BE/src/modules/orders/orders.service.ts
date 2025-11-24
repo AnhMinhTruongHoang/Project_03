@@ -139,36 +139,55 @@ export class OrdersService {
     });
 
     try {
-  // Tạo tracking cho order
-  await this.trackingModel.create({
-    orderId: newOrder._id,
-    status: OrderStatus.PENDING,
-    timestamp: new Date(),
-    location: originProv?.name || 'Khách hàng đặt hàng online',
-    note: 'Đơn hàng được tạo thành công',
-    createdBy: newOrder.createdBy || (user ? { _id: user._id, email: user.email } : null),
-  });
-  console.log('TRACKING ĐÃ TẠO THÀNH CÔNG CHO ORDER:', newOrder._id);
-} catch (error) {
-  console.error('Lỗi tạo tracking:', error);
-}
+      // Tạo tracking cho order
+      await this.trackingModel.create({
+        orderId: newOrder._id,
+        status: OrderStatus.PENDING,
+        timestamp: new Date(),
+        location: originProv?.name || 'Khách hàng đặt hàng online',
+        note: 'Đơn hàng được tạo thành công',
+        createdBy: newOrder.createdBy || (user ? { _id: user._id, email: user.email } : null),
+      });
+      console.log('TRACKING ĐÃ TẠO THÀNH CÔNG CHO ORDER:', newOrder._id);
+    } catch (error) {
+      console.error('Lỗi tạo tracking:', error);
+    }
 
-// Gửi email xác nhận đơn hàng
-try {
-  await this.sendVerificationMailOrder({
-    email: user.email,
-    name: user.name,
-    orderId: newOrder._id.toString(),
-    totalPrice,
-    shippingFee,
-    codValue: dto.codValue,
-  });
-} catch (err) {
-  console.log('Send order confirm email failed: ' + err);
-}
+    if (dto.email) {
+      try {
+        await this.sendVerificationMailOrder({
+          email: dto.email,
+          name: dto.receiverName || 'Khách hàng',
+          orderId: newOrder.waybill || newOrder._id.toString(),
+          totalPrice,
+          shippingFee,
+          codValue: dto.codValue,
+        });
+        console.log('Đã gửi email xác nhận đến khách:', dto.email);
+      } catch (err) {
+        console.log('Gửi email đến khách thất bại:', dto.email, err);
+        // Không throw lỗi → không làm hỏng việc tạo đơn
+      }
+    }
 
-// Trả về order cuối cùng
-return newOrder;
+    // (Tùy chọn) Vẫn gửi cho nhân viên nếu muốn biết đơn đã tạo
+    if (user.email && user.email !== dto.email) {
+      try {
+        await this.sendVerificationMailOrder({
+          email: user.email,
+          name: user.name || 'Nhân viên',
+          orderId: newOrder.waybill || newOrder._id.toString(),
+          totalPrice,
+          shippingFee,
+          codValue: dto.codValue,
+        });
+      } catch (err) {
+        console.log('Gửi email thông báo nhân viên thất bại:', err);
+      }
+    }
+
+    // Trả về order cuối cùng
+    return newOrder;
 
   }
 
@@ -424,19 +443,25 @@ return newOrder;
   }
 
   async updateStatus(id: string, status: OrderStatus, user?: IUser) {
-    const order = await this.orderModel.findById(id);
+    const order = await this.orderModel.findById(id)
+      .populate('pickupAddressId deliveryAddressId')
+      .lean(); // dùng lean() để lấy dữ liệu nhanh
+
     if (!order || order.isDeleted) {
       throw new NotFoundException('Order not found');
     }
+
+    // Cập nhật trạng thái (giữ nguyên logic cũ)
     if (user && ['CONFIRMED', 'SHIPPING', 'COMPLETED'].includes(status)) {
-      order.createdBy = { _id: new Types.ObjectId(user._id), email: user.email };
-      await order.save();
+      await this.orderModel.updateOne(
+        { _id: id },
+        { $set: { 'createdBy': { _id: user._id, email: user.email } } }
+      );
     }
 
-    // Cập nhật trạng thái
-    order.status = status;
-    await order.save();
+    await this.orderModel.updateOne({ _id: id }, { status });
 
+    // === TẠO TRACKING (giữ nguyên) ===
     const display = {
       PENDING: { location: 'Đơn hàng đang chờ xác nhận', note: 'Khách hàng đã đặt hàng' },
       CONFIRMED: { location: 'Bưu cục tiếp nhận', note: 'Nhân viên đã xác nhận đơn' },
@@ -458,7 +483,47 @@ return newOrder;
       createdBy: actionPerformer || null,
     });
 
-    return order;
+    // === MỚI: GỬI EMAIL CHO KHÁCH KHI CẬP NHẬT TRẠNG THÁI ===
+    if (order.email) {
+      const templates: Record<OrderStatus, { subject: string; template: string }> = {
+        PENDING: { subject: 'Đơn hàng đã được tạo', template: 'status/pending.hbs' },
+        CONFIRMED: { subject: 'Đơn hàng đã được xác nhận ✓', template: 'status/confirmed.hbs' },
+        SHIPPING: { subject: 'Đơn hàng đang giao đến bạn', template: 'status/shipping.hbs' },
+        COMPLETED: { subject: 'Giao hàng thành công! Cảm ơn bạn', template: 'status/completed.hbs' },
+        CANCELED: { subject: 'Đơn hàng đã bị hủy', template: 'status/canceled.hbs' },
+      };
+
+      const config = templates[status];
+      if (config) {
+        try {
+          await this.mailerService.sendMail({
+            to: order.email,
+            subject: config.subject,
+            template: config.template,
+            context: {
+              name: order.receiverName || 'Khách hàng',
+              waybill: order.waybill,
+              orderId: order._id.toString(),
+              status: display[status]?.note || status,
+              trackingUrl: `https://yourdomain.com/tracking/${order.waybill}`, // thay domain thật
+              totalPrice: order.totalPrice,
+              codValue: order.codValue,
+            },
+          });
+          console.log(`Đã gửi email trạng thái ${status} đến: ${order.email}`);
+        } catch (err) {
+          console.log(`Gửi email trạng thái ${status} thất bại:`, err);
+          // Không throw → không làm hỏng cập nhật trạng thái
+        }
+      }
+    }
+
+    // Trả về order mới nhất
+    return await this.orderModel.findById(id)
+      .populate({
+        path: 'pickupAddressId deliveryAddressId',
+        populate: { path: 'provinceId communeId' }
+      });
   }
   async getStatistics(month?: number, year?: number, user?: IUser | null) {
     const filter: any = { isDeleted: false };
