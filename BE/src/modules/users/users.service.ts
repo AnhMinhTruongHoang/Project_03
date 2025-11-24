@@ -21,7 +21,7 @@ export class UsersService {
     @InjectModel(UserM.name)
     private userModel: SoftDeleteModel<UserDocument>,
     private mailerService: MailerService,
-  ) { }
+  ) {}
 
   /* ------------ Helpers ------------ */
   private generateCode6(): string {
@@ -53,7 +53,7 @@ export class UsersService {
     });
   }
 
-  /* ------------ Admin create user ------------ */
+  /* ------------ Admin create STAFF user ------------ */
   async create(createUserDto: CreateUserDto, @Users() user: IUser) {
     const {
       name,
@@ -62,8 +62,10 @@ export class UsersService {
       age,
       gender,
       address,
-      role = 'USER',
+      phone,
+      branchId,
       avatarUrl,
+      isActive,
     } = createUserDto;
 
     const emailNorm = this.normalizeEmail(email);
@@ -81,9 +83,16 @@ export class UsersService {
       age,
       gender,
       address,
-      role: role || 'USER',
+      phone,
+      // chi nhánh làm việc
+      branchId: new mongoose.Types.ObjectId(branchId),
+      // avatar
       avatarUrl,
-      isActive: false,
+      // vì route này chuyên tạo nhân viên
+      role: 'STAFF',
+      accountType: 'LOCAL',
+      // mặc định đang hoạt động nếu FE không gửi
+      isActive: typeof isActive === 'boolean' ? isActive : true,
       createdBy: {
         _id: user._id,
         email: user.email,
@@ -253,6 +262,29 @@ export class UsersService {
     };
   }
 
+  /* ------------ Find All (deleted only - trash) ------------ */
+  async findAllDeleted(qs: any) {
+    const { filter, sort, population } = aqp(qs);
+    delete (filter as any).current;
+    delete (filter as any).pageSize;
+
+    // Lấy các user đã xoá mềm: isDeleted = true
+    const baseFilter: any = {
+      ...filter,
+      isDeleted: true,
+    };
+
+    const result = await this.userModel
+      .find(baseFilter)
+      .sort(sort as any)
+      .select('-password')
+      .populate(population as any)
+      .exec();
+
+    // KHÔNG phân trang, trả về mảng luôn
+    return result;
+  }
+
   /* ------------ Find One ------------ */
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) return 'Not found user';
@@ -262,6 +294,11 @@ export class UsersService {
       .select('-password')
       .populate({ path: 'branchId', select: { name: 1, _id: 1 } })
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
+  }
+
+  /* ------------ Find By role ------------ */
+  async findUserByRole(role: string) {
+    return this.userModel.find({ role }).select('-password');
   }
 
   /* ------------ For login ------------ */
@@ -332,6 +369,56 @@ export class UsersService {
 
     await this.userModel.softDelete({ _id: id });
     return { message: 'User deleted' };
+  }
+
+  /* ------------ Restore (admin) ------------ */
+  async restore(id: string, user: IUser) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+
+    // không cho restore admin nếu bạn muốn, tuỳ bạn
+    const foundUser = await this.userModel.findById(id);
+    if (!foundUser) {
+      throw new BadRequestException('User not found');
+    }
+
+    const restored = await this.userModel.restore({ _id: id });
+    if (restored.restored === 0) {
+      throw new BadRequestException('User is not deleted or restore failed');
+    }
+
+    await this.userModel.updateOne(
+      { _id: id },
+      {
+        updatedBy: {
+          _id: user._id,
+          email: user.email,
+        },
+      },
+    );
+
+    return { message: 'User restored' };
+  }
+
+  /* ------------ Hard delete (admin) ------------ */
+  async hardDelete(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+
+    const foundUser = await this.userModel.findById(id);
+    if (!foundUser) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (foundUser.email === 'admin@gmail.com') {
+      throw new BadRequestException('Cannot hard delete admin@gmail.com');
+    }
+
+    await this.userModel.deleteOne({ _id: id });
+
+    return { message: 'User permanently deleted' };
   }
 
   /* ------------ Token helpers ------------ */

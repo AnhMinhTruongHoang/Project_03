@@ -33,6 +33,11 @@ import { AdminListOrder } from './dashboard-layout/dashboard-admin/dashboard-ord
 import { AdmninCreateOrder } from './dashboard-layout/dashboard-admin/dashboard-orders/adminCreateOrder';
 import { AdminEditOrder } from './dashboard-layout/dashboard-admin/dashboard-orders/adminEditOrder';
 import { ListBranch } from './dashboard-layout/dashboard-emoloyee/dashboard-branches/dashboard-branch';
+import { StaffListComponent } from './dashboard-layout/dashboard-admin/staffs/staff-list/staff-list.component';
+import { StaffDetailComponent } from './dashboard-layout/dashboard-admin/staffs/staff-detail/staff-detail.component';
+import { StaffCreateComponent } from './dashboard-layout/dashboard-admin/staffs/staff-create/staff-create.component';
+import { StaffUpdateComponent } from './dashboard-layout/dashboard-admin/staffs/staff-update/staff-update.component';
+import { StaffTrashComponent } from './dashboard-layout/dashboard-admin/staffs/staff-trash/staff-trash.component';
 
 export const routes: Routes = [
   // ----- USER LAYOUT -----
@@ -88,6 +93,16 @@ export const routes: Routes = [
           { path: 'detail/:id', component: BranchDetailComponent },
           { path: 'update/:id', component: BranchUpdateComponent },
           { path: 'trash', component: BranchTrashComponent },
+        ],
+      },
+      {
+        path: 'staff',
+        children: [
+          { path: '', component: StaffListComponent },
+          { path: 'create', component: StaffCreateComponent },
+          { path: 'detail/:id', component: StaffDetailComponent },
+          { path: 'update/:id', component: StaffUpdateComponent },
+          { path: 'trash', component: StaffTrashComponent },
         ],
       },
     ],
