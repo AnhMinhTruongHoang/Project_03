@@ -1,0 +1,84 @@
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">Thùng rác nhân viên</h4>
+      <small class="text-muted">Các tài khoản nhân viên đã xoá mềm.</small>
+    </div>
+
+    <a class="btn btn-outline-secondary" [routerLink]="['/admin/staff']"> ← Quay lại danh sách </a>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading) {
+  <div class="text-center text-muted py-4">Đang tải dữ liệu...</div>
+  } @else if (error) {
+  <!-- Error -->
+  <div class="alert alert-danger py-3">{{ error }}</div>
+  } @else if (!isLoading && ((staffs?.length ?? 0) === 0)) {
+  <!-- Empty -->
+  <div class="text-center text-muted py-4">Thùng rác trống.</div>
+  } @else {
+  <!-- Table -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 app-table">
+          <thead class="table-light text-center">
+            <tr>
+              <th style="width: 90px">Mã NV</th>
+              <th style="width: 200px">Họ tên</th>
+              <th style="width: 220px">Email</th>
+              <th style="width: 200px">Chi nhánh</th>
+              <th style="width: 220px" class="text-center">Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (s of staffs ?? []; track s._id; let i = $index) {
+            <tr>
+              <!-- Mã nhân viên -->
+              <td class="fw-semibold text-center">
+                {{ s.code || 'NV-' + (i + 1) }}
+              </td>
+
+              <!-- Họ tên -->
+              <td>
+                <div class="fw-semibold">{{ s.name }}</div>
+                <small class="text-muted text-uppercase">
+                  {{ s.role || 'STAFF' }}
+                </small>
+              </td>
+
+              <!-- Email -->
+              <td>
+                {{ s.email }}
+              </td>
+
+              <!-- Chi nhánh -->
+              <td>
+                <div>{{ s.branchId?.name || 'Chưa gán chi nhánh' }}</div>
+                @if (s.branchId?.code) {
+                <small class="text-muted"> Mã: {{ s.branchId.code }} </small>
+                }
+              </td>
+
+              <!-- Actions -->
+              <td class="text-end">
+                <button type="button" class="btn btn-sm btn-info me-2" (click)="restore(s._id)">
+                  Khôi phục
+                </button>
+
+                <button type="button" class="btn btn-sm btn-delete" (click)="hardDelete(s._id)">
+                  Xoá vĩnh viễn
+                </button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  }
+</div>

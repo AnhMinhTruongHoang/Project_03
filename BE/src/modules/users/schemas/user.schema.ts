@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument, Types } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -33,7 +33,7 @@ export class User {
   role: string;
 
   @Prop()
-  avatar: string;
+  avatarUrl: string; // 👈 thống nhất với DTO
 
   @Prop({ default: false })
   isDeleted: boolean;
@@ -73,7 +73,6 @@ export class User {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' })
   branchId: mongoose.Schema.Types.ObjectId;
-
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

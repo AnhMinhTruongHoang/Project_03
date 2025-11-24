@@ -45,6 +45,13 @@ export class UsersController {
     return this.usersService.findAll(+currentPage, +limit, qs);
   }
 
+  // Danh sách đã xoá mềm
+  @Get('trash')
+  @ResponseMessage('Fetch deleted users')
+  findAllDeleted(@Query() qs: any) {
+    return this.usersService.findAllDeleted(qs);
+  }
+
   @Public() // bỏ qua JwtAuthGuard
   @ResponseMessage('fetch user by id')
   @Get(':id')
@@ -69,9 +76,24 @@ export class UsersController {
     return this.usersService.update(updateUserDto, users, id);
   }
 
+  // Xoá mềm
   @Delete(':id')
   @ResponseMessage('Delete a User')
   remove(@Param('id') id: string, @Users() users: IUser) {
     return this.usersService.remove(id, users);
+  }
+
+  // Restore a User
+  @Patch(':id/restore')
+  @ResponseMessage('Restore a User')
+  restore(@Param('id') id: string, @Users() users: IUser) {
+    return this.usersService.restore(id, users);
+  }
+
+  // Xoá vĩnh viễn
+  @Delete(':id/hard')
+  @ResponseMessage('Hard delete a User')
+  hardDelete(@Param('id') id: string) {
+    return this.usersService.hardDelete(id);
   }
 }

@@ -1,0 +1,140 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <div class="card shadow-sm border-0">
+        <div
+          class="card-header bg-white border-0 d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">Thêm nhân viên mới</h5>
+          <button class="btn btn-sm btn-outline-secondary" (click)="backToList()" type="button">
+            <i class="bi bi-arrow-left"></i> Quay lại
+          </button>
+        </div>
+
+        <div class="card-body">
+          <form [formGroup]="addForm" (ngSubmit)="save()" method="post">
+            <div class="row g-3">
+              <!-- Họ tên -->
+              <div class="col-md-6">
+                <label class="form-label">
+                  Họ tên nhân viên <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="name"
+                  placeholder="VD: Nguyễn Văn A"
+                />
+                <div
+                  class="text-danger small"
+                  *ngIf="addForm.get('name')?.invalid && addForm.get('name')?.touched"
+                >
+                  Vui lòng nhập họ tên nhân viên
+                </div>
+              </div>
+
+              <!-- Email -->
+              <div class="col-md-6">
+                <label class="form-label">
+                  Email đăng nhập <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="email"
+                  class="form-control"
+                  formControlName="email"
+                  placeholder="VD: nv.a@company.com"
+                />
+                <div
+                  class="text-danger small"
+                  *ngIf="addForm.get('email')?.invalid && addForm.get('email')?.touched"
+                >
+                  Vui lòng nhập email hợp lệ
+                </div>
+              </div>
+
+              <!-- Chi nhánh -->
+              <div class="col-md-6">
+                <label class="form-label">
+                  Chi nhánh làm việc <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" formControlName="branchId">
+                  <option value="">Chọn chi nhánh</option>
+                  <option *ngFor="let b of branches" [value]="b._id">
+                    {{ b.name }}
+                  </option>
+                </select>
+                <div
+                  class="text-danger small"
+                  *ngIf="addForm.get('branchId')?.invalid && addForm.get('branchId')?.touched"
+                >
+                  Vui lòng chọn chi nhánh
+                </div>
+              </div>
+
+              <!-- Trạng thái -->
+              <div class="col-md-6">
+                <label class="form-label d-block">Trạng thái</label>
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="isActiveSwitch"
+                    formControlName="isActive"
+                  />
+                  <label class="form-check-label" for="isActiveSwitch">
+                    <span *ngIf="addForm.get('isActive')?.value">Đang hoạt động</span>
+                    <span *ngIf="!addForm.get('isActive')?.value">Tạm khoá</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Mật khẩu -->
+              <div class="col-md-6">
+                <label class="form-label"> Mật khẩu <span class="text-danger">*</span> </label>
+                <input type="password" class="form-control" formControlName="password" />
+                <div
+                  class="text-danger small"
+                  *ngIf="addForm.get('password')?.invalid && addForm.get('password')?.touched"
+                >
+                  Mật khẩu tối thiểu 6 ký tự
+                </div>
+              </div>
+
+              <!-- Xác nhận mật khẩu -->
+              <div class="col-md-6">
+                <label class="form-label">
+                  Xác nhận mật khẩu <span class="text-danger">*</span>
+                </label>
+                <input type="password" class="form-control" formControlName="confirmPassword" />
+                <div
+                  class="text-danger small"
+                  *ngIf="
+                    addForm.hasError('passwordMismatch') && addForm.get('confirmPassword')?.touched
+                  "
+                >
+                  Mật khẩu xác nhận không khớp
+                </div>
+              </div>
+            </div>
+
+            <!-- Nút -->
+            <div class="mt-4 d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary" (click)="backToList()">
+                Hủy
+              </button>
+
+              <button type="submit" class="btn btn-primary" [disabled]="addForm.invalid || loading">
+                <span *ngIf="!loading">Lưu nhân viên</span>
+                <span *ngIf="loading">
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                  Đang lưu...
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

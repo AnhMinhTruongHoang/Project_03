@@ -11,6 +11,7 @@ import {
   IsEnum,
   Matches,
   IsMongoId,
+  IsBoolean,
 } from 'class-validator';
 
 export enum GenderEnum {
@@ -20,8 +21,15 @@ export enum GenderEnum {
 }
 
 export enum RoleEnum {
-  USER = 'USER',
+  // route này dùng tạo nhân viên, chỉ cần STAFF/ADMIN
+  STAFF = 'STAFF',
   ADMIN = 'ADMIN',
+}
+
+export enum AccountTypeEnum {
+  LOCAL = 'LOCAL',
+  GOOGLE = 'GOOGLE',
+  FACEBOOK = 'FACEBOOK',
 }
 
 export class CreateUserDto {
@@ -42,6 +50,7 @@ export class CreateUserDto {
 
   @ApiProperty({ required: false, example: 25, description: 'Tuổi' })
   @IsOptional()
+  @Type(() => Number)
   @IsInt({ message: 'Tuổi phải là số nguyên' })
   @Min(0, { message: 'Tuổi không được nhỏ hơn 0' })
   @Max(120, { message: 'Tuổi không được lớn hơn 120' })
@@ -78,15 +87,40 @@ export class CreateUserDto {
   @ApiProperty({
     required: false,
     enum: RoleEnum,
-    example: RoleEnum.USER,
-    description: 'Phân quyền',
+    example: RoleEnum.STAFF,
+    description: 'Phân quyền (mặc định STAFF)',
   })
   @IsOptional()
   @IsEnum(RoleEnum, { message: 'Quyền không hợp lệ' })
   role?: RoleEnum;
 
+  @ApiProperty({
+    required: true,
+    example: '6527d0c9c3a2bd7f4a1b2345',
+    description: 'Chi nhánh làm việc',
+  })
+  @IsNotEmpty({ message: 'Chi nhánh không được để trống' })
+  @IsMongoId({ message: 'Chi nhánh không hợp lệ' })
+  branchId: string;
+
+  @ApiProperty({
+    required: false,
+    enum: AccountTypeEnum,
+    example: AccountTypeEnum.LOCAL,
+    description: 'Loại tài khoản',
+  })
   @IsOptional()
-  branchId?: string;
+  @IsEnum(AccountTypeEnum, { message: 'Loại tài khoản không hợp lệ' })
+  accountType?: AccountTypeEnum;
+
+  @ApiProperty({
+    required: false,
+    example: true,
+    description: 'Trạng thái hoạt động',
+  })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 
   @ApiProperty({
     required: false,
@@ -100,8 +134,7 @@ export class CreateUserDto {
   createdAt?: string;
 }
 
-///////////// register valid
-
+/*********** RegisterUserDto & UserLoginDto giữ nguyên ***********/
 export class RegisterUserDto {
   @IsNotEmpty({ message: "Name mustn't empty" })
   name?: string;
@@ -132,7 +165,6 @@ export class RegisterUserDto {
   phone?: number;
 }
 
-//create-user.dto
 export class UserLoginDto {
   @IsString()
   @IsNotEmpty()
