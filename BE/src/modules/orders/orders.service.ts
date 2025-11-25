@@ -19,7 +19,7 @@ import {
 } from '../location/schemas/province.schema';
 import { PricingService } from '../pricing/pricing.service';
 import { ProvinceCode } from 'src/types/location.type';
-import { Tracking, TrackingStatus } from '../tracking/schemas/tracking.schemas';
+import { Tracking } from '../tracking/schemas/tracking.schemas';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()

@@ -7,14 +7,6 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
-import {
-  IsBoolean,
-  isBoolean,
-  IsMongoId,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
 
 export class CreateBranchDto {
   @ApiProperty({ example: 'HNI001', description: 'Mã chi nhánh' })
