@@ -80,7 +80,7 @@ export class DatabasesService implements OnModuleInit {
     @InjectConnection() private readonly connection: Connection,
     private readonly config: ConfigService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     if (this.config.get('SHOULD_INIT') !== 'true') return;
@@ -4039,26 +4039,51 @@ export class DatabasesService implements OnModuleInit {
   }
 
   /* ---------------- ORDERS (no embedded address) ---------------- */
+  /* ---------------- ORDERS (fixed: waybill + snapshotPricingId) ---------------- */
   private async seedOrders(
     pickupAddr: SeedAddress,
     deliveryAddr: SeedAddress,
   ): Promise<{ order1: OrderDocument; customer: UserDocument }> {
-    // Nếu đã có order thì dùng lại
-    if (await this.orderModel.countDocuments()) {
-      const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
-      const order1 = await this.orderModel.findOne({ userId: customer?._id });
-      return { order1, customer };
+    if (await this.orderModel.countDocuments({ isDeleted: false })) {
+      const customer = await this.userModel.findOne({ role: 'CUSTOMER' }).lean();
+      const order1 = await this.orderModel.findOne({ userId: customer?._id }).lean();
+      return { order1: order1 as any, customer: customer as any };
     }
 
-    const customer = await this.userModel.findOne({ role: 'CUSTOMER' });
+    const customer = await this.userModel.findOne({ role: 'CUSTOMER' }).lean();
     if (!customer) throw new Error('No CUSTOMER user to seed orders');
 
-    if (!pickupAddr?._id)
-      throw new Error('seedOrders: pickupAddressId is empty');
-    if (!deliveryAddr?._id)
-      throw new Error('seedOrders: deliveryAddressId is empty');
+    // Lấy một pricing bất kỳ để làm snapshot (hoặc tạo fake nếu chưa có)
+    let pricing = await this.pricingModel.findOne().lean();
+    if (!pricing) {
+      // Nếu chưa có pricing → tạo tạm một cái
+      const svc = await this.serviceModel.findOne({ code: 'STD' }).lean();
+      if (!svc) throw new Error('Service STD not found');
+      const inserted = await this.pricingModel.create({
+        serviceId: svc._id,
+        basePrice: 30000,
+        overweightThresholdKg: 5,
+        overweightFee: 5000,
+        isActive: true,
+        effectiveFrom: new Date(),
+      });
+      pricing = inserted.toObject();
+    }
 
-    // Bổ sung line1 nếu thiếu (giúp hiển thị/in tem)
+    // Tạo waybill theo đúng format: VN + 9 số + VN
+    const generateWaybill = () => {
+      const numbers = Math.floor(100000000 + Math.random() * 900000000); // 9 chữ số
+      return `VN${numbers}VN`;
+    };
+
+    let waybill = generateWaybill();
+    let exists = await this.orderModel.findOne({ waybill });
+    while (exists) {
+      waybill = generateWaybill();
+      exists = await this.orderModel.findOne({ waybill });
+    }
+
+    // Đảm bảo address có line1
     await Promise.all([
       this.ensureLine1(pickupAddr),
       this.ensureLine1(deliveryAddr),
@@ -4067,21 +4092,32 @@ export class DatabasesService implements OnModuleInit {
     const [order1] = await this.orderModel.insertMany([
       {
         userId: customer._id,
+        snapshotPricingId: pricing._id,           // bắt buộc
+        waybill: waybill,                          // bắt buộc + đúng format
         senderName: 'Nguyễn Văn A',
         receiverName: 'Trần Thị B',
         receiverPhone: '0912345678',
-        pickupAddressId: new Types.ObjectId(pickupAddr._id),
-        deliveryAddressId: new Types.ObjectId(deliveryAddr._id),
-        totalPrice: 120000,
-        status: OrderStatus.PENDING,
-        weightKg: 1.5,
+        email: 'khachhang@gmail.com',
+        pickupAddressId: pickupAddr._id,
+        deliveryAddressId: deliveryAddr._id,
+        totalPrice: 155000,
+        codValue: 120000,
         shippingFee: 35000,
-        codValue: 155000,
+        weightKg: 1.5,
+        serviceCode: 'STD',
+        status: OrderStatus.PENDING,
+        snapshotBreakdown: {
+          basePrice: 30000,
+          distanceFee: 5000,
+          weightFee: 0,
+          total: 35000,
+        },
+        createdBy: { _id: customer._id, email: customer.email },
       },
     ]);
 
-    this.logger.log('>>> INIT ORDERS DONE');
-    return { order1, customer };
+    this.logger.log(`>>> INIT ORDERS DONE – Waybill: ${waybill}`);
+    return { order1, customer: customer as any };
   }
 
   /* ---------------- SHIPMENTS ---------------- */
@@ -4160,6 +4196,20 @@ export class DatabasesService implements OnModuleInit {
 
   /* ---------------- TRACKINGS ---------------- */
   private async seedTrackings() {
+
+    // Lấy order đã tạo ở bước seedOrders
+    const order = await this.orderModel.findOne().lean();
+    if (!order) {
+      this.logger.warn('No order found for seeding tracking');
+      return;
+    }
+
+    // Lấy branch HN để gán
+    const branchHN = await this.branchModel.findOne({ code: 'HN01' }).lean();
+    if (!branchHN) {
+      this.logger.warn('Branch HN not found');
+      return;
+    }
     if (await this.trackingModel.countDocuments()) return;
 
     const shipment = await this.shipmentModel.findOne();
@@ -4167,21 +4217,30 @@ export class DatabasesService implements OnModuleInit {
 
     await this.trackingModel.insertMany([
       {
-        shipmentId: shipment._id,
-        status: TrackingStatus.CREATED,
-        location: 'HN01',
-        note: 'Khởi tạo',
-        branchId: shipment.originBranchId,
-        timestamp: new Date(),
+        orderId: order._id,
+        status: OrderStatus.PENDING,        // Phải dùng OrderStatus
+        location: 'Bưu cục Hà Nội Center',
+        branchId: branchHN._id,
+        timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 phút trước
+        note: 'Đơn hàng đã được tạo',
         createdBy: { _id: new Types.ObjectId(), email: 'system@vtpost.local' },
       },
       {
-        shipmentId: shipment._id,
-        status: TrackingStatus.IN_TRANSIT,
-        location: 'HUE01',
-        note: 'Đang trung chuyển',
-        branchId: shipment.originBranchId,
+        orderId: order._id,
+        status: OrderStatus.CONFIRMED,
+        location: 'Bưu cục Hà Nội Center',
+        branchId: branchHN._id,
+        timestamp: new Date(Date.now() - 2 * 60 * 1000),
+        note: 'Đơn hàng đã được xác nhận và tiếp nhận',
+        createdBy: { _id: new Types.ObjectId(), email: 'staff.hn@vtpost.local' },
+      },
+      {
+        orderId: order._id,
+        status: OrderStatus.SHIPPING,
+        location: 'Trạm trung chuyển Huế',
+        branchId: branchHN._id, // hoặc branch khác nếu cần
         timestamp: new Date(),
+        note: 'Đơn hàng đang được vận chuyển',
         createdBy: { _id: new Types.ObjectId(), email: 'system@vtpost.local' },
       },
     ]);
