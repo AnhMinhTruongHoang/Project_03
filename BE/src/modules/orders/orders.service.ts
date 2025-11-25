@@ -165,6 +165,7 @@ export class OrdersService {
         createdBy:
           newOrder.createdBy ||
           (user ? { _id: user._id, email: user.email } : null),
+        branchId: newOrder.branchId || null,
       });
       console.log('TRACKING ĐÃ TẠO THÀNH CÔNG CHO ORDER:', newOrder._id);
     } catch (error) {
@@ -546,6 +547,7 @@ export class OrdersService {
       location: display[status]?.location || 'Cập nhật trạng thái',
       note: display[status]?.note || '',
       createdBy: actionPerformer || null,
+      branchId: order.branchId || null,
     });
 
     // === MỚI: GỬI EMAIL CHO KHÁCH KHI CẬP NHẬT TRẠNG THÁI ===
