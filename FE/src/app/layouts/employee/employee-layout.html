@@ -56,16 +56,16 @@
                   @if (!authService.isLoggedIn()) {
                   <a
                     [routerLink]="['/login']"
-                    class="btn btn-outline-light fs-4 bg-white px-3 py-2 text-dark w-50 hstack justify-content-center"
+                    class="btn btn-outline-light fs-4 bg-white px-3 py-2 text-dark w-100 hstack justify-content-center"
                   >
                     Đăng nhập
                   </a>
-                  <a
+                  <!-- <a
                     [routerLink]="['/register']"
                     class="btn btn-dark text-white fs-4 bg-dark px-3 py-2 w-50 hstack justify-content-center"
                   >
                     Đăng ký
-                  </a>
+                  </a> -->
                   } @else {
                   <div class="d-flex flex-column gap-3 w-100 align-items-stretch text-center">
                     <!-- Hàng trên: hai nút ngang full width -->

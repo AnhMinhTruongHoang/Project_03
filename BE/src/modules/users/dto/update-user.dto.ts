@@ -1,6 +1,6 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { PartialType } from '@nestjs/swagger';
 
 
@@ -24,4 +24,8 @@ export class UpdateUserDto extends PartialType(
   @IsOptional()
   @IsString()
   password?: string;
+
+  @IsOptional()
+  @IsMongoId({ message: 'Chi nhánh không hợp lệ' })
+  branchId?: string;
 }
